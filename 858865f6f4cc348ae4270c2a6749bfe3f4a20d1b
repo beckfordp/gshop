@@ -1,0 +1,13 @@
+Task: Phase 1 Red — failing tests for getOrCreateCartId (track cart_20261008)
+
+Why: TDD per workflow.md — define cart-id persistence behavior before
+implementing it.
+
+Changes:
+- src/services/cartId.test.ts (new): 2 tests — returns an existing
+  localStorage id without calling cartClient.create(); creates+persists
+  when none is stored. Mocks cartClient, uses jsdom's real localStorage
+  (cleared in beforeEach).
+
+Verified Red: npx vitest run src/services/cartId.test.ts — failed to
+resolve import "./cartId" (module doesn't exist yet), as expected.
