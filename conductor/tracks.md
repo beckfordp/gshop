@@ -4,6 +4,13 @@ This file tracks all major tracks for the project.
 
 ---
 
+## Tracks
+
+- [ ] **Track: US-1: browse catalog screen, wire catalogClient to real endpoints**
+  *Link: [./tracks/catalog_20261008/](./tracks/catalog_20261008/)*
+
+---
+
 ## Backlog
 
 Title-only placeholders for future tracks — not yet detailed (no spec/plan, no linked
@@ -11,7 +18,6 @@ folder), so `/conductor:implement` cannot pick these up by accident. Reorder fre
 priorities change. When ready to work on one, run `/conductor:newTrack <title>` to go
 through the spec/plan questions and promote it into a real track above.
 
-- US-1: browse catalog screen, wire catalogClient to real endpoints
 - US-2: cart screen, wire cartClient to real endpoints
 - US-3: checkout screen, wire orderClient to real endpoints
 - US-8: order status/history screen, wire orderClient to real endpoints
