@@ -1,0 +1,22 @@
+Task: Phase 1 — Add Vitest test infrastructure (track catalog_20261008)
+
+Why: US-1's TDD workflow needs a test runner; none was configured yet
+(tech-stack.md flagged it as needed for the first track).
+
+Changes:
+- package.json: added vitest, @vitest/coverage-v8, @testing-library/react,
+  @testing-library/jest-dom, jsdom as devDependencies; added test/test:coverage
+  scripts; added npm "overrides" pinning tinypool to ^2.2.0 to fix a critical
+  RCE in vitest's default transitive dependency (verified working on Node 18.16).
+- vite.config.ts: switched defineConfig import to vitest/config; added test
+  block (jsdom environment, setupFiles).
+- src/test/setup.ts (new): wires up @testing-library/jest-dom/vitest matchers.
+- .gitignore: added coverage/ output dir.
+- conductor/tech-stack.md: documented the new testing deps, version choices
+  (jsdom pinned to 26.x for Node 18 compat), the tinypool override, and a
+  known/accepted moderate @vitest/mocker vulnerability (dev-only, fix requires
+  a vite v6 bump out of this task's scope).
+
+Verified: npm install, vitest run (via real smoke test, removed after),
+npm run build, npm run lint all pass; npm audit vulnerabilities down from
+6 to 5 (critical eliminated).
