@@ -6,6 +6,9 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
+- [ ] **Track: US-2: cart screen, wire cartClient to real endpoints**
+  *Link: [./tracks/cart_20261008/](./tracks/cart_20261008/)*
+
 ---
 
 ## Backlog
@@ -15,7 +18,6 @@ folder), so `/conductor:implement` cannot pick these up by accident. Reorder fre
 priorities change. When ready to work on one, run `/conductor:newTrack <title>` to go
 through the spec/plan questions and promote it into a real track above.
 
-- US-2: cart screen, wire cartClient to real endpoints
 - US-3: checkout screen, wire orderClient to real endpoints
 - US-8: order status/history screen, wire orderClient to real endpoints
 - Confirm whether inventoryClient/paymentClient are needed at all, or drop
