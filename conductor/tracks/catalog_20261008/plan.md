@@ -1,8 +1,8 @@
 # Plan: US-1 Browse Catalog Screen
 
-## Phase 1: Test Infrastructure
+## Phase 1: Test Infrastructure [checkpoint: 25a59e1]
 - [x] Task: Add Vitest + @testing-library/react + @testing-library/jest-dom + jsdom to `package.json` devDependencies; add `test`/`test:coverage` scripts; configure `vite.config.ts` (`test` block: environment `jsdom`, setup file for jest-dom matchers) [5f4c83b]
-- [ ] Task: Conductor - User Manual Verification 'Test Infrastructure' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Test Infrastructure' (Protocol in workflow.md) [25a59e1]
 
 ## Phase 2: catalogClient.list()
 - [ ] Task: Write failing tests for `catalogClient.list({limit, offset})` in `src/services/catalogClient.test.ts` — covers: correct URL/query params built, parses `CatalogResponse[]` body + `X-Total-Count` header into `{items, total}`, throws/returns typed error on non-2xx and on network failure (Red)
