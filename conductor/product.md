@@ -18,8 +18,9 @@ many frontend apps the platform hosts simultaneously.
 None of its own — gshop is a pure client. It consumes five backend services'
 REST APIs (catalog, cart, order, inventory, payment), whose contracts live in
 gluon's `system-design.md`, not duplicated here. `src/services/*Client.ts` are
-the thin per-service client modules (scaffolded, base URL + health check only
-so far — see Status below).
+the thin per-service client modules — `catalogClient.ts` now has a real
+`list()` method (US-1); the rest are still base URL + health check only
+stubs — see Status below.
 
 ## User stories in scope
 From `../../../docs/user-stories.md` (UI realization, not new stories):
@@ -45,5 +46,7 @@ what's natural to build and demo (browse before cart before checkout before
 history).
 
 ## Status
-Scaffold only (Vite + React + TypeScript) — no real UI screens yet. This
-Conductor setup is what starts tracking that work.
+US-1 (browse catalog) is live: `src/screens/Catalog/Catalog.tsx` lists
+products from catalog-service via `catalogClient.list()`, with manual
+"Load more" pagination. No search/filter/categories, no detail view, no
+add-to-cart (that's US-2). US-2/US-3/US-8 screens not yet built.
