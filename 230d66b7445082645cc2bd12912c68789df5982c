@@ -1,0 +1,15 @@
+Task: Phase 1 Green — implement cartClient (track cart_20261008)
+
+Why: minimum code to pass the Red-phase tests against cart-service's real
+contract (POST /carts, GET /carts/{id}, POST/.../items, DELETE/.../items/{sku}).
+
+Changes:
+- src/services/cartClient.ts: added Cart type, CartClientError class, a
+  shared request() helper (mirrors catalogClient's pattern — reads
+  cartClient.baseUrl for test-mutability, throws CartClientError when
+  unconfigured/on fetch rejection/on non-2xx), and create()/get()/
+  addItem()/removeItem() built on it. delete() intentionally not
+  implemented — not in this track's spec.
+
+Verified Green: npx vitest run src/services/cartClient.test.ts — 7/7
+passed. npm run build and npm run lint both clean.
