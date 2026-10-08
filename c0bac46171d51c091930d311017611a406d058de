@@ -1,0 +1,14 @@
+Phase 2 Checkpoint: catalogClient.list() (track catalog_20261008)
+
+Prompting is off for this project (.claude/prompt-off) — manual verification
+done via committed scripts/verify-catalog-client.sh instead of an
+interactive walkthrough, per the /prompt skill's reduced-prompting rules.
+
+Automated test command: ./scripts/verify-catalog-client.sh
+(npm run build && npm run lint && npm test)
+All passed: tsc -b + vite build succeeded, eslint clean, 5/5 vitest tests
+passed.
+
+Phase scope (since Phase 1 checkpoint 25a59e1): catalogClient.ts (new
+list() method) + catalogClient.test.ts — the only non-test code file
+changed has a corresponding test file, so no missing-test gap to fill.
