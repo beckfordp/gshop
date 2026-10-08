@@ -1,7 +1,7 @@
 # Plan: US-1 Browse Catalog Screen
 
 ## Phase 1: Test Infrastructure
-- [ ] Task: Add Vitest + @testing-library/react + @testing-library/jest-dom + jsdom to `package.json` devDependencies; add `test`/`test:coverage` scripts; configure `vite.config.ts` (`test` block: environment `jsdom`, setup file for jest-dom matchers)
+- [x] Task: Add Vitest + @testing-library/react + @testing-library/jest-dom + jsdom to `package.json` devDependencies; add `test`/`test:coverage` scripts; configure `vite.config.ts` (`test` block: environment `jsdom`, setup file for jest-dom matchers) [5f4c83b]
 - [ ] Task: Conductor - User Manual Verification 'Test Infrastructure' (Protocol in workflow.md)
 
 ## Phase 2: catalogClient.list()
