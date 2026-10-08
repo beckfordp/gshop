@@ -42,3 +42,29 @@ pollution RCE (fixed at ≥2.1.2). Added an `"overrides": { "tinypool":
 "^2.2.0" }` in `package.json` to force the patched version — verified
 working on Node 18.16 despite its own `engines` field claiming Node ≥20
 (ran a real test file through it, not just `--passWithNoTests`).
+
+## Local dev against a running backend (added 2026-10-08)
+Backend services in `gluon-local` (OrbStack k8s) have no local port map by
+default — forward the one(s) you need:
+```bash
+kubectl port-forward -n gluon-local svc/catalog-service 8081:8080
+```
+**Do not** point `.env`'s service URL straight at that forwarded port
+(`VITE_CATALOG_SERVICE_URL=http://localhost:8081`) — catalog-service sends
+no `Access-Control-Allow-Origin` header, so the browser blocks the
+cross-origin `fetch()` even though the server itself responds fine (curl
+works, browser throws `TypeError: Failed to fetch`). Confirmed via
+`curl -i -H "Origin: http://localhost:5173" ...` returning 200 with no ACAO
+header.
+
+Worked around with a Vite dev-server proxy (`vite.config.ts`'s
+`server.proxy`), so the browser's request stays same-origin and Vite
+forwards it server-to-server (not subject to browser CORS):
+```
+# .env (gitignored, not committed)
+VITE_CATALOG_SERVICE_URL=/api/catalog
+```
+See `conductor/tracks.md`'s backlog item on local-k8s dev wiring — this
+same gap will hit every other service's client; worth fixing CORS upstream
+in catalog-service (and siblings) rather than adding more proxy entries
+per-service indefinitely.

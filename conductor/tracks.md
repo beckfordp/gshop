@@ -22,11 +22,22 @@ through the spec/plan questions and promote it into a real track above.
   them — per system-design.md, both look server-to-server/event-driven
   only today, no documented frontend-facing endpoint
 - Wire local dev against the real local-k8s deployment (`bin/k8s-local-up`,
-  `gluon-local` namespace) via `kubectl port-forward` per service, env vars
-  in `.env` pointing at `localhost:<forwarded-port>` — the "no local port
-  map" gap this item used to describe is resolved now that Phase 5 landed
-  (real k8s Service DNS names exist); what's left is just the per-service
-  port-forward + `.env` wiring for a dev-mode (`npm run dev`) gshop to talk
-  to it
+  `gluon-local` namespace) via `kubectl port-forward` per service — partially
+  done manually for catalog-service (2026-10-08) while verifying US-1, see
+  below; what's left is doing this properly for cart/order (US-2/US-3/US-8)
+  and deciding if it should be scripted (e.g. a `docs`/`.env.example` +
+  helper script) instead of done by hand each time.
+  **Important discovery**: pointing `.env` at the port-forwarded URL
+  directly (`VITE_CATALOG_SERVICE_URL=http://localhost:<port>`) does NOT
+  work from a browser — catalog-service sends no `Access-Control-Allow-Origin`
+  header, so the browser blocks the cross-origin `fetch()` (confirmed via
+  curl working fine, browser throwing `TypeError: Failed to fetch`). Worked
+  around for catalog-service via a Vite dev-server proxy instead (see
+  `vite.config.ts`'s `server.proxy` and `tech-stack.md`) — browser calls a
+  same-origin relative path, Vite forwards it server-to-server, no CORS
+  involved. This same gap will hit every other service's client too
+  (cart/order next) unless catalog-service's CORS gap gets fixed upstream in
+  the `gluon` platform repo — worth raising there rather than re-solving
+  per-service with more proxy entries indefinitely.
 
 ---
