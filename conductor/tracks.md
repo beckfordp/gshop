@@ -6,7 +6,7 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [ ] **Track: US-2: cart screen, wire cartClient to real endpoints**
+- [~] **Track: US-2: cart screen, wire cartClient to real endpoints**
   *Link: [./tracks/cart_20261008/](./tracks/cart_20261008/)*
 
 ---
