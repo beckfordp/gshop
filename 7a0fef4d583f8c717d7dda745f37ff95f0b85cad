@@ -1,0 +1,17 @@
+Task: Phase 2 Green — implement catalogClient.list() (track catalog_20261008)
+
+Why: minimum code to pass the Red-phase tests against catalog-service's real
+GET /catalogs contract (limit/offset query, X-Total-Count header, JSON array
+body) — replaces the base-URL/health-check-only stub.
+
+Changes:
+- src/services/catalogClient.ts: added CatalogItem/CatalogListResult types,
+  CatalogClientError class, and list({limit, offset}) — reads
+  catalogClient.baseUrl (not the raw env const) so it's test-mutable; throws
+  CatalogClientError when unconfigured, on fetch rejection, and on non-2xx.
+- src/services/catalogClient.test.ts: swapped Node's `global` for
+  `globalThis` (tsc -b has no @types/node in this browser-targeted
+  tsconfig.app.json) so vi.spyOn(..., "fetch") type-checks.
+
+Verified Green: npx vitest run src/services/catalogClient.test.ts — 5/5
+passed. npm run build (tsc -b && vite build) and npm run lint both clean.
