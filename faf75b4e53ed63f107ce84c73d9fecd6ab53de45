@@ -1,0 +1,29 @@
+Phase 3 Checkpoint: Catalog screen (track catalog_20261008)
+
+Prompting is off for this project (.claude/prompt-off) — manual verification
+done via committed scripts/verify-catalog-screen.sh instead of an
+interactive walkthrough, per the /prompt skill's reduced-prompting rules.
+
+Phase scope (since Phase 2 checkpoint c0bac46): App.tsx, Catalog.tsx,
+Catalog.test.tsx, Catalog.css, src/test/setup.ts, index.html, App.css,
+src/assets/react.svg (deleted). Gap found: App.tsx had no test file —
+added src/App.test.tsx (mocks Catalog, asserts App renders it) before
+checkpointing.
+
+Also fixed: `npm run lint` was picking up the gitignored coverage/ output
+dir (3 "unused eslint-disable directive" warnings on its bundled report
+scripts) — added 'coverage' to eslint.config.js's ignores.
+
+Automated test command: ./scripts/verify-catalog-screen.sh
+(npm run build && npm run lint && npm run test:coverage)
+All passed: build clean, lint clean (0 warnings after the coverage-dir
+fix), 11/11 vitest tests passed. Coverage: Catalog.tsx 100%, App.tsx 100%,
+catalogClient.ts 100% stmts/lines (90% branch — one untested header-missing
+fallback). Aggregate 77.92% is dragged down by pre-existing untouched stub
+clients (cartClient/orderClient/paymentClient/inventoryClient) and
+main.tsx bootstrap — out of this track's scope.
+
+Manually verified end-to-end in a real browser (npm run dev +
+claude-in-chrome): app loads, renders the Catalog screen, and with no
+CATALOG_SERVICE_URL configured locally correctly shows "Catalog service
+URL is not configured" + a working Retry button.
