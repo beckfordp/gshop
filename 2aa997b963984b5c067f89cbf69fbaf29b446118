@@ -1,0 +1,13 @@
+Task: Phase 1 Red — failing tests for cartClient (track cart_20261008)
+
+Why: TDD per workflow.md — define cart-service's real contract via tests
+before implementing create()/get()/addItem()/removeItem().
+
+Changes:
+- src/services/cartClient.test.ts (new): 7 tests covering request
+  shape/URL for each of the 4 methods, response parsing, CartClientError on
+  non-2xx, on network failure, and on unconfigured baseUrl.
+
+Verified Red: npx vitest run src/services/cartClient.test.ts — 7/7 failed
+(cartClient.create/get/addItem/removeItem not functions, CartClientError
+not exported), as expected before implementation.
