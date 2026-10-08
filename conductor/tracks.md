@@ -6,7 +6,7 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [ ] **Track: US-1: browse catalog screen, wire catalogClient to real endpoints**
+- [x] **Track: US-1: browse catalog screen, wire catalogClient to real endpoints**
   *Link: [./tracks/catalog_20261008/](./tracks/catalog_20261008/)*
 
 ---
