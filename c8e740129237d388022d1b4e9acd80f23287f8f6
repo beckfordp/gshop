@@ -1,0 +1,13 @@
+Task: Phase 3 Red — failing tests for Catalog screen (track catalog_20261008)
+
+Why: TDD per workflow.md — define Catalog's loading/render/load-more/error+retry
+behavior via tests before implementing the component.
+
+Changes:
+- src/screens/Catalog/Catalog.test.tsx (new): 5 tests — loading state on mount,
+  rendering name/sku/formatted price, Load more pagination (append + hide at
+  total), initial-fetch error+Retry, load-more error+Retry (keeps existing items).
+  Mocks catalogClient via vi.mock.
+
+Verified Red: npx vitest run src/screens/Catalog/Catalog.test.tsx — failed to
+resolve import "./Catalog" (component doesn't exist yet), as expected.
