@@ -1,0 +1,21 @@
+Task: Phase 3 Green — implement Catalog screen (track catalog_20261008)
+
+Why: minimum code to pass the Red-phase tests — read-only browse screen with
+manual "Load more" pagination, per spec.md.
+
+Changes:
+- src/screens/Catalog/Catalog.tsx (new): fetches first page on mount via
+  catalogClient.list(); initial loading/error+Retry states; Load more button
+  appends next page (offset = items.length) and hides once items.length
+  reaches total; load-more error+Retry shown without discarding existing
+  items; formatPrice() converts priceCents to "$X.XX".
+- src/screens/Catalog/Catalog.css (new): minimal list/error styling, matches
+  App.css's plain-CSS pattern.
+- src/test/setup.ts: added afterEach(cleanup) — discovered RTL doesn't
+  auto-register its cleanup without a global `afterEach` (Jest, or Vitest's
+  `globals: true`); without it, multiple component renders across tests in
+  the same file were stacking up in the DOM, causing one Catalog test to see
+  duplicate "Widget" text from a prior test's uncleaned render.
+
+Verified Green: npx vitest run — 10/10 passed (both test files). npm run
+build and npm run lint both clean.
