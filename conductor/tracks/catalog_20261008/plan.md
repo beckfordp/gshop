@@ -8,7 +8,7 @@
 - [x] Task: Write failing tests for `catalogClient.list({limit, offset})` in `src/services/catalogClient.test.ts` — covers: correct URL/query params built, parses `CatalogResponse[]` body + `X-Total-Count` header into `{items, total}`, throws/returns typed error on non-2xx and on network failure (Red) [ba6fe0a]
 - [x] Task: Implement `catalogClient.list()` against real `GET /catalogs` contract — minimum code to pass (Green) [7a0fef4]
 - [x] Task: Refactor `catalogClient.ts` if needed; rerun tests — no refactor needed, implementation already minimal; full suite + lint re-confirmed green [fa1f181]
-- [ ] Task: Conductor - User Manual Verification 'catalogClient.list()' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'catalogClient.list()' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-catalog-client.sh`
 
 ## Phase 3: Catalog screen
 - [ ] Task: Write failing tests for `Catalog.tsx` in `src/screens/Catalog/Catalog.test.tsx` — covers: shows loading state on mount, renders fetched items (name/sku/formatted price), "Load more" fetches+appends next page then hides at total, initial-fetch error shows message+Retry that re-fetches, load-more error shows message+Retry (Red)
