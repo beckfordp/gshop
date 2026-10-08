@@ -1,0 +1,14 @@
+Task: Phase 2 Red — failing tests for catalogClient.list() (track catalog_20261008)
+
+Why: TDD per workflow.md — define the GET /catalogs contract via tests before
+implementing catalogClient.list().
+
+Changes:
+- src/services/catalogClient.test.ts (new): 5 tests covering query-param
+  construction, parsing items + X-Total-Count header into {items, total},
+  CatalogClientError on non-2xx, on network failure, and on unconfigured
+  baseUrl.
+
+Verified Red: npx vitest run src/services/catalogClient.test.ts — 5/5 failed
+(catalogClient.list is not a function / CatalogClientError not exported), as
+expected before implementation.
