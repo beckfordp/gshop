@@ -1,4 +1,4 @@
-# shopping
+# gshop
 
 The first frontend app on the Gluon platform. Walks a user through the
 shopping workflow — browse catalog → cart → checkout → order status — by
@@ -41,5 +41,5 @@ before running against real backends.
 ## Status
 
 Scaffold only — no real UI screens yet. Next: seed `conductor/tracks.md`
-from the UI-side tasks in `../../backlogs/shopping-frontend.md` and start
+from the UI-side tasks in `../../backlogs/gshop-frontend.md` and start
 building against US-1 (`../../docs/user-stories.md`).
