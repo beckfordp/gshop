@@ -1,0 +1,12 @@
+Phase 1 Checkpoint: Test Infrastructure (track catalog_20261008)
+
+Automated test command: npm run build && npm run lint && npx vitest run --passWithNoTests
+All passed (build succeeded, lint clean, vitest runner started cleanly under
+jsdom with jest-dom setup loaded; 0 tests exist yet — meaningful coverage
+checks start Phase 2).
+
+Manual verification steps presented to user: re-run build/lint/vitest-run
+commands above; confirm no unit test needed for vite.config.ts/src/test/setup.ts
+themselves (config/harness, not application logic).
+
+User confirmation: "Yes, create checkpoint" (approved via AskUserQuestion).
