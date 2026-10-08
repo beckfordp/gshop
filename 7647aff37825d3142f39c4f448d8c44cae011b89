@@ -1,0 +1,22 @@
+Task: Phase 3 — wire App.tsx to Catalog screen, remove scaffold boilerplate
+(track catalog_20261008)
+
+Why: spec.md requires App.tsx to render the new Catalog screen in place of
+the Vite/React scaffold default.
+
+Changes:
+- src/App.tsx: renders <Catalog /> instead of the counter-button scaffold.
+- src/App.css: dropped scaffold-only rules (.logo, .card, .read-the-docs,
+  keyframes) and the centered text-align (not right for a list UI); kept
+  #root's width/padding.
+- index.html: title "Vite + React + TS" -> "gshop".
+- src/assets/react.svg deleted (only consumer was the removed scaffold
+  JSX). public/vite.svg kept — still the favicon.
+
+Verified: npm run build, npm run lint, npx vitest run (10/10) all clean.
+Manually checked in a real browser via `npm run dev` + claude-in-chrome:
+app renders the Catalog screen; with no CATALOG_SERVICE_URL set locally
+(no .env yet — separate backlog item for local-k8s wiring) it correctly
+shows "Catalog service URL is not configured" + a working Retry button,
+confirming the wiring and error path both work end-to-end at runtime, not
+just under mocks.
