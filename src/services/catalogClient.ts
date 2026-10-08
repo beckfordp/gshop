@@ -1,14 +1,69 @@
 import { CATALOG_SERVICE_URL } from "./env";
 import { checkHealth } from "./health";
 
-// Thin client for catalog-service. Browse/list endpoints exist
-// (gluon/services/catalog-service/src/main/scala/catalogservice/CatalogRoutes.scala)
-// but aren't yet pinned in gluon/docs/system-design.md's REST contracts
-// section (that section only documents cross-service calls so far) — add
-// real methods here against the service's own tapir-generated /docs
-// (Swagger) once US-1's browse screen is actually built, rather than
-// guessing the shape now.
-export const catalogClient = {
+// Real GET /catalogs and GET /catalogs/{id} contracts:
+// gluon/services/catalog-service/src/main/scala/catalogservice/CatalogRoutes.scala
+
+export interface CatalogItem {
+  id: string;
+  name: string;
+  description: string;
+  priceCents: number;
+  sku: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CatalogListResult {
+  items: CatalogItem[];
+  total: number;
+}
+
+export class CatalogClientError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "CatalogClientError";
+  }
+}
+
+async function list({
+  limit,
+  offset,
+}: {
+  limit: number;
+  offset: number;
+}): Promise<CatalogListResult> {
+  if (!catalogClient.baseUrl) {
+    throw new CatalogClientError("Catalog service URL is not configured");
+  }
+
+  const url = `${catalogClient.baseUrl}/catalogs?limit=${limit}&offset=${offset}`;
+
+  let response: Response;
+  try {
+    response = await fetch(url);
+  } catch (error) {
+    throw new CatalogClientError(
+      `Failed to reach catalog service: ${(error as Error).message}`,
+    );
+  }
+
+  if (!response.ok) {
+    throw new CatalogClientError(`Catalog list request failed with status ${response.status}`);
+  }
+
+  const items = (await response.json()) as CatalogItem[];
+  const total = Number(response.headers.get("X-Total-Count") ?? items.length);
+
+  return { items, total };
+}
+
+export const catalogClient: {
+  baseUrl: string | undefined;
+  health: () => Promise<boolean>;
+  list: typeof list;
+} = {
   baseUrl: CATALOG_SERVICE_URL,
   health: () => checkHealth(CATALOG_SERVICE_URL),
+  list,
 };
