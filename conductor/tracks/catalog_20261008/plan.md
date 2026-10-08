@@ -6,7 +6,7 @@
 
 ## Phase 2: catalogClient.list()
 - [x] Task: Write failing tests for `catalogClient.list({limit, offset})` in `src/services/catalogClient.test.ts` — covers: correct URL/query params built, parses `CatalogResponse[]` body + `X-Total-Count` header into `{items, total}`, throws/returns typed error on non-2xx and on network failure (Red) [ba6fe0a]
-- [ ] Task: Implement `catalogClient.list()` against real `GET /catalogs` contract — minimum code to pass (Green)
+- [x] Task: Implement `catalogClient.list()` against real `GET /catalogs` contract — minimum code to pass (Green) [7a0fef4]
 - [ ] Task: Refactor `catalogClient.ts` if needed; rerun tests
 - [ ] Task: Conductor - User Manual Verification 'catalogClient.list()' (Protocol in workflow.md)
 
