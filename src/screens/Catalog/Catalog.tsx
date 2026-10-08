@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
-import { catalogClient, type CatalogItem } from "../../services/catalogClient";
-import "./Catalog.css";
+import { useCallback, useEffect, useState } from 'react';
+import { catalogClient, type CatalogItem } from '../../services/catalogClient';
+import './Catalog.css';
 
 const PAGE_SIZE = 20;
 
@@ -8,7 +8,13 @@ function formatPrice(priceCents: number): string {
   return `$${(priceCents / 100).toFixed(2)}`;
 }
 
-export function Catalog() {
+function errorMessage(error: unknown): string {
+  // `error` is `unknown` under strict mode; narrow safely rather than
+  // asserting, since a rejected promise isn't guaranteed to be an Error.
+  return error instanceof Error ? error.message : String(error);
+}
+
+export default function Catalog() {
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [total, setTotal] = useState(0);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -24,7 +30,7 @@ export function Catalog() {
       setItems(result.items);
       setTotal(result.total);
     } catch (error) {
-      setInitialError((error as Error).message);
+      setInitialError(errorMessage(error));
     } finally {
       setInitialLoading(false);
     }
@@ -42,7 +48,7 @@ export function Catalog() {
       setItems((prev) => [...prev, ...result.items]);
       setTotal(result.total);
     } catch (error) {
-      setLoadMoreError((error as Error).message);
+      setLoadMoreError(errorMessage(error));
     } finally {
       setLoadingMore(false);
     }
@@ -80,7 +86,7 @@ export function Catalog() {
       )}
       {hasMore && !loadMoreError && (
         <button onClick={fetchMore} disabled={loadingMore}>
-          {loadingMore ? "Loading..." : "Load more"}
+          {loadingMore ? 'Loading...' : 'Load more'}
         </button>
       )}
     </div>

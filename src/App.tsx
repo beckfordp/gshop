@@ -1,4 +1,4 @@
-import { Catalog } from './screens/Catalog/Catalog'
+import Catalog from './screens/Catalog/Catalog'
 import './App.css'
 
 function App() {

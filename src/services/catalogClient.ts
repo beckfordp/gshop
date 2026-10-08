@@ -1,5 +1,5 @@
-import { CATALOG_SERVICE_URL } from "./env";
-import { checkHealth } from "./health";
+import { CATALOG_SERVICE_URL } from './env';
+import { checkHealth } from './health';
 
 // Real GET /catalogs and GET /catalogs/{id} contracts:
 // gluon/services/catalog-service/src/main/scala/catalogservice/CatalogRoutes.scala
@@ -22,7 +22,7 @@ export interface CatalogListResult {
 export class CatalogClientError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "CatalogClientError";
+    this.name = 'CatalogClientError';
   }
 }
 
@@ -34,7 +34,7 @@ async function list({
   offset: number;
 }): Promise<CatalogListResult> {
   if (!catalogClient.baseUrl) {
-    throw new CatalogClientError("Catalog service URL is not configured");
+    throw new CatalogClientError('Catalog service URL is not configured');
   }
 
   const url = `${catalogClient.baseUrl}/catalogs?limit=${limit}&offset=${offset}`;
@@ -43,9 +43,11 @@ async function list({
   try {
     response = await fetch(url);
   } catch (error) {
-    throw new CatalogClientError(
-      `Failed to reach catalog service: ${(error as Error).message}`,
-    );
+    // `error` is `unknown` under strict mode; fetch failures (network down,
+    // DNS, CORS) are always Error instances in practice, but narrow safely
+    // rather than asserting.
+    const message = error instanceof Error ? error.message : String(error);
+    throw new CatalogClientError(`Failed to reach catalog service: ${message}`);
   }
 
   if (!response.ok) {
@@ -53,7 +55,7 @@ async function list({
   }
 
   const items = (await response.json()) as CatalogItem[];
-  const total = Number(response.headers.get("X-Total-Count") ?? items.length);
+  const total = Number(response.headers.get('X-Total-Count') ?? items.length);
 
   return { items, total };
 }
