@@ -2,7 +2,7 @@
 
 ## Phase 1: cartClient + cart identity
 - [x] Task: Write failing tests for `cartClient`'s `create()`/`get()`/`addItem()`/`removeItem()` in `src/services/cartClient.test.ts` — covers request shape, response parsing, `CartClientError` on non-2xx/network failure (Red) [2aa997b]
-- [ ] Task: Implement `cartClient` methods against cart-service's real contract — minimum code to pass (Green)
+- [x] Task: Implement `cartClient` methods against cart-service's real contract — minimum code to pass (Green) [230d66b]
 - [ ] Task: Write failing tests for `getOrCreateCartId()` in `src/services/cartId.test.ts` — covers: returns existing `localStorage` id without calling the API; creates via `cartClient.create()` and persists when absent (Red)
 - [ ] Task: Implement `src/services/cartId.ts` — minimum code to pass (Green)
 - [ ] Task: Refactor; rerun tests
