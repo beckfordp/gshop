@@ -16,3 +16,6 @@
 - [x] Task: Wire `App.tsx` to render `Catalog` screen, remove scaffold boilerplate [7647aff]
 - [x] Task: Refactor; rerun full test suite; check coverage (>80% target) — no refactor needed; 10/10 tests pass; Catalog.tsx 100%, catalogClient.ts 100% stmts/lines (90% branch); aggregate 74% is pre-existing untouched stub clients (cartClient/orderClient/etc.) + App.tsx/main.tsx bootstrap, out of this track's scope
 - [x] Task: Conductor - User Manual Verification 'Catalog screen' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-catalog-screen.sh` [faf75b4]
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions — single-quote string literals (code_styleguides/typescript.md), default-export Catalog component matching App.tsx (product-guidelines.md's React exception), safe `error instanceof Error` narrowing instead of unjustified `as Error` assertions (code_styleguides/typescript.md) [c400e8d]
