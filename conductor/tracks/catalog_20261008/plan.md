@@ -12,7 +12,7 @@
 
 ## Phase 3: Catalog screen
 - [x] Task: Write failing tests for `Catalog.tsx` in `src/screens/Catalog/Catalog.test.tsx` — covers: shows loading state on mount, renders fetched items (name/sku/formatted price), "Load more" fetches+appends next page then hides at total, initial-fetch error shows message+Retry that re-fetches, load-more error shows message+Retry (Red) [c8e7401]
-- [ ] Task: Implement `Catalog.tsx` + `Catalog.css` — minimum code to pass (Green)
+- [x] Task: Implement `Catalog.tsx` + `Catalog.css` — minimum code to pass (Green) [dc92b84]
 - [ ] Task: Wire `App.tsx` to render `Catalog` screen, remove scaffold boilerplate
 - [ ] Task: Refactor; rerun full test suite; check coverage (>80% target)
 - [ ] Task: Conductor - User Manual Verification 'Catalog screen' (Protocol in workflow.md)
