@@ -1,0 +1,14 @@
+Task: Phase 1 Red — failing tests for customerId service (track history_20261009)
+
+Why: TDD per workflow.md — define the persistent customerId's behavior
+before implementing it.
+
+Changes:
+- src/services/customerId.test.ts (new): 4 tests — getOrCreateCustomerId
+  returns the existing stored id without generating a new one; creates+
+  persists a UUID (via crypto.randomUUID, mocked) when none is stored;
+  getStoredCustomerId returns null when absent, the stored value
+  otherwise.
+
+Verified Red: npx vitest run src/services/customerId.test.ts — failed to
+resolve import "./customerId" (module doesn't exist yet), as expected.
