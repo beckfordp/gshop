@@ -1,0 +1,27 @@
+Phase 4 Checkpoint: Navigation (track cart_20261008) — final phase of
+US-2 Cart Screen
+
+Prompting is off for this project (.claude/prompt-off). This phase got a
+full live browser walkthrough (not just the automated script), since
+navigation finally makes the whole US-2 feature reachable end-to-end:
+
+- Catalog screen: clicked "Add to cart" on two different items
+  (watch-rolex-submariner, watch-jlc-reverso) against real cart-service
+  (via Vite dev proxy, port-forwarded to gluon-local's cart-service).
+- Clicked "View Cart" — Cart screen showed both real items with correct
+  names (joined from real catalog-service data), quantities, line prices,
+  and a correct total ($9500 + $11200 = $20700.00).
+- Clicked "+1" on a line — quantity went 1 -> 2, line price and total
+  recalculated correctly ($22400.00 line, $31900.00 total).
+- Clicked "Remove" on the other line — it disappeared, total recalculated
+  to just the remaining line ($22400.00).
+- Clicked "Back to Catalog" — returned to the Catalog screen, "View Cart"
+  nav button still present.
+- No console errors at any point.
+
+Automated test command: npm run build && npm run lint && npm run
+test:coverage — all passed. 36/36 tests. Coverage 91.55% aggregate (every
+file this track touched is at or near 100%; the rest is pre-existing
+untouched stub clients + main.tsx bootstrap, out of scope).
+
+This closes out track cart_20261008 (US-2) — all 4 phases complete.
