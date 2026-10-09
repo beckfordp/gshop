@@ -1,6 +1,6 @@
 # Plan: US-8 Order History
 
-## Phase 1: customerId + orderClient.list() + Cart checkout update
+## Phase 1: customerId + orderClient.list() + Cart checkout update [checkpoint: 76a3293]
 - [x] Task: Write failing tests for `customerId.ts` in `src/services/customerId.test.ts` — covers: `getOrCreateCustomerId()` creates+persists a UUID when absent, returns the existing one when present (no new UUID generated); `getStoredCustomerId()` returns null when absent, the stored value otherwise (Red) [f3c7c14]
 - [x] Task: Implement `src/services/customerId.ts` — minimum code to pass (Green) [fd7fd53]
 - [x] Task: Write failing tests for `orderClient.list()` in `orderClient.test.ts` — covers request shape (GET /orders?customerId=...), response parsing, `OrderClientError` on non-2xx/network failure (Red) [73a8518]
