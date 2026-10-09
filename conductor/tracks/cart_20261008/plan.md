@@ -16,7 +16,7 @@
 
 ## Phase 3: Cart screen
 - [x] Task: Write failing tests for `Cart.tsx` in `src/screens/Cart/Cart.test.tsx` — covers: empty state (no stored id, no API call), loading, joins cart items against catalog list to render name/qty/price lines + total, "+1" and "Remove" actions, error+Retry for get/addItem/removeItem (Red) [d9da12b]
-- [ ] Task: Implement `Cart.tsx` + `Cart.css` — minimum code to pass (Green)
+- [x] Task: Implement `Cart.tsx` + `Cart.css` — minimum code to pass (Green) [0031bee]
 - [ ] Task: Refactor; rerun tests
 - [ ] Task: Conductor - User Manual Verification 'Cart screen' (Protocol in workflow.md)
 
