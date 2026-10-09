@@ -1,0 +1,14 @@
+Task: Phase 3 Green — wire App's Order History navigation
+(track history_20261009)
+
+Why: minimum code to pass the Red-phase tests, per spec.md's nav design.
+
+Changes:
+- src/App.tsx: screen type widened to include 'history'. nav now renders
+  per-screen button pairs: catalog -> [View Cart, Order History], cart ->
+  [Back to Catalog, Order History], history -> [Back to Catalog, View
+  Cart], checkout -> none (unchanged, has its own Continue Shopping CTA).
+  Renders <OrderHistory /> when screen === 'history'.
+
+Verified Green: npx vitest run src/App.test.tsx — 6/6 passed. Full suite
+67/67. npm run build and npm run lint both clean.
