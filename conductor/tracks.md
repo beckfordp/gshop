@@ -6,7 +6,7 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [ ] **Track: US-3: checkout screen, wire orderClient to real endpoints**
+- [~] **Track: US-3: checkout screen, wire orderClient to real endpoints**
   *Link: [./tracks/checkout_20261009/](./tracks/checkout_20261009/)*
 
 ---
