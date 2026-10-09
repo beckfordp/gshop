@@ -35,6 +35,10 @@ vi.mock('./screens/Checkout/Checkout', () => ({
   ),
 }));
 
+vi.mock('./screens/OrderHistory/OrderHistory', () => ({
+  default: () => <div>Order History screen</div>,
+}));
+
 describe('App', () => {
   it('renders the Catalog screen by default', () => {
     render(<App />);
@@ -72,5 +76,32 @@ describe('App', () => {
 
     expect(screen.getByText('Catalog screen')).toBeInTheDocument();
     expect(screen.queryByText(/Checkout screen/)).not.toBeInTheDocument();
+  });
+
+  it('"Order History" is reachable from Catalog and Cart', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Order History' }));
+    expect(screen.getByText('Order History screen')).toBeInTheDocument();
+    expect(screen.queryByText('Catalog screen')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Back to Catalog' }));
+    fireEvent.click(screen.getByRole('button', { name: 'View Cart' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Order History' }));
+    expect(screen.getByText('Order History screen')).toBeInTheDocument();
+  });
+
+  it("History screen's own nav shows Back to Catalog and View Cart", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Order History' }));
+    expect(screen.getByText('Order History screen')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'View Cart' }));
+    expect(screen.getByText('Cart screen')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Order History' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Back to Catalog' }));
+    expect(screen.getByText('Catalog screen')).toBeInTheDocument();
   });
 });
