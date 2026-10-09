@@ -2,12 +2,24 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Catalog from './Catalog';
 import { catalogClient, type CatalogItem } from '../../services/catalogClient';
+import { cartClient } from '../../services/cartClient';
+import { getOrCreateCartId } from '../../services/cartId';
 
 vi.mock('../../services/catalogClient', () => ({
   catalogClient: { list: vi.fn() },
 }));
 
+vi.mock('../../services/cartClient', () => ({
+  cartClient: { addItem: vi.fn() },
+}));
+
+vi.mock('../../services/cartId', () => ({
+  getOrCreateCartId: vi.fn(),
+}));
+
 const list = vi.mocked(catalogClient.list);
+const addItem = vi.mocked(cartClient.addItem);
+const getOrCreateCartIdMock = vi.mocked(getOrCreateCartId);
 
 function makeItem(overrides: Partial<CatalogItem> = {}): CatalogItem {
   return {
@@ -25,6 +37,8 @@ function makeItem(overrides: Partial<CatalogItem> = {}): CatalogItem {
 describe('Catalog', () => {
   beforeEach(() => {
     list.mockReset();
+    addItem.mockReset();
+    getOrCreateCartIdMock.mockReset();
   });
 
   it('shows a loading state on mount', async () => {
@@ -112,5 +126,49 @@ describe('Catalog', () => {
 
     await screen.findByText(/Second/);
     expect(screen.queryByText('load more failed')).not.toBeInTheDocument();
+  });
+
+  it('adds an item to the cart and shows confirmation', async () => {
+    list.mockResolvedValue({ items: [makeItem({ sku: 'WID-1' })], total: 1 });
+    getOrCreateCartIdMock.mockResolvedValue('cart-1');
+    addItem.mockResolvedValue({
+      id: 'cart-1',
+      items: { 'WID-1': 1 },
+      createdAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-01T00:00:00Z',
+    });
+
+    render(<Catalog />);
+
+    await screen.findByText(/Widget/);
+    fireEvent.click(screen.getByRole('button', { name: 'Add to cart' }));
+
+    await screen.findByRole('button', { name: 'Added' });
+    expect(getOrCreateCartIdMock).toHaveBeenCalledOnce();
+    expect(addItem).toHaveBeenCalledWith('cart-1', 'WID-1', 1);
+  });
+
+  it('shows an inline error and working Retry when adding to cart fails', async () => {
+    list.mockResolvedValue({ items: [makeItem({ sku: 'WID-1' })], total: 1 });
+    getOrCreateCartIdMock.mockResolvedValue('cart-1');
+    addItem
+      .mockRejectedValueOnce(new Error('cart service down'))
+      .mockResolvedValueOnce({
+        id: 'cart-1',
+        items: { 'WID-1': 1 },
+        createdAt: '2026-01-01T00:00:00Z',
+        updatedAt: '2026-01-01T00:00:00Z',
+      });
+
+    render(<Catalog />);
+
+    await screen.findByText(/Widget/);
+    fireEvent.click(screen.getByRole('button', { name: 'Add to cart' }));
+
+    await screen.findByText('cart service down');
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+
+    await screen.findByRole('button', { name: 'Added' });
+    expect(screen.queryByText('cart service down')).not.toBeInTheDocument();
   });
 });
