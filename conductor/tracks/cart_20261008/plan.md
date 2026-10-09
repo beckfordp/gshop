@@ -6,7 +6,7 @@
 - [x] Task: Write failing tests for `getOrCreateCartId()` in `src/services/cartId.test.ts` — covers: returns existing `localStorage` id without calling the API; creates via `cartClient.create()` and persists when absent (Red) [858865f]
 - [x] Task: Implement `src/services/cartId.ts` — minimum code to pass (Green) [dddffc9]
 - [x] Task: Refactor; rerun tests — no refactor needed; both files already minimal, consistent with catalogClient.ts's pattern; full suite (20/20) + lint re-confirmed green [03b1fc4]
-- [ ] Task: Conductor - User Manual Verification 'cartClient + cart identity' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'cartClient + cart identity' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-cart-phase1.sh`
 
 ## Phase 2: Add to cart (Catalog screen)
 - [ ] Task: Write failing tests for Catalog's "Add to cart" button in `Catalog.test.tsx` — covers: click calls `getOrCreateCartId()` + `cartClient.addItem()`, shows brief "Added" feedback, shows inline error on failure (Red)
