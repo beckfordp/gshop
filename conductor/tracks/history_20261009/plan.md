@@ -7,7 +7,7 @@
 - [x] Task: Implement `orderClient.list()` against order-service's real contract — minimum code to pass (Green) [13ffa70]
 - [x] Task: Update `Cart.test.tsx`'s checkout tests to expect `customerId` from `getOrCreateCustomerId()` instead of the cart id, then update `Cart.tsx`'s `handleCheckout` to match (Red → Green in one task, since it's a one-line source swap in an already-tested code path) [df6fc04]
 - [x] Task: Refactor; rerun tests — no refactor needed, all Phase 1 changes already minimal; full suite (59/59) + lint re-confirmed green
-- [ ] Task: Conductor - User Manual Verification 'customerId + orderClient.list()' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'customerId + orderClient.list()' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-history-phase1.sh` + a real browser walkthrough: two separate checkouts in the same session both used the SAME persistent `gshop:customerId` (confirmed via `GET /orders?customerId=`), while `gshop:cartId` was correctly cleared/regenerated each time; discovered order-service's history cache has a 60s staleness TTL with no write-invalidation (documented in tech-stack.md, not a gshop bug)
 
 ## Phase 2: Order History screen
 - [ ] Task: Write failing tests for `OrderHistory.tsx` in `src/screens/OrderHistory/OrderHistory.test.tsx` — covers: empty state (no stored customerId, no API call), loading, renders past orders (id/status/items/total/date) newest-first, error+Retry (Red)

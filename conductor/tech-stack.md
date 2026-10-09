@@ -101,3 +101,20 @@ gap is worth fixing upstream in these services (and payment-service, if it
 ever gets a frontend-facing endpoint) rather than adding more proxy entries
 per-service indefinitely — noted in `gluon`'s `backlogs/catalog-service.md`
 and `backlogs/cart-service.md`.
+
+## Order-service's history cache has a 60s staleness window (found 2026-10-09)
+Confirmed live while verifying track `history_20261009`'s Phase 1 (same
+persistent `customerId` used across two real checkouts): `GET
+/orders?customerId=...` is cache-aside with **TTL-only freshness, no
+active invalidation on write** (`order-service`'s own
+`application.conf`: `order-history-cache.history-ttl-seconds = 60`, and
+`OrderHistoryCache.scala`'s own doc comment says so explicitly — this is
+a known, deliberate choice on their side, not a bug). Placed a second
+order for the same customer right after the first; `GET
+/orders?customerId=` kept returning only the first order (verified via
+direct `curl` to the port-forwarded service, not just through gshop) for
+up to a minute. **Not something gshop can fix client-side** — the
+Order History screen (US-8) just won't show a just-placed order
+immediately; it'll appear once the 60s TTL rolls over. No action needed
+here beyond this note — order-service's own docs already scope this as
+intentional, so no new upstream backlog item filed for it.
