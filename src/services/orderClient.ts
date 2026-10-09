@@ -66,12 +66,35 @@ async function create({
   return (await response.json()) as Order;
 }
 
+async function list(customerId: string): Promise<Order[]> {
+  if (!orderClient.baseUrl) {
+    throw new OrderClientError('Order service URL is not configured');
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(
+      `${orderClient.baseUrl}/orders?customerId=${encodeURIComponent(customerId)}`,
+    );
+  } catch (error) {
+    throw new OrderClientError(`Failed to reach order service: ${errorMessage(error)}`);
+  }
+
+  if (!response.ok) {
+    throw new OrderClientError(`Order request failed with status ${response.status}`);
+  }
+
+  return (await response.json()) as Order[];
+}
+
 export const orderClient: {
   baseUrl: string | undefined;
   health: () => Promise<boolean>;
   create: typeof create;
+  list: typeof list;
 } = {
   baseUrl: ORDER_SERVICE_URL,
   health: () => checkHealth(ORDER_SERVICE_URL),
   create,
+  list,
 };
