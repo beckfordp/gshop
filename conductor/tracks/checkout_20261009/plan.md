@@ -20,6 +20,6 @@
 
 ## Phase 4: Navigation wiring
 - [x] Task: Write failing tests for `App.tsx`'s Checkout-screen wiring in `App.test.tsx` — covers: Cart's success callback switches to the Checkout screen with the order, "Continue Shopping" returns to Catalog (Red) [fe78325]
-- [ ] Task: Implement the wiring in `App.tsx` (`screen: 'catalog' | 'cart' | 'checkout'`, `lastOrder` state) — minimum code to pass (Green)
+- [x] Task: Implement the wiring in `App.tsx` (`screen: 'catalog' | 'cart' | 'checkout'`, `lastOrder` state) — minimum code to pass (Green) [f87ca32]
 - [ ] Task: Refactor; rerun full test suite; check coverage (>80% target)
 - [ ] Task: Conductor - User Manual Verification 'Navigation wiring' (Protocol in workflow.md)
