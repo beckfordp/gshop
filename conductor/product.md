@@ -18,9 +18,10 @@ many frontend apps the platform hosts simultaneously.
 None of its own — gshop is a pure client. It consumes five backend services'
 REST APIs (catalog, cart, order, inventory, payment), whose contracts live in
 gluon's `system-design.md`, not duplicated here. `src/services/*Client.ts` are
-the thin per-service client modules — `catalogClient.ts` now has a real
-`list()` method (US-1); the rest are still base URL + health check only
-stubs — see Status below.
+the thin per-service client modules — `catalogClient.ts` (US-1) and
+`cartClient.ts` (US-2) now have real methods; `orderClient.ts`,
+`inventoryClient.ts`, and `paymentClient.ts` are still base URL + health
+check only stubs — see Status below.
 
 ## User stories in scope
 From `../../../docs/user-stories.md` (UI realization, not new stories):
@@ -46,7 +47,24 @@ what's natural to build and demo (browse before cart before checkout before
 history).
 
 ## Status
-US-1 (browse catalog) is live: `src/screens/Catalog/Catalog.tsx` lists
-products from catalog-service via `catalogClient.list()`, with manual
-"Load more" pagination. No search/filter/categories, no detail view, no
-add-to-cart (that's US-2). US-2/US-3/US-8 screens not yet built.
+US-1 (browse catalog) and US-2 (cart) are live:
+- `src/screens/Catalog/Catalog.tsx` lists products from catalog-service via
+  `catalogClient.list()`, with manual "Load more" pagination, and an
+  "Add to cart" button per item. No search/filter/categories, no detail
+  view.
+- `src/screens/Cart/Cart.tsx` shows the current cart (via `cartClient`),
+  joined against the full catalog list for display names/prices (no
+  lookup-by-sku endpoint exists yet — see `backlogs/catalog-service.md` in
+  `gluon`). Supports "+1" and "Remove" per line; no quantity decrement or
+  set-to-exact-quantity (cart-service's HTTP API doesn't expose that).
+- The cart itself is anonymous — identified by an opaque id cart-service
+  generates, persisted only in the browser's `localStorage`
+  (`src/services/cartId.ts`); no auth/session system exists.
+- `App.tsx` toggles between the two screens via local `useState` — no
+  router yet (deliberately deferred, see `tech-stack.md`).
+- Both screens currently need a Vite dev-server proxy to reach their
+  backend services locally — catalog-service and cart-service don't send
+  CORS headers, so a browser blocks direct cross-origin calls to them (see
+  `tech-stack.md`'s "Local dev against a running backend").
+
+US-3 (checkout) and US-8 (order history) screens not yet built.
