@@ -15,7 +15,7 @@
 ## Phase 3: Checkout screen
 - [x] Task: Write failing tests for `Checkout.tsx` in `src/screens/Checkout/Checkout.test.tsx` — covers: renders the passed-in order's id/status/items/total, "Continue Shopping" button (Red) [087b1f7]
 - [x] Task: Implement `Checkout.tsx` + `Checkout.css` — minimum code to pass (Green) [aa9f62b]
-- [ ] Task: Refactor; rerun tests
+- [x] Task: Refactor; rerun tests — no refactor needed, implementation already minimal; full suite (50/50) + lint re-confirmed green
 - [ ] Task: Conductor - User Manual Verification 'Checkout screen' (Protocol in workflow.md)
 
 ## Phase 4: Navigation wiring
