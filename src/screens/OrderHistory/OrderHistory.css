@@ -1,0 +1,24 @@
+.order-history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.order-history-order {
+  padding: 1rem 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.order-history-items {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+
+.order-history-total {
+  font-weight: bold;
+}
+
+.order-history-error {
+  margin: 1rem 0;
+}
