@@ -7,7 +7,7 @@
 - [x] Task: Conductor - User Manual Verification 'orderClient' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-checkout-phase1.sh`
 
 ## Phase 2: Checkout button (Cart screen)
-- [ ] Task: Write failing tests for Cart's "Checkout" button in `Cart.test.tsx` — covers: blocked submission when a line has no resolved price, waiting state while in flight, success calls the parent's callback with the order + clears `gshop:cartId`, `reservation_failed` shows inline error+Retry and stays on Cart, request error shows error+Retry (Red)
+- [x] Task: Write failing tests for Cart's "Checkout" button in `Cart.test.tsx` — covers: blocked submission when a line has no resolved price, waiting state while in flight, success calls the parent's callback with the order + clears `gshop:cartId`, `reservation_failed` shows inline error+Retry and stays on Cart, request error shows error+Retry (Red) [85250fc]
 - [ ] Task: Implement the button in `Cart.tsx` (new `onCheckoutSuccess` prop) — minimum code to pass (Green)
 - [ ] Task: Refactor; rerun tests
 - [ ] Task: Conductor - User Manual Verification 'Checkout button' (Protocol in workflow.md)
