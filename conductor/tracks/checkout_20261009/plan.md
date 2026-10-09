@@ -13,7 +13,7 @@
 - [x] Task: Conductor - User Manual Verification 'Checkout button' (Protocol in workflow.md) — prompting off, verified via real browser click against live order-service (new Vite dev proxy, same CORS workaround pattern): got a genuine `reservation_failed` response (inventory-service has no seeded stock — confirmed via GET /inventory/<sku> 404, noted in gluon's backlogs/inventory-service.md), correctly showed "Some items are out of stock." + Retry, cart id preserved, no console errors
 
 ## Phase 3: Checkout screen
-- [ ] Task: Write failing tests for `Checkout.tsx` in `src/screens/Checkout/Checkout.test.tsx` — covers: renders the passed-in order's id/status/items/total, "Continue Shopping" button (Red)
+- [x] Task: Write failing tests for `Checkout.tsx` in `src/screens/Checkout/Checkout.test.tsx` — covers: renders the passed-in order's id/status/items/total, "Continue Shopping" button (Red) [087b1f7]
 - [ ] Task: Implement `Checkout.tsx` + `Checkout.css` — minimum code to pass (Green)
 - [ ] Task: Refactor; rerun tests
 - [ ] Task: Conductor - User Manual Verification 'Checkout screen' (Protocol in workflow.md)
