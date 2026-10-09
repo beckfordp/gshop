@@ -9,7 +9,7 @@
 - [x] Task: Refactor; rerun tests — no refactor needed, all Phase 1 changes already minimal; full suite (59/59) + lint re-confirmed green
 - [x] Task: Conductor - User Manual Verification 'customerId + orderClient.list()' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-history-phase1.sh` + a real browser walkthrough: two separate checkouts in the same session both used the SAME persistent `gshop:customerId` (confirmed via `GET /orders?customerId=`), while `gshop:cartId` was correctly cleared/regenerated each time; discovered order-service's history cache has a 60s staleness TTL with no write-invalidation (documented in tech-stack.md, not a gshop bug)
 
-## Phase 2: Order History screen
+## Phase 2: Order History screen [checkpoint: 558597f]
 - [x] Task: Write failing tests for `OrderHistory.tsx` in `src/screens/OrderHistory/OrderHistory.test.tsx` — covers: empty state (no stored customerId, no API call), loading, renders past orders (id/status/items/total/date) newest-first, error+Retry (Red) [e0410a4]
 - [x] Task: Implement `OrderHistory.tsx` + `.css` — minimum code to pass (Green) [cd0588f]
 - [x] Task: Refactor; rerun tests — `formatStatus` was identically duplicated between Checkout.tsx and OrderHistory.tsx; extracted to `src/lib/format.ts` with its own test; full suite (65/65) + lint + build re-confirmed green [32e2dc5]
