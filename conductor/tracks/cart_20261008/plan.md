@@ -12,7 +12,7 @@
 - [x] Task: Write failing tests for Catalog's "Add to cart" button in `Catalog.test.tsx` — covers: click calls `getOrCreateCartId()` + `cartClient.addItem()`, shows brief "Added" feedback, shows inline error on failure (Red) [7592193]
 - [x] Task: Implement the button in `Catalog.tsx` — minimum code to pass (Green) [31bef2c]
 - [x] Task: Refactor; rerun tests — extracted `addToCartLabel()` helper to replace a nested ternary; full suite (22/22) + lint + build re-confirmed green [191e52c]
-- [ ] Task: Conductor - User Manual Verification 'Add to cart' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Add to cart' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-cart-phase2.sh` + a real browser click against live cart-service (through a new Vite dev proxy entry, same CORS workaround as catalog); confirmed server-side via GET /carts/{id}
 
 ## Phase 3: Cart screen
 - [ ] Task: Write failing tests for `Cart.tsx` in `src/screens/Cart/Cart.test.tsx` — covers: empty state (no stored id, no API call), loading, joins cart items against catalog list to render name/qty/price lines + total, "+1" and "Remove" actions, error+Retry for get/addItem/removeItem (Red)
