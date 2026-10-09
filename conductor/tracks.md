@@ -6,9 +6,6 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [x] **Track: US-8: order status/history screen, wire orderClient to real endpoints**
-  *Link: [./tracks/history_20261009/](./tracks/history_20261009/)*
-
 ---
 
 ## Backlog
