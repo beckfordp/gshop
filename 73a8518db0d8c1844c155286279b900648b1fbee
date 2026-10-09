@@ -1,0 +1,13 @@
+Task: Phase 1 Red — failing tests for orderClient.list() (track history_20261009)
+
+Why: TDD per workflow.md — define order-service's real GET /orders
+contract via tests before implementing orderClient.list().
+
+Changes:
+- src/services/orderClient.test.ts: 3 new tests — GETs /orders with the
+  customerId query param and returns the parsed list, OrderClientError on
+  non-2xx, OrderClientError on network failure.
+
+Verified Red: npx vitest run src/services/orderClient.test.ts — 3/8
+failed (orderClient.list is not a function), the 5 pre-existing create()
+tests still passed.
