@@ -15,7 +15,7 @@
 - [x] Task: Refactor; rerun tests — `formatStatus` was identically duplicated between Checkout.tsx and OrderHistory.tsx; extracted to `src/lib/format.ts` with its own test; full suite (65/65) + lint + build re-confirmed green [32e2dc5]
 - [x] Task: Conductor - User Manual Verification 'Order History screen' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-history-phase2.sh`; live browser click-through deferred to Phase 3 (screen not reachable in the app until nav is wired)
 
-## Phase 3: Navigation wiring
+## Phase 3: Navigation wiring [checkpoint: 224e7a6]
 - [x] Task: Write failing tests for `App.tsx`'s History screen + per-screen nav buttons in `App.test.tsx` — covers: "Order History" reachable from Catalog and Cart, History screen's own nav shows "Back to Catalog" and "View Cart" (Red) [00d8ea0]
 - [x] Task: Implement the wiring in `App.tsx` (`screen` widened to include `'history'`) — minimum code to pass (Green) [751bf3e]
 - [x] Task: Refactor; rerun full test suite; check coverage (>80% target) — App.tsx's three near-identical nav button blocks (each repeating the same screen/label pairs) replaced with a data-driven `NAV_TARGETS` list filtered by current screen [1d0a7ce]; 67/67 tests pass; aggregate coverage 94.86% (App.tsx/OrderHistory.tsx/customerId.ts 100%), exceeds target
