@@ -8,7 +8,7 @@
 - [x] Task: Refactor; rerun tests — no refactor needed; both files already minimal, consistent with catalogClient.ts's pattern; full suite (20/20) + lint re-confirmed green [03b1fc4]
 - [x] Task: Conductor - User Manual Verification 'cartClient + cart identity' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-cart-phase1.sh`
 
-## Phase 2: Add to cart (Catalog screen)
+## Phase 2: Add to cart (Catalog screen) [checkpoint: 6f72020]
 - [x] Task: Write failing tests for Catalog's "Add to cart" button in `Catalog.test.tsx` — covers: click calls `getOrCreateCartId()` + `cartClient.addItem()`, shows brief "Added" feedback, shows inline error on failure (Red) [7592193]
 - [x] Task: Implement the button in `Catalog.tsx` — minimum code to pass (Green) [31bef2c]
 - [x] Task: Refactor; rerun tests — extracted `addToCartLabel()` helper to replace a nested ternary; full suite (22/22) + lint + build re-confirmed green [191e52c]
