@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getOrCreateCartId } from './cartId';
+import { getOrCreateCartId, getStoredCartId } from './cartId';
 import { cartClient } from './cartClient';
 
 vi.mock('./cartClient', () => ({
@@ -36,5 +36,21 @@ describe('getOrCreateCartId', () => {
     expect(id).toBe('new-cart-id');
     expect(create).toHaveBeenCalledOnce();
     expect(localStorage.getItem('gshop:cartId')).toBe('new-cart-id');
+  });
+});
+
+describe('getStoredCartId', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('returns null when no cart id is stored', () => {
+    expect(getStoredCartId()).toBeNull();
+  });
+
+  it('returns the stored cart id without creating one', () => {
+    localStorage.setItem('gshop:cartId', 'existing-cart-id');
+
+    expect(getStoredCartId()).toBe('existing-cart-id');
   });
 });
