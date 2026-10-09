@@ -6,7 +6,7 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [~] **Track: US-2: cart screen, wire cartClient to real endpoints**
+- [x] **Track: US-2: cart screen, wire cartClient to real endpoints**
   *Link: [./tracks/cart_20261008/](./tracks/cart_20261008/)*
 
 ---
@@ -24,22 +24,24 @@ through the spec/plan questions and promote it into a real track above.
   them — per system-design.md, both look server-to-server/event-driven
   only today, no documented frontend-facing endpoint
 - Wire local dev against the real local-k8s deployment (`bin/k8s-local-up`,
-  `gluon-local` namespace) via `kubectl port-forward` per service — partially
-  done manually for catalog-service (2026-10-08) while verifying US-1, see
-  below; what's left is doing this properly for cart/order (US-2/US-3/US-8)
-  and deciding if it should be scripted (e.g. a `docs`/`.env.example` +
-  helper script) instead of done by hand each time.
-  **Important discovery**: pointing `.env` at the port-forwarded URL
-  directly (`VITE_CATALOG_SERVICE_URL=http://localhost:<port>`) does NOT
-  work from a browser — catalog-service sends no `Access-Control-Allow-Origin`
-  header, so the browser blocks the cross-origin `fetch()` (confirmed via
-  curl working fine, browser throwing `TypeError: Failed to fetch`). Worked
-  around for catalog-service via a Vite dev-server proxy instead (see
-  `vite.config.ts`'s `server.proxy` and `tech-stack.md`) — browser calls a
-  same-origin relative path, Vite forwards it server-to-server, no CORS
-  involved. This same gap will hit every other service's client too
-  (cart/order next) unless catalog-service's CORS gap gets fixed upstream in
-  the `gluon` platform repo — worth raising there rather than re-solving
-  per-service with more proxy entries indefinitely.
+  `gluon-local` namespace) via `kubectl port-forward` per service — done by
+  hand for catalog-service and cart-service (2026-10-08/09) while verifying
+  US-1/US-2; what's left is order-service (US-3) and deciding if this
+  should be scripted (e.g. a `docs`/`.env.example` + helper script) instead
+  of done by hand each time.
+  **Important discovery**: pointing `.env` at a port-forwarded URL directly
+  (`VITE_CATALOG_SERVICE_URL=http://localhost:<port>`) does NOT work from a
+  browser — neither catalog-service nor cart-service sends an
+  `Access-Control-Allow-Origin` header, so the browser blocks the
+  cross-origin `fetch()` (confirmed via curl working fine, browser throwing
+  `TypeError: Failed to fetch`, for both services). Worked around with a
+  Vite dev-server proxy entry per service instead (see `vite.config.ts`'s
+  `server.proxy` and `tech-stack.md`) — browser calls a same-origin
+  relative path, Vite forwards it server-to-server, no CORS involved. This
+  same gap will hit order-service next (US-3) unless CORS gets fixed
+  upstream in the `gluon` platform repo — noted there in
+  `backlogs/catalog-service.md` and `backlogs/cart-service.md`, worth
+  raising rather than re-solving per-service with more proxy entries
+  indefinitely.
 
 ---
