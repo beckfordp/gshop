@@ -1,0 +1,33 @@
+Phase 3 Checkpoint: Navigation wiring (track history_20261009) — final
+phase of US-8 Order History
+
+Prompting is off for this project (.claude/prompt-off). This phase got a
+full live browser walkthrough covering the whole nav matrix, since
+navigation finally makes Order History reachable:
+
+- Hit a real environment blocker mid-verification: OrbStack's local k8s
+  API server stopped responding (TLS handshake timeout on all kubectl
+  calls) — unrelated to gshop's code, likely tied to real wall-clock time
+  passing during a session usage-limit reset. Paused and asked the user
+  rather than attempting to restart their environment unprompted; user
+  restarted it themselves.
+- After restart: all pods came back (fresh RESTARTS counts), but
+  Postgres-backed data survived (both orders placed during Phase 1's
+  verification were still there, now showing status "confirmed" — async
+  payment processing completed in the ~10h since). Re-established all
+  four port-forwards (catalog/cart/order/inventory).
+- Catalog screen: "View Cart" and "Order History" both present in nav.
+- Order History: real GET /orders?customerId= returned both prior orders,
+  rendered newest-first, each with correct id/status/date/items/total.
+- Cart screen (empty, since both prior checkouts cleared it): "Back to
+  Catalog" and "Order History" both present in nav.
+- No console errors at any point.
+
+Automated test command: npm run build && npm run lint && npm run
+test:coverage — all passed. 67/67 tests. Coverage 94.86% aggregate (every
+file this track touched is at or near 100%; the rest is pre-existing
+untouched stub clients + main.tsx bootstrap, out of scope).
+
+This closes out track history_20261009 (US-8) — all 3 phases complete,
+verified against real backend services including surviving a real
+infrastructure outage mid-track.
