@@ -1,0 +1,29 @@
+Phase 1 Checkpoint: customerId + orderClient.list() (track history_20261009)
+
+Prompting is off for this project (.claude/prompt-off) — manual verification
+done via a real browser check (stronger than the script alone, since this
+phase's whole point is fixing a cross-checkout identity bug):
+
+- Cleared localStorage for a truly fresh visitor. Added the one sku with
+  seeded test stock (watch-rolex-submariner), checked out — real order
+  created, a fresh gshop:customerId UUID minted (9c78f90f-...), confirmed
+  distinct from any cart id, confirmed gshop:cartId cleared.
+- Added the same sku again, checked out a SECOND time — confirmed (via
+  localStorage) the SAME customerId was reused, not regenerated, while a
+  new cart id was created fresh for the new cart. This is the core fix
+  this track exists for: history now has one stable identity to query by,
+  independent of the cart id's per-checkout reset.
+- GET /orders?customerId=<that id> (direct curl, bypassing gshop) correctly
+  returned the order tied to that customerId.
+- Found and documented (tech-stack.md): order-service's history endpoint
+  has a 60s cache TTL with no write-invalidation (confirmed in its own
+  application.conf/code comments as a deliberate, already-scoped
+  limitation) — a second order didn't show up in GET /orders?customerId=
+  for up to a minute after creation. Not a gshop bug, no fix possible
+  client-side; just documented so Phase 2's screen isn't mistaken for
+  broken when this happens.
+- No console errors at any point.
+
+Automated test command: ./scripts/verify-history-phase1.sh
+(npm run build && npm run lint && npm test)
+All passed: build clean, lint clean, 59/59 vitest tests passed (10 files).
