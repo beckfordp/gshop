@@ -6,7 +6,7 @@
 - [x] Task: Write failing tests for `orderClient.list()` in `orderClient.test.ts` — covers request shape (GET /orders?customerId=...), response parsing, `OrderClientError` on non-2xx/network failure (Red) [73a8518]
 - [x] Task: Implement `orderClient.list()` against order-service's real contract — minimum code to pass (Green) [13ffa70]
 - [x] Task: Update `Cart.test.tsx`'s checkout tests to expect `customerId` from `getOrCreateCustomerId()` instead of the cart id, then update `Cart.tsx`'s `handleCheckout` to match (Red → Green in one task, since it's a one-line source swap in an already-tested code path) [df6fc04]
-- [ ] Task: Refactor; rerun tests
+- [x] Task: Refactor; rerun tests — no refactor needed, all Phase 1 changes already minimal; full suite (59/59) + lint re-confirmed green
 - [ ] Task: Conductor - User Manual Verification 'customerId + orderClient.list()' (Protocol in workflow.md)
 
 ## Phase 2: Order History screen
