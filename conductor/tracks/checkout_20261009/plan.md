@@ -12,7 +12,7 @@
 - [x] Task: Refactor; rerun tests — extracted `CartProps` interface for readability; full suite (47/47) + lint + build re-confirmed green [49c1cbc]
 - [x] Task: Conductor - User Manual Verification 'Checkout button' (Protocol in workflow.md) — prompting off, verified via real browser click against live order-service (new Vite dev proxy, same CORS workaround pattern): got a genuine `reservation_failed` response (inventory-service has no seeded stock — confirmed via GET /inventory/<sku> 404, noted in gluon's backlogs/inventory-service.md), correctly showed "Some items are out of stock." + Retry, cart id preserved, no console errors
 
-## Phase 3: Checkout screen
+## Phase 3: Checkout screen [checkpoint: 6293f5e]
 - [x] Task: Write failing tests for `Checkout.tsx` in `src/screens/Checkout/Checkout.test.tsx` — covers: renders the passed-in order's id/status/items/total, "Continue Shopping" button (Red) [087b1f7]
 - [x] Task: Implement `Checkout.tsx` + `Checkout.css` — minimum code to pass (Green) [aa9f62b]
 - [x] Task: Refactor; rerun tests — no refactor needed, implementation already minimal; full suite (50/50) + lint re-confirmed green
