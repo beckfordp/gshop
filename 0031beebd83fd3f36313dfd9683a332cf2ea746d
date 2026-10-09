@@ -1,0 +1,21 @@
+Task: Phase 3 Green — implement Cart screen (track cart_20261008)
+
+Why: minimum code to pass the Red-phase tests, per spec.md.
+
+Changes:
+- src/screens/Cart/Cart.tsx (new): load() reads getStoredCartId(); if
+  none, shows empty state with no API call. Otherwise Promise.all's
+  cartClient.get(cartId) + catalogClient.list({limit:100, offset:0}),
+  joins cart's {sku: qty} against the catalog by sku (Map lookup), falls
+  back to sku as display name when not found. runAction() is a shared
+  helper for "+1" (addItem) and "Remove" (removeItem) — sets per-sku
+  loading/error state, calls the action, then reloads. Computed total
+  sums line.priceCents * quantity (treating unmatched items as 0).
+- src/screens/Cart/Cart.css (new): minimal list/error/total styling,
+  matches Catalog.css's pattern.
+
+Verified Green: npx vitest run src/screens/Cart/Cart.test.tsx — 8/8
+passed (one test's assertion needed fixing mid-cycle — $20.00 matched
+both the line price and the total text; switched to checking the line
+element's textContent directly, not an implementation issue). Full suite
+32/32. npm run build and npm run lint both clean.
