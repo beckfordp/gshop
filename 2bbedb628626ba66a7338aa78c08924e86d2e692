@@ -1,0 +1,32 @@
+Phase 2 Checkpoint: Checkout button (track checkout_20261009)
+
+Prompting is off for this project (.claude/prompt-off) — manual verification
+done via a real browser check (stronger than a script, since this phase is
+user-facing):
+
+- Port-forwarded order-service (kubectl port-forward -n gluon-local
+  svc/order-service 8083:8080), confirmed same CORS gap as catalog/cart
+  services (curl 201s, browser fetch() doesn't — no ACAO header).
+- Added a third Vite dev-proxy entry (/api/order -> localhost:8083) and
+  VITE_ORDER_SERVICE_URL=/api/order in .env, matching the established
+  pattern.
+- Clicked "Checkout" on a real cart (5 items, $86650 total) in the actual
+  browser — got a genuine reservation_failed response from real
+  order-service, because inventory-service has no stock seeded for ANY
+  sku (GET /inventory/<sku> returns 404 for real catalog skus) — a
+  backend data gap, not a gshop bug. Confirmed gshop handled it exactly
+  per spec: "Some items are out of stock." + Retry shown, cart NOT
+  cleared (localStorage gshop:cartId still present), onCheckoutSuccess
+  NOT called.
+- No console errors.
+- Documented in tech-stack.md; filed both findings upstream in gluon:
+  backlogs/order-service.md (CORS) and backlogs/inventory-service.md (no
+  seed data) — committed+pushed there (66f1056).
+
+Could not verify the success path (reservation succeeding) against live
+services today, since no sku has stock — that's blocked on the
+inventory-seeding backlog item, not something gshop can fix. The success
+path IS covered by Cart.test.tsx's unit tests (mocked orderClient).
+
+Automated test command: npm run build && npm run lint && npm test — all
+passed, 47/47 tests.
