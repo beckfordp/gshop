@@ -1,0 +1,17 @@
+Task: Phase 2 Red — failing tests for Order History screen
+(track history_20261009)
+
+Why: TDD per workflow.md — define the screen's empty/loading/display/
+error+Retry behavior before implementing it.
+
+Changes:
+- src/screens/OrderHistory/OrderHistory.test.tsx (new): 5 tests — empty
+  state with no stored customerId (no API call), empty state when the
+  customer has no past orders, loading state, renders orders in the
+  order the server returns them (no client-side sorting — verified via
+  DOM position, not re-sorting), each order's id/status/items/total/date,
+  error+working Retry.
+
+Verified Red: npx vitest run src/screens/OrderHistory/OrderHistory.test.tsx
+— failed to resolve import "./OrderHistory" (component doesn't exist
+yet), as expected.
