@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { cartClient } from '../../services/cartClient';
 import { catalogClient } from '../../services/catalogClient';
 import { getStoredCartId } from '../../services/cartId';
+import { errorMessage, formatPrice } from '../../lib/format';
 import './Cart.css';
 
 // catalog-service has no lookup-by-sku endpoint, so the join below fetches
@@ -14,16 +15,6 @@ interface CartLine {
   quantity: number;
   name: string;
   priceCents: number | null;
-}
-
-function formatPrice(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
-}
-
-function errorMessage(error: unknown): string {
-  // `error` is `unknown` under strict mode; narrow safely rather than
-  // asserting, since a rejected promise isn't guaranteed to be an Error.
-  return error instanceof Error ? error.message : String(error);
 }
 
 export default function Cart() {

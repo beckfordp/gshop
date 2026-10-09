@@ -2,21 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { catalogClient, type CatalogItem } from '../../services/catalogClient';
 import { cartClient } from '../../services/cartClient';
 import { getOrCreateCartId } from '../../services/cartId';
+import { errorMessage, formatPrice } from '../../lib/format';
 import './Catalog.css';
 
 type AddToCartState = 'idle' | 'adding' | 'added' | 'error';
 
 const PAGE_SIZE = 20;
-
-function formatPrice(priceCents: number): string {
-  return `$${(priceCents / 100).toFixed(2)}`;
-}
-
-function errorMessage(error: unknown): string {
-  // `error` is `unknown` under strict mode; narrow safely rather than
-  // asserting, since a rejected promise isn't guaranteed to be an Error.
-  return error instanceof Error ? error.message : String(error);
-}
 
 function addToCartLabel(state: AddToCartState): string {
   switch (state) {
