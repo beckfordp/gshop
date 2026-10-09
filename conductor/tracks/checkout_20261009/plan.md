@@ -18,7 +18,7 @@
 - [x] Task: Refactor; rerun tests — no refactor needed, implementation already minimal; full suite (50/50) + lint re-confirmed green
 - [x] Task: Conductor - User Manual Verification 'Checkout screen' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-checkout-phase3.sh`; live browser click-through deferred to Phase 4 (screen not reachable in the app until nav is wired)
 
-## Phase 4: Navigation wiring
+## Phase 4: Navigation wiring [checkpoint: 7cbbf6a]
 - [x] Task: Write failing tests for `App.tsx`'s Checkout-screen wiring in `App.test.tsx` — covers: Cart's success callback switches to the Checkout screen with the order, "Continue Shopping" returns to Catalog (Red) [fe78325]
 - [x] Task: Implement the wiring in `App.tsx` (`screen: 'catalog' | 'cart' | 'checkout'`, `lastOrder` state) — minimum code to pass (Green) [f87ca32]
 - [x] Task: Refactor; rerun full test suite; check coverage (>80% target) — no refactor needed, App.tsx minimal; 52/52 tests pass; aggregate coverage 94.15% (App.tsx/Checkout.tsx/orderClient.ts 100%, Cart.tsx 97%), exceeds target
