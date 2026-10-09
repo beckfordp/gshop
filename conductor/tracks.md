@@ -6,9 +6,6 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [x] **Track: US-2: cart screen, wire cartClient to real endpoints**
-  *Link: [./tracks/cart_20261008/](./tracks/cart_20261008/)*
-
 ---
 
 ## Backlog
