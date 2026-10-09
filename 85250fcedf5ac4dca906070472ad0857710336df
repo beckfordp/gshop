@@ -1,0 +1,17 @@
+Task: Phase 2 Red — failing tests for Cart's Checkout button
+(track checkout_20261009)
+
+Why: TDD per workflow.md — define checkout's blocked/waiting/success/
+reservation-failed/error+retry behavior before implementing it.
+
+Changes:
+- src/screens/Cart/Cart.test.tsx: added orderClient mock, clearCartId mock,
+  a renderCart() helper (Cart now needs an onCheckoutSuccess prop — updated
+  all 8 existing render(<Cart />) call sites too), and 5 new tests:
+  blocked when a line has no resolved price, waiting state while in
+  flight, success calls onCheckoutSuccess + clears the cart id,
+  reservation_failed shows error+Retry and stays on Cart (Retry resubmits
+  and can still succeed), request error shows error+Retry.
+
+Verified Red: npx vitest run src/screens/Cart/Cart.test.tsx — 5/13 failed
+(no "Checkout" button exists yet), the 8 pre-existing tests still passed.
