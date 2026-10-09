@@ -23,3 +23,6 @@
 - [x] Task: Implement the wiring in `App.tsx` (`screen: 'catalog' | 'cart' | 'checkout'`, `lastOrder` state) — minimum code to pass (Green) [f87ca32]
 - [x] Task: Refactor; rerun full test suite; check coverage (>80% target) — no refactor needed, App.tsx minimal; 52/52 tests pass; aggregate coverage 94.15% (App.tsx/Checkout.tsx/orderClient.ts 100%, Cart.tsx 97%), exceeds target
 - [x] Task: Conductor - User Manual Verification 'Navigation wiring' (Protocol in workflow.md) — prompting off, verified via full live browser walkthrough including the real success path (seeded test stock for one sku so a reservation could genuinely succeed): Catalog -> Add to cart -> View Cart -> Checkout -> real order created (status: pending) -> Checkout screen shows correct id/status/items/total -> cart id cleared -> Continue Shopping back to Catalog, no console errors
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions — added justification comment for the `line.priceCents as number` type assertion in Cart.tsx's checkout item mapping (code_styleguides/typescript.md's "provide a clear justification" rule) [e16146a]
