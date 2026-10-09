@@ -1,6 +1,6 @@
 # Plan: US-3 Checkout
 
-## Phase 1: orderClient
+## Phase 1: orderClient [checkpoint: 16426b8]
 - [x] Task: Write failing tests for `orderClient.create()` in `src/services/orderClient.test.ts` — covers request shape/body, response parsing, `OrderClientError` on non-2xx/network failure (Red) [741f81b]
 - [x] Task: Implement `orderClient.create()` against order-service's real `POST /orders` contract — minimum code to pass (Green) [a524b62]
 - [x] Task: Refactor; rerun tests — no refactor needed, implementation already minimal and reuses errorMessage() from src/lib/format.ts; full suite (41/41) + lint re-confirmed green
