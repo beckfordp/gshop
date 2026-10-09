@@ -18,7 +18,11 @@ interface CartLine {
   priceCents: number | null;
 }
 
-export default function Cart({ onCheckoutSuccess }: { onCheckoutSuccess: (order: Order) => void }) {
+interface CartProps {
+  onCheckoutSuccess: (order: Order) => void;
+}
+
+export default function Cart({ onCheckoutSuccess }: CartProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lines, setLines] = useState<CartLine[]>([]);
