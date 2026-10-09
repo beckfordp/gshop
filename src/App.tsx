@@ -8,6 +8,12 @@ import './App.css'
 
 type Screen = 'catalog' | 'cart' | 'checkout' | 'history'
 
+const NAV_TARGETS: { screen: Exclude<Screen, 'checkout'>; label: string }[] = [
+  { screen: 'catalog', label: 'Back to Catalog' },
+  { screen: 'cart', label: 'View Cart' },
+  { screen: 'history', label: 'Order History' },
+]
+
 function App() {
   const [screen, setScreen] = useState<Screen>('catalog')
   const [lastOrder, setLastOrder] = useState<Order | null>(null)
@@ -25,24 +31,12 @@ function App() {
   return (
     <>
       <nav>
-        {screen === 'catalog' && (
-          <>
-            <button onClick={() => setScreen('cart')}>View Cart</button>
-            <button onClick={() => setScreen('history')}>Order History</button>
-          </>
-        )}
-        {screen === 'cart' && (
-          <>
-            <button onClick={() => setScreen('catalog')}>Back to Catalog</button>
-            <button onClick={() => setScreen('history')}>Order History</button>
-          </>
-        )}
-        {screen === 'history' && (
-          <>
-            <button onClick={() => setScreen('catalog')}>Back to Catalog</button>
-            <button onClick={() => setScreen('cart')}>View Cart</button>
-          </>
-        )}
+        {screen !== 'checkout' &&
+          NAV_TARGETS.filter((target) => target.screen !== screen).map((target) => (
+            <button key={target.screen} onClick={() => setScreen(target.screen)}>
+              {target.label}
+            </button>
+          ))}
       </nav>
       {screen === 'catalog' && <Catalog />}
       {screen === 'cart' && <Cart onCheckoutSuccess={handleCheckoutSuccess} />}
