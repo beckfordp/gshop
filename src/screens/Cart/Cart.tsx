@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { cartClient } from '../../services/cartClient';
 import { catalogClient } from '../../services/catalogClient';
-import { getStoredCartId } from '../../services/cartId';
+import { clearCartId, getStoredCartId } from '../../services/cartId';
+import { orderClient, type Order } from '../../services/orderClient';
 import { errorMessage, formatPrice } from '../../lib/format';
 import './Cart.css';
 
@@ -17,12 +18,14 @@ interface CartLine {
   priceCents: number | null;
 }
 
-export default function Cart() {
+export default function Cart({ onCheckoutSuccess }: { onCheckoutSuccess: (order: Order) => void }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lines, setLines] = useState<CartLine[]>([]);
   const [actionError, setActionError] = useState<Record<string, string>>({});
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const cartId = getStoredCartId();
@@ -82,6 +85,41 @@ export default function Cart() {
     }
   };
 
+  const handleCheckout = async () => {
+    const cartId = getStoredCartId();
+    if (!cartId) {
+      return;
+    }
+    if (lines.some((line) => line.priceCents === null)) {
+      setCheckoutError('Remove unavailable items before checking out.');
+      return;
+    }
+
+    setCheckingOut(true);
+    setCheckoutError(null);
+    try {
+      const order = await orderClient.create({
+        customerId: cartId,
+        items: lines.map((line) => ({
+          sku: line.sku,
+          productName: line.name,
+          unitPriceCents: line.priceCents as number,
+          quantity: line.quantity,
+        })),
+      });
+      if (order.status === 'reservation_failed') {
+        setCheckoutError('Some items are out of stock.');
+        return;
+      }
+      clearCartId();
+      onCheckoutSuccess(order);
+    } catch (err) {
+      setCheckoutError(errorMessage(err));
+    } finally {
+      setCheckingOut(false);
+    }
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -129,6 +167,15 @@ export default function Cart() {
         ))}
       </ul>
       <p className="cart-total">Total: {formatPrice(total)}</p>
+      <button onClick={handleCheckout} disabled={checkingOut}>
+        {checkingOut ? 'Placing order...' : 'Checkout'}
+      </button>
+      {checkoutError && (
+        <div className="cart-error">
+          <p role="alert">{checkoutError}</p>
+          <button onClick={handleCheckout}>Retry</button>
+        </div>
+      )}
     </div>
   );
 }

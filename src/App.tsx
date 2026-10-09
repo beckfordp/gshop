@@ -17,7 +17,13 @@ function App() {
           <button onClick={() => setScreen('catalog')}>Back to Catalog</button>
         )}
       </nav>
-      {screen === 'catalog' ? <Catalog /> : <Cart />}
+      {screen === 'catalog' ? (
+        <Catalog />
+      ) : (
+        // TODO(checkout_20261009 Phase 4): wire a real onCheckoutSuccess
+        // that switches to the Checkout screen with the created order.
+        <Cart onCheckoutSuccess={() => {}} />
+      )}
     </>
   )
 }
