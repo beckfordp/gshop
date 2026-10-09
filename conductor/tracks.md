@@ -6,7 +6,7 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [ ] **Track: US-8: order status/history screen, wire orderClient to real endpoints**
+- [~] **Track: US-8: order status/history screen, wire orderClient to real endpoints**
   *Link: [./tracks/history_20261009/](./tracks/history_20261009/)*
 
 ---
