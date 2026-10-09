@@ -1,0 +1,16 @@
+Task: Phase 4 Green — wire App's Checkout-screen navigation
+(track checkout_20261009)
+
+Why: minimum code to pass the Red-phase tests, per spec.md — replaces
+Phase 2's TODO placeholder with the real wiring.
+
+Changes:
+- src/App.tsx: screen type widened to 'catalog' | 'cart' | 'checkout';
+  added lastOrder: Order | null state. handleCheckoutSuccess(order) sets
+  lastOrder and switches to 'checkout'. handleContinueShopping() clears
+  lastOrder and switches back to 'catalog'. nav now only shows a button
+  on catalog/cart screens (none on checkout — it has its own "Continue
+  Shopping" CTA). Removed the Phase 2 TODO placeholder.
+
+Verified Green: npx vitest run src/App.test.tsx — 4/4 passed. Full suite
+52/52. npm run build and npm run lint both clean.
