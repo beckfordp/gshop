@@ -2,7 +2,7 @@
 
 ## Phase 1: orderClient
 - [x] Task: Write failing tests for `orderClient.create()` in `src/services/orderClient.test.ts` — covers request shape/body, response parsing, `OrderClientError` on non-2xx/network failure (Red) [741f81b]
-- [ ] Task: Implement `orderClient.create()` against order-service's real `POST /orders` contract — minimum code to pass (Green)
+- [x] Task: Implement `orderClient.create()` against order-service's real `POST /orders` contract — minimum code to pass (Green) [a524b62]
 - [ ] Task: Refactor; rerun tests
 - [ ] Task: Conductor - User Manual Verification 'orderClient' (Protocol in workflow.md)
 
