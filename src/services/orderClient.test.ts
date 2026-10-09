@@ -1,0 +1,101 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { orderClient, OrderClientError } from './orderClient';
+
+describe('orderClient.create', () => {
+  const baseUrl = 'http://order.test';
+  const orderBody = {
+    id: 'order-1',
+    customerId: 'cart-1',
+    totalCents: 1999,
+    status: 'pending',
+    items: [
+      {
+        id: 'item-1',
+        sku: 'WID-1',
+        productName: 'Widget',
+        unitPriceCents: 1999,
+        quantity: 1,
+      },
+    ],
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: '2026-01-01T00:00:00Z',
+  };
+
+  afterEach(() => {
+    orderClient.baseUrl = baseUrl;
+    vi.restoreAllMocks();
+  });
+
+  it('POSTs to /orders with the customerId and items, and returns the parsed order', async () => {
+    orderClient.baseUrl = baseUrl;
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify(orderBody), { status: 201 }));
+
+    const result = await orderClient.create({
+      customerId: 'cart-1',
+      items: [{ sku: 'WID-1', productName: 'Widget', unitPriceCents: 1999, quantity: 1 }],
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(`${baseUrl}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerId: 'cart-1',
+        items: [{ sku: 'WID-1', productName: 'Widget', unitPriceCents: 1999, quantity: 1 }],
+      }),
+    });
+    expect(result).toEqual(orderBody);
+  });
+
+  it('returns the order even when status is reservation_failed (still a 201, not an error)', async () => {
+    orderClient.baseUrl = baseUrl;
+    const failedOrder = { ...orderBody, status: 'reservation_failed' };
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify(failedOrder), { status: 201 }),
+    );
+
+    const result = await orderClient.create({
+      customerId: 'cart-1',
+      items: [{ sku: 'WID-1', productName: 'Widget', unitPriceCents: 1999, quantity: 1 }],
+    });
+
+    expect(result.status).toBe('reservation_failed');
+  });
+
+  it('throws OrderClientError on a non-2xx response', async () => {
+    orderClient.baseUrl = baseUrl;
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ error: 'Order must have at least one item' }), {
+        status: 400,
+      }),
+    );
+
+    await expect(
+      orderClient.create({ customerId: 'cart-1', items: [] }),
+    ).rejects.toThrow(OrderClientError);
+  });
+
+  it('throws OrderClientError when the network request fails', async () => {
+    orderClient.baseUrl = baseUrl;
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
+
+    await expect(
+      orderClient.create({
+        customerId: 'cart-1',
+        items: [{ sku: 'WID-1', productName: 'Widget', unitPriceCents: 1999, quantity: 1 }],
+      }),
+    ).rejects.toThrow(OrderClientError);
+  });
+
+  it('throws OrderClientError when the base URL is not configured', async () => {
+    orderClient.baseUrl = undefined;
+
+    await expect(
+      orderClient.create({
+        customerId: 'cart-1',
+        items: [{ sku: 'WID-1', productName: 'Widget', unitPriceCents: 1999, quantity: 1 }],
+      }),
+    ).rejects.toThrow(OrderClientError);
+  });
+});
