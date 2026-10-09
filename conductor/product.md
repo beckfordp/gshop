@@ -19,10 +19,11 @@ None of its own — gshop is a pure client. It consumes five backend services'
 REST APIs (catalog, cart, order, inventory, payment), whose contracts live in
 gluon's `system-design.md`, not duplicated here. `src/services/*Client.ts` are
 the thin per-service client modules — `catalogClient.ts` (US-1),
-`cartClient.ts` (US-2), and `orderClient.ts` (US-3) now have real
-methods; `inventoryClient.ts` and `paymentClient.ts` are still base URL +
-health check only stubs — see Status below and the Open question below
-(inventory confirmed unneeded during US-3; payment still open).
+`cartClient.ts` (US-2), and `orderClient.ts` (`create()` from US-3,
+`list()` from US-8) now have real methods; `inventoryClient.ts` and
+`paymentClient.ts` are still base URL + health check only stubs — see
+Status below and the Open question below (inventory confirmed unneeded
+during US-3; payment still open).
 
 ## User stories in scope
 From `../../../docs/user-stories.md` (UI realization, not new stories):
@@ -56,7 +57,8 @@ what's natural to build and demo (browse before cart before checkout before
 history).
 
 ## Status
-US-1 (browse catalog), US-2 (cart), and US-3 (checkout) are live:
+All four in-scope user stories are live: US-1 (browse catalog), US-2
+(cart), US-3 (checkout), and US-8 (order history).
 - `src/screens/Catalog/Catalog.tsx` lists products from catalog-service via
   `catalogClient.list()`, with manual "Load more" pagination, and an
   "Add to cart" button per item. No search/filter/categories, no detail
@@ -75,20 +77,34 @@ US-1 (browse catalog), US-2 (cart), and US-3 (checkout) are live:
 - `src/screens/Checkout/Checkout.tsx` is a pure confirmation display (order
   id, status, line items, total) for the order just placed — passed in
   from `App.tsx`, not re-fetched. "Continue Shopping" returns to Catalog.
+- `src/screens/OrderHistory/OrderHistory.tsx` lists all past orders for
+  this customer (`orderClient.list()`), newest first (server-sorted, no
+  client re-sort), each with id/status/items/total/date. Empty state when
+  there's no customerId yet or no past orders. No pagination (order-service
+  doesn't have any).
 - The cart itself is anonymous — identified by an opaque id cart-service
   generates, persisted only in the browser's `localStorage`
-  (`src/services/cartId.ts`); no auth/session system exists. That same id
-  is reused as the order's `customerId` — orders aren't tied to a real
-  user/session either.
-- `App.tsx` toggles between the three screens via local `useState` — no
-  router yet (deliberately deferred, see `tech-stack.md`).
-- All three screens currently need a Vite dev-server proxy to reach their
+  (`src/services/cartId.ts`); no auth/session system exists. **As of
+  US-8**, the order's `customerId` is a *separate* persistent anonymous id
+  (`src/services/customerId.ts`, a `crypto.randomUUID()` minted once and
+  never cleared) — not the cart id. Earlier (US-3) checkout reused the
+  cart id as customerId, which broke order history: a successful checkout
+  clears the cart id, so each checkout got a different "customer". US-8
+  fixed this by introducing the separate identity and updating Cart's
+  checkout to send it instead.
+- `App.tsx` toggles between four screens via local `useState` — no router
+  yet (deliberately deferred, see `tech-stack.md`). Nav shows "the other
+  reachable screens" per current screen (Catalog/Cart/History each show
+  the other two; Checkout has its own "Continue Shopping" CTA instead of
+  nav buttons).
+- All screens currently need a Vite dev-server proxy to reach their
   backend services locally — catalog-service, cart-service, and
   order-service don't send CORS headers, so a browser blocks direct
   cross-origin calls to them (see `tech-stack.md`'s "Local dev against a
   running backend"). Also found during US-3: `inventory-service` has no
   stock seeded for any sku, so real checkouts currently all come back
   `reservation_failed` unless test stock is seeded by hand (see
-  `gluon`'s `backlogs/inventory-service.md`).
-
-US-8 (order history) screen not yet built.
+  `gluon`'s `backlogs/inventory-service.md`). And found during US-8:
+  order-service's history endpoint has a 60s cache TTL with no
+  write-invalidation (its own documented, deliberate design) — a
+  just-placed order can take up to a minute to show up in Order History.
