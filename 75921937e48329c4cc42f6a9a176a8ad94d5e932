@@ -1,0 +1,15 @@
+Task: Phase 2 Red — failing tests for Catalog's Add-to-cart button
+(track cart_20261008)
+
+Why: TDD per workflow.md — define the button's click-through behavior
+(getOrCreateCartId + cartClient.addItem, confirmation, error+Retry) before
+implementing it.
+
+Changes:
+- src/screens/Catalog/Catalog.test.tsx: added mocks for cartClient and
+  cartId, 2 new tests — successful add shows "Added" confirmation; failed
+  add shows inline error + working Retry that succeeds on retry.
+
+Verified Red: npx vitest run src/screens/Catalog/Catalog.test.tsx — 2/7
+failed (no "Add to cart" button exists yet), 5 pre-existing tests still
+passed.
