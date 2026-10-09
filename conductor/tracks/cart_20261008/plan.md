@@ -9,7 +9,7 @@
 - [x] Task: Conductor - User Manual Verification 'cartClient + cart identity' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-cart-phase1.sh`
 
 ## Phase 2: Add to cart (Catalog screen)
-- [ ] Task: Write failing tests for Catalog's "Add to cart" button in `Catalog.test.tsx` — covers: click calls `getOrCreateCartId()` + `cartClient.addItem()`, shows brief "Added" feedback, shows inline error on failure (Red)
+- [x] Task: Write failing tests for Catalog's "Add to cart" button in `Catalog.test.tsx` — covers: click calls `getOrCreateCartId()` + `cartClient.addItem()`, shows brief "Added" feedback, shows inline error on failure (Red) [7592193]
 - [ ] Task: Implement the button in `Catalog.tsx` — minimum code to pass (Green)
 - [ ] Task: Refactor; rerun tests
 - [ ] Task: Conductor - User Manual Verification 'Add to cart' (Protocol in workflow.md)
