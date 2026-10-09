@@ -12,7 +12,7 @@
 ## Phase 2: Order History screen
 - [x] Task: Write failing tests for `OrderHistory.tsx` in `src/screens/OrderHistory/OrderHistory.test.tsx` — covers: empty state (no stored customerId, no API call), loading, renders past orders (id/status/items/total/date) newest-first, error+Retry (Red) [e0410a4]
 - [x] Task: Implement `OrderHistory.tsx` + `.css` — minimum code to pass (Green) [cd0588f]
-- [ ] Task: Refactor; rerun tests
+- [x] Task: Refactor; rerun tests — `formatStatus` was identically duplicated between Checkout.tsx and OrderHistory.tsx; extracted to `src/lib/format.ts` with its own test; full suite (65/65) + lint + build re-confirmed green [32e2dc5]
 - [ ] Task: Conductor - User Manual Verification 'Order History screen' (Protocol in workflow.md)
 
 ## Phase 3: Navigation wiring
