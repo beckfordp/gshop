@@ -20,7 +20,7 @@
 - [x] Task: Refactor; rerun tests — `formatPrice`/`errorMessage` were identically duplicated between Catalog.tsx and Cart.tsx; extracted to `src/lib/format.ts` with its own tests; full suite (35/35) + lint + build re-confirmed green [7afba95]
 - [x] Task: Conductor - User Manual Verification 'Cart screen' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-cart-phase3.sh`; live browser click-through deferred to Phase 4 (screen not reachable in the app until nav is wired)
 
-## Phase 4: Navigation
+## Phase 4: Navigation [checkpoint: 11861d8]
 - [x] Task: Write failing tests for `App.tsx`'s Catalog/Cart screen toggle in `App.test.tsx` — covers: default screen, switching via nav links (Red) [7e1ac4e]
 - [x] Task: Implement the toggle in `App.tsx` — minimum code to pass (Green) [ccc445c]
 - [x] Task: Refactor; rerun full test suite; check coverage (>80% target) — no refactor needed, App.tsx minimal; 36/36 tests pass; aggregate coverage 91.55% (App.tsx/Cart.tsx/Catalog.tsx/cartId.ts/format.ts all 100% or near it), exceeds target
