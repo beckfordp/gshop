@@ -11,7 +11,7 @@
 
 ## Phase 2: Order History screen
 - [x] Task: Write failing tests for `OrderHistory.tsx` in `src/screens/OrderHistory/OrderHistory.test.tsx` — covers: empty state (no stored customerId, no API call), loading, renders past orders (id/status/items/total/date) newest-first, error+Retry (Red) [e0410a4]
-- [ ] Task: Implement `OrderHistory.tsx` + `.css` — minimum code to pass (Green)
+- [x] Task: Implement `OrderHistory.tsx` + `.css` — minimum code to pass (Green) [cd0588f]
 - [ ] Task: Refactor; rerun tests
 - [ ] Task: Conductor - User Manual Verification 'Order History screen' (Protocol in workflow.md)
 
