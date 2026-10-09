@@ -1,0 +1,14 @@
+Task: Phase 3 Red — failing tests for Checkout screen (track checkout_20261009)
+
+Why: TDD per workflow.md — define the confirmation screen's display
+behavior before implementing it.
+
+Changes:
+- src/screens/Checkout/Checkout.test.tsx (new): 3 tests — renders the
+  passed-in order's id/status/items (name, qty, line price)/total; status
+  formatting (reservation_failed -> "Reservation failed"); "Continue
+  Shopping" calls the onContinueShopping prop.
+
+Verified Red: npx vitest run src/screens/Checkout/Checkout.test.tsx —
+failed to resolve import "./Checkout" (component doesn't exist yet), as
+expected.
