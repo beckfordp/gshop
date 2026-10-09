@@ -24,4 +24,4 @@
 - [x] Task: Write failing tests for `App.tsx`'s Catalog/Cart screen toggle in `App.test.tsx` — covers: default screen, switching via nav links (Red) [7e1ac4e]
 - [x] Task: Implement the toggle in `App.tsx` — minimum code to pass (Green) [ccc445c]
 - [x] Task: Refactor; rerun full test suite; check coverage (>80% target) — no refactor needed, App.tsx minimal; 36/36 tests pass; aggregate coverage 91.55% (App.tsx/Cart.tsx/Catalog.tsx/cartId.ts/format.ts all 100% or near it), exceeds target
-- [ ] Task: Conductor - User Manual Verification 'Navigation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Navigation' (Protocol in workflow.md) — prompting off, verified via full live browser walkthrough: Catalog -> Add to cart -> View Cart -> +1 -> Remove -> Back to Catalog, all against real catalog-service/cart-service, no console errors
