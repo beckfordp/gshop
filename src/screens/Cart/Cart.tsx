@@ -104,6 +104,10 @@ export default function Cart({ onCheckoutSuccess }: CartProps) {
     try {
       const order = await orderClient.create({
         customerId: cartId,
+        // Safe: the `lines.some(...)` guard above already returned early
+        // if any line's priceCents is null, so every line here has a
+        // resolved price — TypeScript just can't see that across the
+        // .some()/.map() boundary.
         items: lines.map((line) => ({
           sku: line.sku,
           productName: line.name,
