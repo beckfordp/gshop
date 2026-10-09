@@ -1,0 +1,22 @@
+Phase 2 Checkpoint: Add to cart (track cart_20261008)
+
+Prompting is off for this project (.claude/prompt-off) — manual verification
+done via committed scripts/verify-cart-phase2.sh, PLUS a real browser check
+(stronger than the script alone, since this phase is user-facing UI):
+
+- Port-forwarded cart-service (kubectl port-forward -n gluon-local
+  svc/cart-service 8082:8080), confirmed same CORS gap as catalog-service
+  (curl works, browser fetch() doesn't — no ACAO header).
+- Added a second Vite dev-proxy entry (/api/cart -> localhost:8082) and
+  VITE_CART_SERVICE_URL=/api/cart in .env, matching catalog's workaround.
+- Clicked "Add to cart" on a real catalog item in the actual browser (via
+  claude-in-chrome) — button went Add to cart -> Adding... -> Added.
+- Verified server-side: GET /carts/{id} (localStorage's gshop:cartId)
+  returned the real created cart with the item's sku at quantity 1.
+- No console errors.
+
+Documented in tech-stack.md and in gluon's backlogs/cart-service.md
+(committed+pushed there: 082043c).
+
+Automated test command: ./scripts/verify-cart-phase2.sh
+(npm run build && npm run lint && npm test) — all passed, 22/22 tests.
