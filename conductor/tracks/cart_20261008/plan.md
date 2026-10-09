@@ -15,7 +15,7 @@
 - [x] Task: Conductor - User Manual Verification 'Add to cart' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-cart-phase2.sh` + a real browser click against live cart-service (through a new Vite dev proxy entry, same CORS workaround as catalog); confirmed server-side via GET /carts/{id}
 
 ## Phase 3: Cart screen
-- [ ] Task: Write failing tests for `Cart.tsx` in `src/screens/Cart/Cart.test.tsx` — covers: empty state (no stored id, no API call), loading, joins cart items against catalog list to render name/qty/price lines + total, "+1" and "Remove" actions, error+Retry for get/addItem/removeItem (Red)
+- [x] Task: Write failing tests for `Cart.tsx` in `src/screens/Cart/Cart.test.tsx` — covers: empty state (no stored id, no API call), loading, joins cart items against catalog list to render name/qty/price lines + total, "+1" and "Remove" actions, error+Retry for get/addItem/removeItem (Red) [d9da12b]
 - [ ] Task: Implement `Cart.tsx` + `Cart.css` — minimum code to pass (Green)
 - [ ] Task: Refactor; rerun tests
 - [ ] Task: Conductor - User Manual Verification 'Cart screen' (Protocol in workflow.md)
