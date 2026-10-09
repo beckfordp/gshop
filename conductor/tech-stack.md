@@ -84,6 +84,18 @@ the "Some items are out of stock." error — this is gshop behaving
 correctly against real (if unseeded) data, not a gshop bug. Noted in
 `gluon`'s `backlogs/inventory-service.md`.
 
+Verified the full success path too, Phase 4 2026-10-09: manually seeded
+one sku (`POST /inventorys {"sku":"watch-rolex-submariner",
+"quantityAvailable":5}` against the port-forwarded inventory-service) so
+a real reservation could succeed. End-to-end in a real browser: Catalog →
+Add to cart → View Cart → Checkout → real `POST /orders` with
+`status: "pending"` (reservation succeeded) → Checkout screen showing the
+correct order id/status/items/total → `gshop:cartId` cleared from
+`localStorage` → "Continue Shopping" back to Catalog. No console errors
+at any step. This seeded row is local-k8s test data only, not part of
+the official seed script — it'll persist until `inventory-postgres`'s
+volume is reset.
+
 See `conductor/tracks.md`'s backlog item on local-k8s dev wiring — the CORS
 gap is worth fixing upstream in these services (and payment-service, if it
 ever gets a frontend-facing endpoint) rather than adding more proxy entries
