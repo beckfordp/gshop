@@ -99,3 +99,47 @@ describe('orderClient.create', () => {
     ).rejects.toThrow(OrderClientError);
   });
 });
+
+describe('orderClient.list', () => {
+  const baseUrl = 'http://order.test';
+  const order = {
+    id: 'order-1',
+    customerId: 'customer-1',
+    totalCents: 1999,
+    status: 'pending',
+    items: [],
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: '2026-01-01T00:00:00Z',
+  };
+
+  afterEach(() => {
+    orderClient.baseUrl = baseUrl;
+    vi.restoreAllMocks();
+  });
+
+  it('GETs /orders?customerId=... and returns the parsed list', async () => {
+    orderClient.baseUrl = baseUrl;
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify([order]), { status: 200 }));
+
+    const result = await orderClient.list('customer-1');
+
+    expect(fetchMock).toHaveBeenCalledWith(`${baseUrl}/orders?customerId=customer-1`);
+    expect(result).toEqual([order]);
+  });
+
+  it('throws OrderClientError on a non-2xx response', async () => {
+    orderClient.baseUrl = baseUrl;
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 500 }));
+
+    await expect(orderClient.list('customer-1')).rejects.toThrow(OrderClientError);
+  });
+
+  it('throws OrderClientError when the network request fails', async () => {
+    orderClient.baseUrl = baseUrl;
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
+
+    await expect(orderClient.list('customer-1')).rejects.toThrow(OrderClientError);
+  });
+});
