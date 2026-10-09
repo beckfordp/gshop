@@ -1,0 +1,21 @@
+Task: Phase 2 Green — implement Cart's Checkout button
+(track checkout_20261009)
+
+Why: minimum code to pass the Red-phase tests, per spec.md's checkout flow.
+
+Changes:
+- src/screens/Cart/Cart.tsx: Cart now takes a required onCheckoutSuccess
+  prop. handleCheckout(): blocks (sets checkoutError, no API call) if any
+  line's priceCents is null; otherwise shows a waiting state and calls
+  orderClient.create({customerId: cartId, items: [...]}). On
+  status === 'reservation_failed', shows an inline error and stays put
+  (onCheckoutSuccess is not called). On any other status, clearCartId()
+  then onCheckoutSuccess(order). On a thrown OrderClientError, same
+  inline error+Retry pattern as the rest of the app.
+- src/App.tsx: passes a placeholder onCheckoutSuccess={() => {}} to Cart
+  (marked with a TODO) just to keep the build green — Phase 4 replaces it
+  with real screen-switching state + its own Red/Green cycle. Cart's new
+  required prop would otherwise break App.tsx's build before Phase 4 runs.
+
+Verified Green: npx vitest run src/screens/Cart/Cart.test.tsx — 13/13
+passed. Full suite 47/47. npm run build and npm run lint both clean.
