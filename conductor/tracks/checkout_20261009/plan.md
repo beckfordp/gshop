@@ -8,7 +8,7 @@
 
 ## Phase 2: Checkout button (Cart screen)
 - [x] Task: Write failing tests for Cart's "Checkout" button in `Cart.test.tsx` — covers: blocked submission when a line has no resolved price, waiting state while in flight, success calls the parent's callback with the order + clears `gshop:cartId`, `reservation_failed` shows inline error+Retry and stays on Cart, request error shows error+Retry (Red) [85250fc]
-- [ ] Task: Implement the button in `Cart.tsx` (new `onCheckoutSuccess` prop) — minimum code to pass (Green)
+- [x] Task: Implement the button in `Cart.tsx` (new `onCheckoutSuccess` prop) — minimum code to pass (Green) [874c918]
 - [ ] Task: Refactor; rerun tests
 - [ ] Task: Conductor - User Manual Verification 'Checkout button' (Protocol in workflow.md)
 
