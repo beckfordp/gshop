@@ -1,0 +1,26 @@
+Task: Phase 1 — update Cart's checkout to send the persistent customerId
+(track history_20261009)
+
+Why: fixes the order-history wrinkle this track's spec identified — US-3
+made customerId = the cart's own id, but checkout clears that cart id, so
+history (querying GET /orders?customerId=<id>) would only ever see the
+in-progress cart, never past ones. Switching checkout's customerId source
+to the new persistent customerId.ts (never cleared) fixes this.
+
+Changes:
+- src/screens/Cart/Cart.test.tsx: added a customerId service mock
+  (default-mocked to return 'customer-1' in beforeEach so unrelated
+  checkout tests don't need to set it up individually); updated the
+  success test's assertion to expect customerId: 'customer-1' (from
+  getOrCreateCustomerId()) instead of 'cart-1' (the cart id).
+- src/screens/Cart/Cart.tsx: handleCheckout now calls
+  getOrCreateCustomerId() for orderClient.create()'s customerId field,
+  instead of reusing the cartId variable. cartId itself is unchanged —
+  still used for the early-return guard and, elsewhere in the component,
+  for actual cart operations (get/addItem/removeItem).
+
+Verified Red->Green in one commit (single-line source swap in an
+already-tested path, per plan.md): npx vitest run
+src/screens/Cart/Cart.test.tsx — 13/13 passed (1 failed first, confirming
+Red, before the Cart.tsx change). Full suite 59/59. npm run build and
+npm run lint both clean.
