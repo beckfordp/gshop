@@ -1,0 +1,15 @@
+Task: Phase 1 Green — implement orderClient.create() (track checkout_20261009)
+
+Why: minimum code to pass the Red-phase tests against order-service's real
+POST /orders contract.
+
+Changes:
+- src/services/orderClient.ts: added NewOrderItem/OrderItem/Order types,
+  OrderClientError class, and create({customerId, items}) built on the
+  same baseUrl/fetch/error pattern as catalogClient/cartClient — reuses
+  errorMessage() from src/lib/format.ts instead of redefining it. A
+  doc comment flags that a 201 response doesn't guarantee
+  reservation succeeded — callers must check the returned `status`.
+
+Verified Green: npx vitest run src/services/orderClient.test.ts — 5/5
+passed. Full suite 41/41. npm run build and npm run lint both clean.
