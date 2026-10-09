@@ -1,0 +1,11 @@
+Phase 1 Checkpoint: orderClient (track checkout_20261009)
+
+Prompting is off for this project (.claude/prompt-off) — manual verification
+done via committed scripts/verify-checkout-phase1.sh.
+
+Phase scope (since track start 5b6ac7c): orderClient.ts/.test.ts. Code
+file has a corresponding test file, no coverage gap.
+
+Automated test command: ./scripts/verify-checkout-phase1.sh
+(npm run build && npm run lint && npm test)
+All passed: build clean, lint clean, 41/41 vitest tests passed (8 files).
