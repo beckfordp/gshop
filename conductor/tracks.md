@@ -6,9 +6,6 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [x] **Track: US-3: checkout screen, wire orderClient to real endpoints**
-  *Link: [./tracks/checkout_20261009/](./tracks/checkout_20261009/)*
-
 ---
 
 ## Backlog
@@ -19,9 +16,13 @@ priorities change. When ready to work on one, run `/conductor:newTrack <title>` 
 through the spec/plan questions and promote it into a real track above.
 
 - US-8: order status/history screen, wire orderClient to real endpoints
-- Confirm whether inventoryClient/paymentClient are needed at all, or drop
-  them — per system-design.md, both look server-to-server/event-driven
-  only today, no documented frontend-facing endpoint
+- Drop `inventoryClient.ts` — confirmed unneeded during US-3: order-service
+  calls inventory-service server-to-server itself (synchronous reservation
+  inside `POST /orders`), gshop never calls it directly. See product.md's
+  "Open question" section. `paymentClient.ts` stays an open question —
+  revisit when a payment-collection story gets scoped (not US-3, which
+  explicitly left payment out: `payment_failed` is an async status gshop
+  doesn't trigger or wait for).
 - Wire local dev against the real local-k8s deployment (`bin/k8s-local-up`,
   `gluon-local` namespace) via `kubectl port-forward` per service — done by
   hand for catalog-service, cart-service, and order-service (2026-10-08/09)
