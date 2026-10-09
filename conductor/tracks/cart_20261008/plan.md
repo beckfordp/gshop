@@ -22,6 +22,6 @@
 
 ## Phase 4: Navigation
 - [x] Task: Write failing tests for `App.tsx`'s Catalog/Cart screen toggle in `App.test.tsx` — covers: default screen, switching via nav links (Red) [7e1ac4e]
-- [ ] Task: Implement the toggle in `App.tsx` — minimum code to pass (Green)
+- [x] Task: Implement the toggle in `App.tsx` — minimum code to pass (Green) [ccc445c]
 - [ ] Task: Refactor; rerun full test suite; check coverage (>80% target)
 - [ ] Task: Conductor - User Manual Verification 'Navigation' (Protocol in workflow.md)
