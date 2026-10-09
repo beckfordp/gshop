@@ -17,7 +17,7 @@
 ## Phase 3: Cart screen
 - [x] Task: Write failing tests for `Cart.tsx` in `src/screens/Cart/Cart.test.tsx` — covers: empty state (no stored id, no API call), loading, joins cart items against catalog list to render name/qty/price lines + total, "+1" and "Remove" actions, error+Retry for get/addItem/removeItem (Red) [d9da12b]
 - [x] Task: Implement `Cart.tsx` + `Cart.css` — minimum code to pass (Green) [0031bee]
-- [ ] Task: Refactor; rerun tests
+- [x] Task: Refactor; rerun tests — `formatPrice`/`errorMessage` were identically duplicated between Catalog.tsx and Cart.tsx; extracted to `src/lib/format.ts` with its own tests; full suite (35/35) + lint + build re-confirmed green [7afba95]
 - [ ] Task: Conductor - User Manual Verification 'Cart screen' (Protocol in workflow.md)
 
 ## Phase 4: Navigation
