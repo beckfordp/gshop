@@ -18,6 +18,17 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+function addToCartLabel(state: AddToCartState): string {
+  switch (state) {
+    case 'adding':
+      return 'Adding...';
+    case 'added':
+      return 'Added';
+    default:
+      return 'Add to cart';
+  }
+}
+
 export default function Catalog() {
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -101,7 +112,7 @@ export default function Catalog() {
             <li key={item.id} className="catalog-item">
               {item.name} — {item.sku} — {formatPrice(item.priceCents)}
               <button onClick={() => handleAddToCart(item)} disabled={state === 'adding'}>
-                {state === 'adding' ? 'Adding...' : state === 'added' ? 'Added' : 'Add to cart'}
+                {addToCartLabel(state)}
               </button>
               {state === 'error' && (
                 <span className="catalog-error">
