@@ -1,0 +1,14 @@
+Task: Phase 1 Green — implement customerId service (track history_20261009)
+
+Why: minimum code to pass the Red-phase tests — a persistent anonymous
+identity decoupled from the cart id's own reset-per-checkout lifecycle.
+
+Changes:
+- src/services/customerId.ts (new): getOrCreateCustomerId() (reads
+  getStoredCustomerId(), generates+persists a crypto.randomUUID() if
+  absent) and getStoredCustomerId() (plain localStorage read). Same
+  get/getOrCreate split pattern as cartId.ts, but synchronous — no server
+  call needed since this id is purely client-side.
+
+Verified Green: npx vitest run src/services/customerId.test.ts — 4/4
+passed. npm run build and npm run lint both clean.
