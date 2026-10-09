@@ -1,0 +1,14 @@
+Task: Phase 1 Green — implement orderClient.list() (track history_20261009)
+
+Why: minimum code to pass the Red-phase tests against order-service's real
+GET /orders?customerId= contract.
+
+Changes:
+- src/services/orderClient.ts: added list(customerId) — GET request with
+  the customerId query param (encodeURIComponent'd), same error-handling
+  pattern as create() (OrderClientError on unconfigured baseUrl, fetch
+  rejection, or non-2xx). Returns Order[] (server already sorts
+  newest-first, per OrderStore.listByCustomer).
+
+Verified Green: npx vitest run src/services/orderClient.test.ts — 8/8
+passed. npm run build and npm run lint both clean.
