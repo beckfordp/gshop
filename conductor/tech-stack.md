@@ -49,14 +49,15 @@ default — forward the one(s) you need:
 ```bash
 kubectl port-forward -n gluon-local svc/catalog-service 8081:8080
 kubectl port-forward -n gluon-local svc/cart-service 8082:8080
+kubectl port-forward -n gluon-local svc/order-service 8083:8080
 ```
 **Do not** point `.env`'s service URLs straight at those forwarded ports
-(`VITE_CATALOG_SERVICE_URL=http://localhost:8081`) — neither catalog-service
-nor cart-service sends an `Access-Control-Allow-Origin` header, so the
-browser blocks the cross-origin `fetch()` even though the server itself
-responds fine (curl works, browser throws `TypeError: Failed to fetch`).
-Confirmed via `curl -i -H "Origin: http://localhost:5173" ...` returning 200
-with no ACAO header, for both services.
+(`VITE_CATALOG_SERVICE_URL=http://localhost:8081`) — catalog-service,
+cart-service, and order-service all send no `Access-Control-Allow-Origin`
+header, so the browser blocks the cross-origin `fetch()` even though the
+server itself responds fine (curl works, browser throws `TypeError: Failed
+to fetch`). Confirmed via `curl -i -H "Origin: http://localhost:5173" ...`
+returning 200/201 with no ACAO header, for all three services.
 
 Worked around with Vite dev-server proxy entries (`vite.config.ts`'s
 `server.proxy`, one per service), so the browser's request stays
@@ -66,13 +67,25 @@ CORS):
 # .env (gitignored, not committed)
 VITE_CATALOG_SERVICE_URL=/api/catalog
 VITE_CART_SERVICE_URL=/api/cart
+VITE_ORDER_SERVICE_URL=/api/order
 ```
 Verified end-to-end for cart-service 2026-10-09 (track `cart_20261008`
 Phase 2): clicking "Add to cart" in a real browser created a real cart via
 `POST /carts` and persisted the item via `POST /carts/{id}/items`,
 confirmed by re-fetching `GET /carts/{id}`.
 
-See `conductor/tracks.md`'s backlog item on local-k8s dev wiring — this
-same gap will hit order-service next (US-3). Worth fixing CORS upstream in
-these services (and siblings) rather than adding more proxy entries
-per-service indefinitely — noted in `gluon`'s `backlogs/catalog-service.md`.
+Verified for order-service 2026-10-09 (track `checkout_20261009` Phase 2):
+clicking "Checkout" in a real browser called the real `POST /orders`
+through the proxy and got back a genuine `reservation_failed` response —
+**`inventory-service` has no stock seeded for any sku** (`GET
+/inventory/<sku>` returns 404 for real catalog skus), so every real
+reservation currently fails. Cart correctly stayed un-cleared and showed
+the "Some items are out of stock." error — this is gshop behaving
+correctly against real (if unseeded) data, not a gshop bug. Noted in
+`gluon`'s `backlogs/inventory-service.md`.
+
+See `conductor/tracks.md`'s backlog item on local-k8s dev wiring — the CORS
+gap is worth fixing upstream in these services (and payment-service, if it
+ever gets a frontend-facing endpoint) rather than adding more proxy entries
+per-service indefinitely — noted in `gluon`'s `backlogs/catalog-service.md`
+and `backlogs/cart-service.md`.
