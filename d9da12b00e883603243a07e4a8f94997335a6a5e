@@ -1,0 +1,15 @@
+Task: Phase 3 Red — failing tests for Cart screen (track cart_20261008)
+
+Why: TDD per workflow.md — define Cart's empty/loading/joined-display/+1/
+Remove/error+Retry behavior via tests before implementing the component.
+
+Changes:
+- src/screens/Cart/Cart.test.tsx (new): 8 tests — empty state with zero API
+  calls, loading state, cart-items-joined-against-catalog rendering (name/
+  qty/line-price/total), sku fallback when a cart item isn't in the
+  catalog, "+1" calls addItem + refreshes, "Remove" calls removeItem +
+  refreshes, initial-fetch error+Retry, inline per-line error when "+1"
+  fails. Mocks cartClient, catalogClient, and cartId's getStoredCartId.
+
+Verified Red: npx vitest run src/screens/Cart/Cart.test.tsx — failed to
+resolve import "./Cart" (component doesn't exist yet), as expected.
