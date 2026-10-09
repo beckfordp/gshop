@@ -13,7 +13,7 @@
 - [x] Task: Write failing tests for `OrderHistory.tsx` in `src/screens/OrderHistory/OrderHistory.test.tsx` — covers: empty state (no stored customerId, no API call), loading, renders past orders (id/status/items/total/date) newest-first, error+Retry (Red) [e0410a4]
 - [x] Task: Implement `OrderHistory.tsx` + `.css` — minimum code to pass (Green) [cd0588f]
 - [x] Task: Refactor; rerun tests — `formatStatus` was identically duplicated between Checkout.tsx and OrderHistory.tsx; extracted to `src/lib/format.ts` with its own test; full suite (65/65) + lint + build re-confirmed green [32e2dc5]
-- [ ] Task: Conductor - User Manual Verification 'Order History screen' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Order History screen' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-history-phase2.sh`; live browser click-through deferred to Phase 3 (screen not reachable in the app until nav is wired)
 
 ## Phase 3: Navigation wiring
 - [ ] Task: Write failing tests for `App.tsx`'s History screen + per-screen nav buttons in `App.test.tsx` — covers: "Order History" reachable from Catalog and Cart, History screen's own nav shows "Back to Catalog" and "View Cart" (Red)
