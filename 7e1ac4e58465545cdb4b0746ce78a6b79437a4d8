@@ -1,0 +1,13 @@
+Task: Phase 4 Red — failing tests for App's Catalog/Cart nav toggle
+(track cart_20261008)
+
+Why: TDD per workflow.md — define the screen-toggle behavior before
+implementing it.
+
+Changes:
+- src/App.test.tsx: added a Cart screen mock alongside the existing
+  Catalog mock; 1 new test — clicking "View Cart" switches to Cart,
+  clicking "Back to Catalog" switches back.
+
+Verified Red: npx vitest run src/App.test.tsx — 1/2 failed (no "View Cart"
+button exists yet), the pre-existing default-screen test still passed.
