@@ -1,0 +1,15 @@
+Phase 3 Checkpoint: Checkout screen (track checkout_20261009)
+
+Prompting is off for this project (.claude/prompt-off) — manual verification
+done via committed scripts/verify-checkout-phase3.sh.
+
+Phase scope (since Phase 2 checkpoint 2bbedb6): Checkout.tsx/.test.tsx,
+Checkout.css. Code file has a corresponding test file, no gap.
+
+Automated test command: ./scripts/verify-checkout-phase3.sh
+(npm run build && npm run lint && npm test)
+All passed: build clean, lint clean, 50/50 vitest tests passed (9 files).
+
+Live browser click-through intentionally deferred to Phase 4's checkpoint:
+the Checkout screen isn't reachable in the running app yet (App.tsx still
+only toggles Catalog/Cart — nav wiring is Phase 4's own task).
