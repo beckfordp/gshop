@@ -1,0 +1,14 @@
+Task: Phase 2 Green — implement Catalog's Add-to-cart button
+(track cart_20261008)
+
+Why: minimum code to pass the Red-phase tests.
+
+Changes:
+- src/screens/Catalog/Catalog.tsx: per-item addToCartState/addToCartError
+  maps (keyed by catalog item id). Button cycles "Add to cart" ->
+  "Adding..." (disabled) -> "Added" on success, or shows an inline
+  error + Retry (reusing handleAddToCart) on failure. handleAddToCart
+  calls getOrCreateCartId() then cartClient.addItem(cartId, sku, 1).
+
+Verified Green: npx vitest run src/screens/Catalog/Catalog.test.tsx — 7/7
+passed. Full suite 22/22. npm run build and npm run lint both clean.
