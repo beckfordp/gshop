@@ -1,0 +1,13 @@
+Task: Phase 4 Green — implement App's Catalog/Cart nav toggle
+(track cart_20261008)
+
+Why: minimum code to pass the Red-phase tests — plain useState toggle per
+spec.md (no router, confirmed in the clarifying questions).
+
+Changes:
+- src/App.tsx: screen: 'catalog' | 'cart' state; a <nav> showing "View
+  Cart" (on Catalog) or "Back to Catalog" (on Cart); renders Catalog or
+  Cart based on screen.
+
+Verified Green: npx vitest run src/App.test.tsx — 2/2 passed. Full suite
+36/36. npm run build and npm run lint both clean.
