@@ -1,0 +1,29 @@
+Phase 4 Checkpoint: Navigation wiring (track checkout_20261009) — final
+phase of US-3 Checkout
+
+Prompting is off for this project (.claude/prompt-off). This phase got a
+full live browser walkthrough covering BOTH outcomes, since navigation
+finally makes the whole US-3 feature reachable end-to-end:
+
+- Reservation-failed path (already proven in Phase 2, re-confirmed here
+  with nav wired): Checkout button -> waiting -> inline error on Cart,
+  no navigation away.
+- Success path (new): manually seeded one sku's stock
+  (POST /inventorys {"sku":"watch-rolex-submariner","quantityAvailable":5}
+  against the port-forwarded inventory-service — local-k8s test data
+  only, not part of the official seed script) so a real reservation could
+  succeed. Cleared localStorage, added just that item, clicked Checkout:
+  real POST /orders returned status "pending" (reservation succeeded),
+  app navigated to the Checkout screen showing the correct order id,
+  status ("Pending"), line item, and total ($9500.00). Confirmed
+  gshop:cartId was cleared from localStorage. Clicked "Continue Shopping"
+  — returned to the Catalog screen. No console errors at any point.
+
+Automated test command: npm run build && npm run lint && npm run
+test:coverage — all passed. 52/52 tests. Coverage 94.15% aggregate (every
+file this track touched is at or near 100%; the rest is pre-existing
+untouched stub clients + main.tsx bootstrap, out of scope).
+
+This closes out track checkout_20261009 (US-3) — all 4 phases complete,
+both the success and failure paths verified against real backend
+services, not just mocks.
