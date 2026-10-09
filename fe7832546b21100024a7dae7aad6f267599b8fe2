@@ -1,0 +1,16 @@
+Task: Phase 4 Red — failing tests for App's Checkout-screen wiring
+(track checkout_20261009)
+
+Why: TDD per workflow.md — define the screen-switching behavior before
+implementing it.
+
+Changes:
+- src/App.test.tsx: added a Checkout screen mock; the Cart mock now
+  actually invokes its onCheckoutSuccess prop via a button, and the
+  Checkout mock invokes onContinueShopping via a button, so the wiring
+  itself is exercised. 2 new tests: Cart's checkout success switches to
+  Checkout with the order; "Continue Shopping" returns to Catalog.
+
+Verified Red: npx vitest run src/App.test.tsx — 2/4 failed (no real
+onCheckoutSuccess wiring yet — App.tsx still passes a no-op placeholder
+from Phase 2), the 2 pre-existing tests still passed.
