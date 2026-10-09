@@ -1,0 +1,13 @@
+Task: Phase 3 Red — failing tests for App's Order History nav wiring
+(track history_20261009)
+
+Why: TDD per workflow.md — define the per-screen nav button set before
+implementing it.
+
+Changes:
+- src/App.test.tsx: added an OrderHistory screen mock; 2 new tests —
+  "Order History" is reachable from both Catalog and Cart, and the
+  History screen's own nav shows "Back to Catalog" and "View Cart".
+
+Verified Red: npx vitest run src/App.test.tsx — 2/6 failed (no "Order
+History" button exists yet), the 4 pre-existing tests still passed.
