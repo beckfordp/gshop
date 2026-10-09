@@ -19,7 +19,7 @@
 - [x] Task: Conductor - User Manual Verification 'Checkout screen' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-checkout-phase3.sh`; live browser click-through deferred to Phase 4 (screen not reachable in the app until nav is wired)
 
 ## Phase 4: Navigation wiring
-- [ ] Task: Write failing tests for `App.tsx`'s Checkout-screen wiring in `App.test.tsx` — covers: Cart's success callback switches to the Checkout screen with the order, "Continue Shopping" returns to Catalog (Red)
+- [x] Task: Write failing tests for `App.tsx`'s Checkout-screen wiring in `App.test.tsx` — covers: Cart's success callback switches to the Checkout screen with the order, "Continue Shopping" returns to Catalog (Red) [fe78325]
 - [ ] Task: Implement the wiring in `App.tsx` (`screen: 'catalog' | 'cart' | 'checkout'`, `lastOrder` state) — minimum code to pass (Green)
 - [ ] Task: Refactor; rerun full test suite; check coverage (>80% target)
 - [ ] Task: Conductor - User Manual Verification 'Navigation wiring' (Protocol in workflow.md)
