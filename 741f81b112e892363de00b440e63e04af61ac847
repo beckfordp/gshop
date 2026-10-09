@@ -1,0 +1,14 @@
+Task: Phase 1 Red — failing tests for orderClient.create() (track checkout_20261009)
+
+Why: TDD per workflow.md — define order-service's real POST /orders
+contract via tests before implementing orderClient.create().
+
+Changes:
+- src/services/orderClient.test.ts (new): 5 tests — request shape/body
+  (customerId + items), response parsing, a reservation_failed status is
+  still a successful parse (not an error), OrderClientError on non-2xx,
+  on network failure, and on unconfigured baseUrl.
+
+Verified Red: npx vitest run src/services/orderClient.test.ts — 5/5
+failed (orderClient.create is not a function / OrderClientError not
+exported), as expected.
