@@ -1,0 +1,16 @@
+Task: Phase 3 Green — implement Checkout screen (track checkout_20261009)
+
+Why: minimum code to pass the Red-phase tests, per spec.md — pure display
+of an order passed in as a prop, no re-fetch.
+
+Changes:
+- src/screens/Checkout/Checkout.tsx (new): renders order id, a friendly
+  formatted status (formatStatus: underscores -> spaces, capitalized —
+  e.g. "reservation_failed" -> "Reservation failed"), each item's
+  name/qty/line price, the order total, and a "Continue Shopping" button
+  that calls the onContinueShopping prop.
+- src/screens/Checkout/Checkout.css (new): minimal list/total styling,
+  matches Catalog.css/Cart.css's pattern.
+
+Verified Green: npx vitest run src/screens/Checkout/Checkout.test.tsx —
+3/3 passed. Full suite 50/50. npm run build and npm run lint both clean.
