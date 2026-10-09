@@ -4,7 +4,7 @@
 - [x] Task: Write failing tests for `orderClient.create()` in `src/services/orderClient.test.ts` — covers request shape/body, response parsing, `OrderClientError` on non-2xx/network failure (Red) [741f81b]
 - [x] Task: Implement `orderClient.create()` against order-service's real `POST /orders` contract — minimum code to pass (Green) [a524b62]
 - [x] Task: Refactor; rerun tests — no refactor needed, implementation already minimal and reuses errorMessage() from src/lib/format.ts; full suite (41/41) + lint re-confirmed green
-- [ ] Task: Conductor - User Manual Verification 'orderClient' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'orderClient' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-checkout-phase1.sh`
 
 ## Phase 2: Checkout button (Cart screen)
 - [ ] Task: Write failing tests for Cart's "Checkout" button in `Cart.test.tsx` — covers: blocked submission when a line has no resolved price, waiting state while in flight, success calls the parent's callback with the order + clears `gshop:cartId`, `reservation_failed` shows inline error+Retry and stays on Cart, request error shows error+Retry (Red)
