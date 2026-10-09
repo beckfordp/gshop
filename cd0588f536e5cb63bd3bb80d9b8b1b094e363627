@@ -1,0 +1,18 @@
+Task: Phase 2 Green — implement Order History screen
+(track history_20261009)
+
+Why: minimum code to pass the Red-phase tests, per spec.md.
+
+Changes:
+- src/screens/OrderHistory/OrderHistory.tsx (new): load() reads
+  getStoredCustomerId(); if none, empty state with no API call. Otherwise
+  orderClient.list(customerId), rendered as-is (server already sorts
+  newest-first, no client re-sorting). Each order shows id, friendly
+  status (same formatStatus pattern as Checkout.tsx), formatted date
+  (toLocaleDateString), line items (name/qty/line price), and total.
+  Error+Retry on failure, same pattern as the rest of the app.
+- src/screens/OrderHistory/OrderHistory.css (new): minimal list/total/
+  error styling, matches the other screens' pattern.
+
+Verified Green: npx vitest run src/screens/OrderHistory/OrderHistory.test.tsx
+— 5/5 passed. Full suite 64/64. npm run build and npm run lint both clean.
