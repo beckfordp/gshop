@@ -1,6 +1,6 @@
 # Plan: US-2 Cart Screen
 
-## Phase 1: cartClient + cart identity
+## Phase 1: cartClient + cart identity [checkpoint: 82bfaa0]
 - [x] Task: Write failing tests for `cartClient`'s `create()`/`get()`/`addItem()`/`removeItem()` in `src/services/cartClient.test.ts` — covers request shape, response parsing, `CartClientError` on non-2xx/network failure (Red) [2aa997b]
 - [x] Task: Implement `cartClient` methods against cart-service's real contract — minimum code to pass (Green) [230d66b]
 - [x] Task: Write failing tests for `getOrCreateCartId()` in `src/services/cartId.test.ts` — covers: returns existing `localStorage` id without calling the API; creates via `cartClient.create()` and persists when absent (Red) [858865f]
