@@ -7,3 +7,7 @@ export function errorMessage(error: unknown): string {
   // asserting, since a rejected promise isn't guaranteed to be an Error.
   return error instanceof Error ? error.message : String(error);
 }
+
+export function formatStatus(status: string): string {
+  return status.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
+}

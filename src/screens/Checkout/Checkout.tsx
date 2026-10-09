@@ -1,14 +1,10 @@
-import { formatPrice } from '../../lib/format';
+import { formatPrice, formatStatus } from '../../lib/format';
 import type { Order } from '../../services/orderClient';
 import './Checkout.css';
 
 interface CheckoutProps {
   order: Order;
   onContinueShopping: () => void;
-}
-
-function formatStatus(status: string): string {
-  return status.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
 }
 
 export default function Checkout({ order, onContinueShopping }: CheckoutProps) {

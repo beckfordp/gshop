@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { errorMessage, formatPrice } from './format';
+import { errorMessage, formatPrice, formatStatus } from './format';
 
 describe('formatPrice', () => {
   it('formats cents as a dollar string with two decimal places', () => {
@@ -16,5 +16,12 @@ describe('errorMessage', () => {
 
   it('stringifies a non-Error value', () => {
     expect(errorMessage('plain string')).toBe('plain string');
+  });
+});
+
+describe('formatStatus', () => {
+  it('replaces underscores with spaces and capitalizes the first letter', () => {
+    expect(formatStatus('reservation_failed')).toBe('Reservation failed');
+    expect(formatStatus('pending')).toBe('Pending');
   });
 });

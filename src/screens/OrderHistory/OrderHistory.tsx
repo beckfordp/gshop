@@ -1,12 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { orderClient, type Order } from '../../services/orderClient';
 import { getStoredCustomerId } from '../../services/customerId';
-import { errorMessage, formatPrice } from '../../lib/format';
+import { errorMessage, formatPrice, formatStatus } from '../../lib/format';
 import './OrderHistory.css';
-
-function formatStatus(status: string): string {
-  return status.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
-}
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString();
