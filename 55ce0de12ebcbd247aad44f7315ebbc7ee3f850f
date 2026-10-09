@@ -1,0 +1,18 @@
+Task: Phase 3 prep — add getStoredCartId (track cart_20261008)
+
+Why: the Cart screen needs to read the stored cart id WITHOUT creating one
+(an empty cart screen for a first-time visitor shouldn't call POST /carts)
+— getOrCreateCartId() always creates on absence, which is wrong for this
+read-only check. Small addition discovered while designing Cart.tsx, folded
+into Phase 3 rather than reopening the already-checkpointed Phase 1.
+
+Changes:
+- src/services/cartId.ts: added getStoredCartId() (plain localStorage read,
+  no side effects); getOrCreateCartId() now calls it internally instead of
+  duplicating the localStorage.getItem() call.
+- src/services/cartId.test.ts: 2 new tests (null when unset, returns the
+  stored value without calling cartClient.create()).
+
+Verified: npx vitest run src/services/cartId.test.ts — 4/4 passed (TDD
+Red/Green both done in this one commit since it's a 2-line addition).
+npm run build and npm run lint both clean.
