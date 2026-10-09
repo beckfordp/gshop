@@ -1,0 +1,14 @@
+Task: Phase 2 prep — add clearCartId (track checkout_20261009)
+
+Why: successful checkout needs to clear the local cart id so the next
+"Add to cart" starts a fresh cart. Rather than duplicating the
+'gshop:cartId' localStorage key string a third time in Cart.tsx, added
+clearCartId() alongside getStoredCartId()/getOrCreateCartId() — same
+pattern as that earlier addition during cart_20261008 Phase 3.
+
+Changes:
+- src/services/cartId.ts: added clearCartId() (localStorage.removeItem).
+- src/services/cartId.test.ts: 1 new test.
+
+Verified: npx vitest run src/services/cartId.test.ts — 5/5 passed. npm run
+build and npm run lint both clean.
