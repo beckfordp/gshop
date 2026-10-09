@@ -21,7 +21,7 @@
 - [x] Task: Conductor - User Manual Verification 'Cart screen' (Protocol in workflow.md) — prompting off, verified via `scripts/verify-cart-phase3.sh`; live browser click-through deferred to Phase 4 (screen not reachable in the app until nav is wired)
 
 ## Phase 4: Navigation
-- [ ] Task: Write failing tests for `App.tsx`'s Catalog/Cart screen toggle in `App.test.tsx` — covers: default screen, switching via nav links (Red)
+- [x] Task: Write failing tests for `App.tsx`'s Catalog/Cart screen toggle in `App.test.tsx` — covers: default screen, switching via nav links (Red) [7e1ac4e]
 - [ ] Task: Implement the toggle in `App.tsx` — minimum code to pass (Green)
 - [ ] Task: Refactor; rerun full test suite; check coverage (>80% target)
 - [ ] Task: Conductor - User Manual Verification 'Navigation' (Protocol in workflow.md)
