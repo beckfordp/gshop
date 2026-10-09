@@ -18,10 +18,11 @@ many frontend apps the platform hosts simultaneously.
 None of its own — gshop is a pure client. It consumes five backend services'
 REST APIs (catalog, cart, order, inventory, payment), whose contracts live in
 gluon's `system-design.md`, not duplicated here. `src/services/*Client.ts` are
-the thin per-service client modules — `catalogClient.ts` (US-1) and
-`cartClient.ts` (US-2) now have real methods; `orderClient.ts`,
-`inventoryClient.ts`, and `paymentClient.ts` are still base URL + health
-check only stubs — see Status below.
+the thin per-service client modules — `catalogClient.ts` (US-1),
+`cartClient.ts` (US-2), and `orderClient.ts` (US-3) now have real
+methods; `inventoryClient.ts` and `paymentClient.ts` are still base URL +
+health check only stubs — see Status below and the Open question below
+(inventory confirmed unneeded during US-3; payment still open).
 
 ## User stories in scope
 From `../../../docs/user-stories.md` (UI realization, not new stories):
@@ -33,11 +34,19 @@ From `../../../docs/user-stories.md` (UI realization, not new stories):
 Out of scope: **US-7** (order status notifications) has no UI surface — it's
 email-only, nothing for this app to call.
 
-## Open question (flagged, not yet resolved)
+## Open question (partially resolved during US-3)
 Per `system-design.md`'s sync/async boundaries, `inventoryClient.ts` and
 `paymentClient.ts` may be unneeded — both look server-to-server/event-driven
-only, no documented frontend-facing endpoint. Confirm during US-3/US-8 work;
-drop them if so (see `../../../backlogs/gshop-frontend.md`).
+only, no documented frontend-facing endpoint.
+- **`inventoryClient.ts`: confirmed unneeded.** US-3's checkout flow
+  verified this directly — order-service itself calls inventory-service
+  server-to-server (synchronous reservation inside `POST /orders`); gshop
+  never calls inventory-service. The stub is still present but unused;
+  dropping it is a small separate cleanup, not done as part of US-3.
+- **`paymentClient.ts`: still open.** No payment-collection story has been
+  built (US-3 explicitly left it out of scope — `payment_failed` is an
+  async order status, not something gshop triggers or waits for). Revisit
+  during US-8 or whenever a payment-collection story is scoped.
 
 ## Sequencing
 Per `../../../PLAN.md`'s Phase 9 — depends on catalog-service, cart-service,
@@ -47,7 +56,7 @@ what's natural to build and demo (browse before cart before checkout before
 history).
 
 ## Status
-US-1 (browse catalog) and US-2 (cart) are live:
+US-1 (browse catalog), US-2 (cart), and US-3 (checkout) are live:
 - `src/screens/Catalog/Catalog.tsx` lists products from catalog-service via
   `catalogClient.list()`, with manual "Load more" pagination, and an
   "Add to cart" button per item. No search/filter/categories, no detail
@@ -56,15 +65,30 @@ US-1 (browse catalog) and US-2 (cart) are live:
   joined against the full catalog list for display names/prices (no
   lookup-by-sku endpoint exists yet — see `backlogs/catalog-service.md` in
   `gluon`). Supports "+1" and "Remove" per line; no quantity decrement or
-  set-to-exact-quantity (cart-service's HTTP API doesn't expose that).
+  set-to-exact-quantity (cart-service's HTTP API doesn't expose that). A
+  "Checkout" button places a real order (`orderClient.create()`), waiting
+  for order-service's synchronous stock-reservation result: on success it
+  navigates to the Checkout screen and clears the local cart id; on
+  `reservation_failed` (or a request error) it shows an inline error +
+  Retry and stays put — checkout never silently "succeeds" over a real
+  stock problem.
+- `src/screens/Checkout/Checkout.tsx` is a pure confirmation display (order
+  id, status, line items, total) for the order just placed — passed in
+  from `App.tsx`, not re-fetched. "Continue Shopping" returns to Catalog.
 - The cart itself is anonymous — identified by an opaque id cart-service
   generates, persisted only in the browser's `localStorage`
-  (`src/services/cartId.ts`); no auth/session system exists.
-- `App.tsx` toggles between the two screens via local `useState` — no
+  (`src/services/cartId.ts`); no auth/session system exists. That same id
+  is reused as the order's `customerId` — orders aren't tied to a real
+  user/session either.
+- `App.tsx` toggles between the three screens via local `useState` — no
   router yet (deliberately deferred, see `tech-stack.md`).
-- Both screens currently need a Vite dev-server proxy to reach their
-  backend services locally — catalog-service and cart-service don't send
-  CORS headers, so a browser blocks direct cross-origin calls to them (see
-  `tech-stack.md`'s "Local dev against a running backend").
+- All three screens currently need a Vite dev-server proxy to reach their
+  backend services locally — catalog-service, cart-service, and
+  order-service don't send CORS headers, so a browser blocks direct
+  cross-origin calls to them (see `tech-stack.md`'s "Local dev against a
+  running backend"). Also found during US-3: `inventory-service` has no
+  stock seeded for any sku, so real checkouts currently all come back
+  `reservation_failed` unless test stock is seeded by hand (see
+  `gluon`'s `backlogs/inventory-service.md`).
 
-US-3 (checkout) and US-8 (order history) screens not yet built.
+US-8 (order history) screen not yet built.
