@@ -19,6 +19,7 @@ describe('orderClient.create', () => {
     ],
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-01-01T00:00:00Z',
+    reservationFailure: null,
   };
 
   afterEach(() => {
@@ -48,9 +49,13 @@ describe('orderClient.create', () => {
     expect(result).toEqual(orderBody);
   });
 
-  it('returns the order even when status is reservation_failed (still a 201, not an error)', async () => {
+  it('returns the order even when status is reservation_failed (still a 201, not an error), including the failure detail', async () => {
     orderClient.baseUrl = baseUrl;
-    const failedOrder = { ...orderBody, status: 'reservation_failed' };
+    const failedOrder = {
+      ...orderBody,
+      status: 'reservation_failed',
+      reservationFailure: { sku: 'WID-1', reason: "insufficient stock for sku 'WID-1'" },
+    };
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify(failedOrder), { status: 201 }),
     );
@@ -61,6 +66,10 @@ describe('orderClient.create', () => {
     });
 
     expect(result.status).toBe('reservation_failed');
+    expect(result.reservationFailure).toEqual({
+      sku: 'WID-1',
+      reason: "insufficient stock for sku 'WID-1'",
+    });
   });
 
   it('throws OrderClientError on a non-2xx response', async () => {
@@ -110,6 +119,7 @@ describe('orderClient.list', () => {
     items: [],
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-01-01T00:00:00Z',
+    reservationFailure: null,
   };
 
   afterEach(() => {

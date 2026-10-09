@@ -46,6 +46,7 @@ function makeOrder(overrides: Partial<Order> = {}): Order {
     items: [],
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-01-01T00:00:00Z',
+    reservationFailure: null,
     ...overrides,
   };
 }
@@ -279,7 +280,12 @@ describe('Cart', () => {
       total: 1,
     });
     createOrder
-      .mockResolvedValueOnce(makeOrder({ status: 'reservation_failed' }))
+      .mockResolvedValueOnce(
+        makeOrder({
+          status: 'reservation_failed',
+          reservationFailure: { sku: 'WID-1', reason: "insufficient stock for sku 'WID-1'" },
+        }),
+      )
       .mockResolvedValueOnce(makeOrder({ status: 'pending' }));
 
     renderCart();
@@ -287,10 +293,10 @@ describe('Cart', () => {
     await screen.findByText(/Widget/);
     fireEvent.click(screen.getByRole('button', { name: 'Checkout' }));
 
-    await screen.findByText('Some items are out of stock.');
+    await screen.findByText('Widget is out of stock.');
     expect(onCheckoutSuccess).not.toHaveBeenCalled();
     expect(clearCartIdMock).not.toHaveBeenCalled();
-    expect(screen.getByText(/Widget/)).toBeInTheDocument();
+    expect(screen.getByText(/qty 1/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
 

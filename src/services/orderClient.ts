@@ -20,6 +20,11 @@ export interface OrderItem extends NewOrderItem {
   id: string;
 }
 
+export interface ReservationFailure {
+  sku: string;
+  reason: string;
+}
+
 export interface Order {
   id: string;
   customerId: string;
@@ -28,6 +33,7 @@ export interface Order {
   items: OrderItem[];
   createdAt: string;
   updatedAt: string;
+  reservationFailure: ReservationFailure | null;
 }
 
 export class OrderClientError extends Error {

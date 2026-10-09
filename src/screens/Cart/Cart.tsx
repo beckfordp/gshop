@@ -117,7 +117,10 @@ export default function Cart({ onCheckoutSuccess }: CartProps) {
         })),
       });
       if (order.status === 'reservation_failed') {
-        setCheckoutError('Some items are out of stock.');
+        const failedSku = order.reservationFailure?.sku;
+        const failedLine = lines.find((line) => line.sku === failedSku);
+        const itemLabel = failedLine?.name ?? failedSku ?? 'An item';
+        setCheckoutError(`${itemLabel} is out of stock.`);
         return;
       }
       clearCartId();
