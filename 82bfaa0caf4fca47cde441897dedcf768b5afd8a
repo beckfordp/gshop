@@ -1,0 +1,13 @@
+Phase 1 Checkpoint: cartClient + cart identity (track cart_20261008)
+
+Prompting is off for this project (.claude/prompt-off) — manual verification
+done via committed scripts/verify-cart-phase1.sh instead of an interactive
+walkthrough.
+
+Phase scope (since this track's start, commit 628bc3b — no prior checkpoint
+within this track): cartClient.ts/.test.ts, cartId.ts/.test.ts. Both code
+files have corresponding test files, no coverage gap.
+
+Automated test command: ./scripts/verify-cart-phase1.sh
+(npm run build && npm run lint && npm test)
+All passed: build clean, lint clean, 20/20 vitest tests passed (5 files).
