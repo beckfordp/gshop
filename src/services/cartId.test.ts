@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getOrCreateCartId, getStoredCartId } from './cartId';
+import { clearCartId, getOrCreateCartId, getStoredCartId } from './cartId';
 import { cartClient } from './cartClient';
 
 vi.mock('./cartClient', () => ({
@@ -52,5 +52,19 @@ describe('getStoredCartId', () => {
     localStorage.setItem('gshop:cartId', 'existing-cart-id');
 
     expect(getStoredCartId()).toBe('existing-cart-id');
+  });
+});
+
+describe('clearCartId', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('removes the stored cart id', () => {
+    localStorage.setItem('gshop:cartId', 'existing-cart-id');
+
+    clearCartId();
+
+    expect(localStorage.getItem('gshop:cartId')).toBeNull();
   });
 });

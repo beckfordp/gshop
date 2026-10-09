@@ -19,3 +19,7 @@ export async function getOrCreateCartId(): Promise<string> {
 export function getStoredCartId(): string | null {
   return localStorage.getItem(CART_ID_KEY);
 }
+
+export function clearCartId(): void {
+  localStorage.removeItem(CART_ID_KEY);
+}
