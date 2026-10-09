@@ -4,6 +4,7 @@ import Cart from './Cart';
 import { cartClient, type Cart as CartData } from '../../services/cartClient';
 import { catalogClient, type CatalogItem } from '../../services/catalogClient';
 import { getStoredCartId, clearCartId } from '../../services/cartId';
+import { getOrCreateCustomerId } from '../../services/customerId';
 import { orderClient, type Order } from '../../services/orderClient';
 
 vi.mock('../../services/cartClient', () => ({
@@ -19,6 +20,10 @@ vi.mock('../../services/cartId', () => ({
   clearCartId: vi.fn(),
 }));
 
+vi.mock('../../services/customerId', () => ({
+  getOrCreateCustomerId: vi.fn(),
+}));
+
 vi.mock('../../services/orderClient', () => ({
   orderClient: { create: vi.fn() },
 }));
@@ -29,6 +34,7 @@ const removeItem = vi.mocked(cartClient.removeItem);
 const list = vi.mocked(catalogClient.list);
 const getStoredCartIdMock = vi.mocked(getStoredCartId);
 const clearCartIdMock = vi.mocked(clearCartId);
+const getOrCreateCustomerIdMock = vi.mocked(getOrCreateCustomerId);
 const createOrder = vi.mocked(orderClient.create);
 
 function makeOrder(overrides: Partial<Order> = {}): Order {
@@ -81,6 +87,8 @@ describe('Cart', () => {
     list.mockReset();
     getStoredCartIdMock.mockReset();
     clearCartIdMock.mockReset();
+    getOrCreateCustomerIdMock.mockReset();
+    getOrCreateCustomerIdMock.mockReturnValue('customer-1');
     createOrder.mockReset();
     onCheckoutSuccess.mockReset();
   });
@@ -257,7 +265,7 @@ describe('Cart', () => {
 
     await waitFor(() => expect(onCheckoutSuccess).toHaveBeenCalledWith(order));
     expect(createOrder).toHaveBeenCalledWith({
-      customerId: 'cart-1',
+      customerId: 'customer-1',
       items: [{ sku: 'WID-1', productName: 'Widget', unitPriceCents: 1000, quantity: 1 }],
     });
     expect(clearCartIdMock).toHaveBeenCalledOnce();

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { cartClient } from '../../services/cartClient';
 import { catalogClient } from '../../services/catalogClient';
 import { clearCartId, getStoredCartId } from '../../services/cartId';
+import { getOrCreateCustomerId } from '../../services/customerId';
 import { orderClient, type Order } from '../../services/orderClient';
 import { errorMessage, formatPrice } from '../../lib/format';
 import './Cart.css';
@@ -103,7 +104,7 @@ export default function Cart({ onCheckoutSuccess }: CartProps) {
     setCheckoutError(null);
     try {
       const order = await orderClient.create({
-        customerId: cartId,
+        customerId: getOrCreateCustomerId(),
         // Safe: the `lines.some(...)` guard above already returned early
         // if any line's priceCents is null, so every line here has a
         // resolved price — TypeScript just can't see that across the
