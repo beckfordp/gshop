@@ -1,0 +1,18 @@
+Phase 2 Checkpoint: Order History screen (track history_20261009)
+
+Prompting is off for this project (.claude/prompt-off) — manual verification
+done via committed scripts/verify-history-phase2.sh.
+
+Phase scope (since Phase 1 checkpoint 76a3293): OrderHistory.tsx/.test.tsx,
+OrderHistory.css, plus the formatStatus extraction into src/lib/format.ts
+(touching Checkout.tsx too). All code files have corresponding tests, no
+gap.
+
+Automated test command: ./scripts/verify-history-phase2.sh
+(npm run build && npm run lint && npm test)
+All passed: build clean, lint clean, 65/65 vitest tests passed (11 files).
+
+Live browser click-through intentionally deferred to Phase 3's checkpoint:
+the Order History screen isn't reachable in the running app yet (App.tsx
+still only toggles Catalog/Cart/Checkout — nav wiring is Phase 3's own
+task).
