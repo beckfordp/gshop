@@ -10,7 +10,7 @@
 - [x] Task: Write failing tests for Cart's "Checkout" button in `Cart.test.tsx` — covers: blocked submission when a line has no resolved price, waiting state while in flight, success calls the parent's callback with the order + clears `gshop:cartId`, `reservation_failed` shows inline error+Retry and stays on Cart, request error shows error+Retry (Red) [85250fc]
 - [x] Task: Implement the button in `Cart.tsx` (new `onCheckoutSuccess` prop) — minimum code to pass (Green) [874c918]
 - [x] Task: Refactor; rerun tests — extracted `CartProps` interface for readability; full suite (47/47) + lint + build re-confirmed green [49c1cbc]
-- [ ] Task: Conductor - User Manual Verification 'Checkout button' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Checkout button' (Protocol in workflow.md) — prompting off, verified via real browser click against live order-service (new Vite dev proxy, same CORS workaround pattern): got a genuine `reservation_failed` response (inventory-service has no seeded stock — confirmed via GET /inventory/<sku> 404, noted in gluon's backlogs/inventory-service.md), correctly showed "Some items are out of stock." + Retry, cart id preserved, no console errors
 
 ## Phase 3: Checkout screen
 - [ ] Task: Write failing tests for `Checkout.tsx` in `src/screens/Checkout/Checkout.test.tsx` — covers: renders the passed-in order's id/status/items/total, "Continue Shopping" button (Red)
