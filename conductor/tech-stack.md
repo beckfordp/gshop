@@ -43,28 +43,36 @@ pollution RCE (fixed at ≥2.1.2). Added an `"overrides": { "tinypool":
 working on Node 18.16 despite its own `engines` field claiming Node ≥20
 (ran a real test file through it, not just `--passWithNoTests`).
 
-## Local dev against a running backend (added 2026-10-08)
+## Local dev against a running backend (added 2026-10-08, extended 2026-10-09)
 Backend services in `gluon-local` (OrbStack k8s) have no local port map by
 default — forward the one(s) you need:
 ```bash
 kubectl port-forward -n gluon-local svc/catalog-service 8081:8080
+kubectl port-forward -n gluon-local svc/cart-service 8082:8080
 ```
-**Do not** point `.env`'s service URL straight at that forwarded port
-(`VITE_CATALOG_SERVICE_URL=http://localhost:8081`) — catalog-service sends
-no `Access-Control-Allow-Origin` header, so the browser blocks the
-cross-origin `fetch()` even though the server itself responds fine (curl
-works, browser throws `TypeError: Failed to fetch`). Confirmed via
-`curl -i -H "Origin: http://localhost:5173" ...` returning 200 with no ACAO
-header.
+**Do not** point `.env`'s service URLs straight at those forwarded ports
+(`VITE_CATALOG_SERVICE_URL=http://localhost:8081`) — neither catalog-service
+nor cart-service sends an `Access-Control-Allow-Origin` header, so the
+browser blocks the cross-origin `fetch()` even though the server itself
+responds fine (curl works, browser throws `TypeError: Failed to fetch`).
+Confirmed via `curl -i -H "Origin: http://localhost:5173" ...` returning 200
+with no ACAO header, for both services.
 
-Worked around with a Vite dev-server proxy (`vite.config.ts`'s
-`server.proxy`), so the browser's request stays same-origin and Vite
-forwards it server-to-server (not subject to browser CORS):
+Worked around with Vite dev-server proxy entries (`vite.config.ts`'s
+`server.proxy`, one per service), so the browser's request stays
+same-origin and Vite forwards it server-to-server (not subject to browser
+CORS):
 ```
 # .env (gitignored, not committed)
 VITE_CATALOG_SERVICE_URL=/api/catalog
+VITE_CART_SERVICE_URL=/api/cart
 ```
+Verified end-to-end for cart-service 2026-10-09 (track `cart_20261008`
+Phase 2): clicking "Add to cart" in a real browser created a real cart via
+`POST /carts` and persisted the item via `POST /carts/{id}/items`,
+confirmed by re-fetching `GET /carts/{id}`.
+
 See `conductor/tracks.md`'s backlog item on local-k8s dev wiring — this
-same gap will hit every other service's client; worth fixing CORS upstream
-in catalog-service (and siblings) rather than adding more proxy entries
-per-service indefinitely.
+same gap will hit order-service next (US-3). Worth fixing CORS upstream in
+these services (and siblings) rather than adding more proxy entries
+per-service indefinitely — noted in `gluon`'s `backlogs/catalog-service.md`.
