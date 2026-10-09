@@ -1,0 +1,13 @@
+Task: Phase 1 Green — implement getOrCreateCartId (track cart_20261008)
+
+Why: minimum code to pass the Red-phase tests — persist only the cart's
+opaque id client-side (localStorage key gshop:cartId), lazily creating a
+cart via cartClient.create() the first time it's needed.
+
+Changes:
+- src/services/cartId.ts (new): getOrCreateCartId() reads localStorage,
+  returns the existing id if present, otherwise creates a cart and
+  persists + returns its id.
+
+Verified Green: npx vitest run src/services/cartId.test.ts — 2/2 passed.
+npm run build and npm run lint both clean.
