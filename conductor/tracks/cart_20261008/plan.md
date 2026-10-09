@@ -11,7 +11,7 @@
 ## Phase 2: Add to cart (Catalog screen)
 - [x] Task: Write failing tests for Catalog's "Add to cart" button in `Catalog.test.tsx` — covers: click calls `getOrCreateCartId()` + `cartClient.addItem()`, shows brief "Added" feedback, shows inline error on failure (Red) [7592193]
 - [x] Task: Implement the button in `Catalog.tsx` — minimum code to pass (Green) [31bef2c]
-- [ ] Task: Refactor; rerun tests
+- [x] Task: Refactor; rerun tests — extracted `addToCartLabel()` helper to replace a nested ternary; full suite (22/22) + lint + build re-confirmed green [191e52c]
 - [ ] Task: Conductor - User Manual Verification 'Add to cart' (Protocol in workflow.md)
 
 ## Phase 3: Cart screen
