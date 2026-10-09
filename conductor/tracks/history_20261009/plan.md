@@ -17,6 +17,6 @@
 
 ## Phase 3: Navigation wiring
 - [x] Task: Write failing tests for `App.tsx`'s History screen + per-screen nav buttons in `App.test.tsx` — covers: "Order History" reachable from Catalog and Cart, History screen's own nav shows "Back to Catalog" and "View Cart" (Red) [00d8ea0]
-- [ ] Task: Implement the wiring in `App.tsx` (`screen` widened to include `'history'`) — minimum code to pass (Green)
+- [x] Task: Implement the wiring in `App.tsx` (`screen` widened to include `'history'`) — minimum code to pass (Green) [751bf3e]
 - [ ] Task: Refactor; rerun full test suite; check coverage (>80% target)
 - [ ] Task: Conductor - User Manual Verification 'Navigation wiring' (Protocol in workflow.md)
