@@ -4,7 +4,7 @@
 - [x] Task: Write failing tests for `customerId.ts` in `src/services/customerId.test.ts` — covers: `getOrCreateCustomerId()` creates+persists a UUID when absent, returns the existing one when present (no new UUID generated); `getStoredCustomerId()` returns null when absent, the stored value otherwise (Red) [f3c7c14]
 - [x] Task: Implement `src/services/customerId.ts` — minimum code to pass (Green) [fd7fd53]
 - [x] Task: Write failing tests for `orderClient.list()` in `orderClient.test.ts` — covers request shape (GET /orders?customerId=...), response parsing, `OrderClientError` on non-2xx/network failure (Red) [73a8518]
-- [ ] Task: Implement `orderClient.list()` against order-service's real contract — minimum code to pass (Green)
+- [x] Task: Implement `orderClient.list()` against order-service's real contract — minimum code to pass (Green) [13ffa70]
 - [ ] Task: Update `Cart.test.tsx`'s checkout tests to expect `customerId` from `getOrCreateCustomerId()` instead of the cart id, then update `Cart.tsx`'s `handleCheckout` to match (Red → Green in one task, since it's a one-line source swap in an already-tested code path)
 - [ ] Task: Refactor; rerun tests
 - [ ] Task: Conductor - User Manual Verification 'customerId + orderClient.list()' (Protocol in workflow.md)
