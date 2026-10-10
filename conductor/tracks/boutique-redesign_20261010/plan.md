@@ -30,10 +30,10 @@
 
 ## Phase 4: App Shell / Nav
 
-- [ ] Task: Write failing tests asserting `App.tsx`'s header shows the brand wordmark and nav renders as text links (Red)
-- [ ] Task: Restyle `App.tsx`'s header/nav — serif brand wordmark, text-link nav with accent hover underline (Green)
-- [ ] Task: Refactor, keep tests green
-- [ ] Task: Run full suite + coverage check, confirm >80% maintained
+- [x] Task: Write failing tests asserting `App.tsx`'s header shows the brand wordmark and nav renders as text links (Red) `pending-commit`
+- [x] Task: Restyle `App.tsx`'s header/nav — serif brand wordmark, text-link nav with accent hover underline (Green) `pending-commit`
+- [x] Task: Refactor, keep tests green `pending-commit` (no further refactor needed)
+- [x] Task: Run full suite + coverage check, confirm >80% maintained `pending-commit` (overall 84%+, App.tsx 100%)
 - [ ] Task: Conductor - User Manual Verification 'App Shell / Nav' (Protocol in workflow.md)
 
 ## Phase 5: 100-Item Catalog Data (cross-repo)

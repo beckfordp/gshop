@@ -30,20 +30,29 @@ function App() {
 
   return (
     <>
-      <nav>
-        {screen !== 'checkout' &&
-          NAV_TARGETS.filter((target) => target.screen !== screen).map((target) => (
-            <button key={target.screen} onClick={() => setScreen(target.screen)}>
-              {target.label}
-            </button>
-          ))}
-      </nav>
-      {screen === 'catalog' && <Catalog />}
-      {screen === 'cart' && <Cart onCheckoutSuccess={handleCheckoutSuccess} />}
-      {screen === 'checkout' && lastOrder && (
-        <Checkout order={lastOrder} onContinueShopping={handleContinueShopping} />
-      )}
-      {screen === 'history' && <OrderHistory />}
+      <header className="app-header">
+        <span className="app-header__wordmark">gshop</span>
+        <nav className="app-nav">
+          {screen !== 'checkout' &&
+            NAV_TARGETS.filter((target) => target.screen !== screen).map((target) => (
+              <button
+                key={target.screen}
+                className="nav-link"
+                onClick={() => setScreen(target.screen)}
+              >
+                {target.label}
+              </button>
+            ))}
+        </nav>
+      </header>
+      <main className="app-main">
+        {screen === 'catalog' && <Catalog />}
+        {screen === 'cart' && <Cart onCheckoutSuccess={handleCheckoutSuccess} />}
+        {screen === 'checkout' && lastOrder && (
+          <Checkout order={lastOrder} onContinueShopping={handleContinueShopping} />
+        )}
+        {screen === 'history' && <OrderHistory />}
+      </main>
     </>
   )
 }

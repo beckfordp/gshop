@@ -41,6 +41,12 @@ vi.mock('./screens/OrderHistory/OrderHistory', () => ({
 }));
 
 describe('App', () => {
+  it('renders a header with the brand wordmark', () => {
+    render(<App />);
+    expect(screen.getByRole('banner')).toBeInTheDocument();
+    expect(screen.getByText('gshop')).toBeInTheDocument();
+  });
+
   it('renders the Catalog screen by default', () => {
     render(<App />);
     expect(screen.getByText('Catalog screen')).toBeInTheDocument();
