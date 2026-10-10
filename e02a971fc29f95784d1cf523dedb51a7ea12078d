@@ -1,0 +1,1 @@
+Phase 1: 60 real watch photos (licensed, hotlinked from images.unsplash.com, verified all 60 return HTTP 200) + imageForSku(sku) round-robin lookup against the catalog's real 100-sku seeding order, so any reused photo lands exactly 60 catalog positions from its first use. Unknown skus fall back to a hash pick. TDD red->green->no-refactor-needed.
