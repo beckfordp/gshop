@@ -12,9 +12,9 @@
 
 ## Phase 2: Catalog Screen
 
-- [ ] Task: Write failing tests asserting `Catalog.tsx` renders a `WatchArt` per item and the new card-grid structure (Red)
-- [ ] Task: Integrate `WatchArt` into `Catalog.tsx`, restyle as card grid, including loading/error/"Load more" states (Green)
-- [ ] Task: Refactor styling/markup, keep tests green
+- [x] Task: Write failing tests asserting `Catalog.tsx` renders a `WatchArt` per item and the new card-grid structure (Red) `pending-commit`
+- [x] Task: Integrate `WatchArt` into `Catalog.tsx`, restyle as card grid, including loading/error/"Load more" states (Green) `pending-commit`
+- [x] Task: Refactor styling/markup, keep tests green `pending-commit` (no further refactor needed)
 - [ ] Task: Conductor - User Manual Verification 'Catalog Screen' (Protocol in workflow.md)
 
 ## Phase 3: Cart, Checkout, Order History

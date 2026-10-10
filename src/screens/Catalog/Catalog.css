@@ -1,14 +1,47 @@
-.catalog-list {
+.catalog {
+  padding: var(--space-md) 0;
+}
+
+.catalog-grid {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-lg);
 }
 
-.catalog-item {
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #ddd;
+.catalog-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-xs);
+  padding: var(--space-lg) var(--space-md);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.catalog-card__name {
+  margin: var(--space-sm) 0 0;
+  font-size: 1.05rem;
+}
+
+.catalog-card__sku {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+}
+
+.catalog-card__price {
+  margin: 0 0 var(--space-sm);
+  color: var(--color-accent);
+  font-weight: 600;
 }
 
 .catalog-error {
-  margin: 1rem 0;
+  margin: var(--space-md) 0;
+  color: var(--color-danger);
 }

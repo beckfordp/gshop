@@ -70,6 +70,19 @@ describe('Catalog', () => {
     expect(screen.getByText(/\$19\.99/)).toBeInTheDocument();
   });
 
+  it('renders a WatchArt dial as a card grid for each item', async () => {
+    list.mockResolvedValue({
+      items: [makeItem({ name: 'Widget', sku: 'WID-1' })],
+      total: 1,
+    });
+
+    const { container } = render(<Catalog />);
+
+    await screen.findByText(/Widget/);
+    expect(container.querySelectorAll('.catalog-card')).toHaveLength(1);
+    expect(container.querySelectorAll('.watch-art')).toHaveLength(1);
+  });
+
   it('loads more on click, appends the next page, and hides the button at total', async () => {
     list
       .mockResolvedValueOnce({

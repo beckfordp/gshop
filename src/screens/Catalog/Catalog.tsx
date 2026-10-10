@@ -3,6 +3,7 @@ import { catalogClient, type CatalogItem } from '../../services/catalogClient';
 import { cartClient } from '../../services/cartClient';
 import { getOrCreateCartId } from '../../services/cartId';
 import { errorMessage, formatPrice } from '../../lib/format';
+import WatchArt from '../../components/WatchArt/WatchArt';
 import './Catalog.css';
 
 type AddToCartState = 'idle' | 'adding' | 'added' | 'error';
@@ -96,12 +97,15 @@ export default function Catalog() {
 
   return (
     <div className="catalog">
-      <ul className="catalog-list">
+      <ul className="catalog-grid">
         {items.map((item) => {
           const state = addToCartState[item.id] ?? 'idle';
           return (
-            <li key={item.id} className="catalog-item">
-              {item.name} — {item.sku} — {formatPrice(item.priceCents)}
+            <li key={item.id} className="catalog-card">
+              <WatchArt sku={item.sku} name={item.name} size={96} />
+              <h3 className="catalog-card__name">{item.name}</h3>
+              <p className="catalog-card__sku">{item.sku}</p>
+              <p className="catalog-card__price">{formatPrice(item.priceCents)}</p>
               <button onClick={() => handleAddToCart(item)} disabled={state === 'adding'}>
                 {addToCartLabel(state)}
               </button>
