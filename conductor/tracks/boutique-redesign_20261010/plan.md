@@ -38,9 +38,9 @@
 
 ## Phase 5: 100-Item Catalog Data (cross-repo)
 
-- [ ] Task: Draft 90 new real-brand/model watch entries (original one-line descriptions, `watch-<brand>-<model-slug>` SKUs, ~$4,300–$35,000 price band), avoiding duplicates with the existing 10
-- [ ] Task: Append the 90 entries to `gluon/services/catalog-service/scripts/seed-watches.sh`'s `WATCHES` array (separate commit, in the `gluon` repo)
-- [ ] Task: Run the script live against port-forwarded catalog-service
-- [ ] Task: Verify via `GET /catalogs` that 100 items exist with no SKU collisions
-- [ ] Task: Live browser verification — page through "Load more" on the Catalog screen until all 100 items are shown
-- [ ] Task: Conductor - User Manual Verification '100-Item Catalog Data' (Protocol in workflow.md)
+- [x] Task: Draft 90 new real-brand/model watch entries (original one-line descriptions, `watch-<brand>-<model-slug>` SKUs, ~$4,300–$35,000 price band), avoiding duplicates with the existing 10
+- [x] Task: Append the 90 entries to `gluon/services/catalog-service/scripts/seed-watches.sh`'s `WATCHES` array (separate commit, in the `gluon` repo)
+- [x] Task: Run the script live against port-forwarded catalog-service — 90 created, 10 skipped (pre-existing), 0 failed
+- [x] Task: Verify via `GET /catalogs` that 100 items exist with no SKU collisions — confirmed (100 items, 100 unique skus across all 20-item pages)
+- [x] Task: Live browser verification — page through "Load more" on the Catalog screen until all 100 items are shown — confirmed via browser JS: 3 clicks, 100 cards, 100 unique skus rendered, button disappears; same-brand dials share hue as designed
+- [x] Task: Conductor - User Manual Verification '100-Item Catalog Data' (Protocol in workflow.md) — `scripts/verify-boutique-phase5.sh` + live browser check above
