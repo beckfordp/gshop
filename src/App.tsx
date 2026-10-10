@@ -3,10 +3,11 @@ import Catalog from './screens/Catalog/Catalog'
 import Cart from './screens/Cart/Cart'
 import Checkout from './screens/Checkout/Checkout'
 import OrderHistory from './screens/OrderHistory/OrderHistory'
+import Admin from './screens/Admin/Admin'
 import type { Order } from './services/orderClient'
 import './App.css'
 
-type Screen = 'catalog' | 'cart' | 'checkout' | 'history'
+type Screen = 'catalog' | 'cart' | 'checkout' | 'history' | 'admin'
 
 const NAV_TARGETS: { screen: Exclude<Screen, 'checkout'>; label: string }[] = [
   { screen: 'catalog', label: 'Back to Catalog' },
@@ -52,7 +53,18 @@ function App() {
           <Checkout order={lastOrder} onContinueShopping={handleContinueShopping} />
         )}
         {screen === 'history' && <OrderHistory />}
+        {screen === 'admin' && <Admin />}
       </main>
+      <a
+        href="#"
+        className="admin-entry"
+        onClick={(event) => {
+          event.preventDefault()
+          setScreen('admin')
+        }}
+      >
+        Admin
+      </a>
     </>
   )
 }

@@ -40,6 +40,10 @@ vi.mock('./screens/OrderHistory/OrderHistory', () => ({
   default: () => <div>Order History screen</div>,
 }));
 
+vi.mock('./screens/Admin/Admin', () => ({
+  default: () => <div>Admin screen</div>,
+}));
+
 describe('App', () => {
   it('renders a header with the brand wordmark', () => {
     render(<App />);
@@ -96,6 +100,14 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('button', { name: 'View Cart' }));
     fireEvent.click(screen.getByRole('button', { name: 'Order History' }));
     expect(screen.getByText('Order History screen')).toBeInTheDocument();
+  });
+
+  it('a discreet "Admin" link is present and navigates to the Admin screen', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('link', { name: 'Admin' }));
+    expect(screen.getByText('Admin screen')).toBeInTheDocument();
+    expect(screen.queryByText('Catalog screen')).not.toBeInTheDocument();
   });
 
   it("History screen's own nav shows Back to Catalog and View Cart", () => {

@@ -20,7 +20,7 @@
 - [ ] Task: Conductor - User Manual Verification 'Admin screen' (Protocol in workflow.md) — pending inventory-service redeploy
 
 ## Phase 4: App shell wiring + full verification
-- [ ] Task: Write failing test asserting the discreet "Admin" link appears and navigates to the Admin screen (Red)
-- [ ] Task: Wire into `App.tsx`'s screen state + add the low-contrast corner-styled link (Green)
-- [ ] Task: Run full suite + lint + build in gshop; confirm green
-- [ ] Task: Conductor - User Manual Verification: live browser check — adjust real inventory via the admin screen and confirm it reflects in a fresh `GET /inventorys`; clear order history and confirm orders are gone (Protocol in workflow.md)
+- [x] Task: Write failing test asserting the discreet "Admin" link appears and navigates to the Admin screen (Red) `pending-commit`
+- [x] Task: Wire into `App.tsx`'s screen state + add the low-contrast corner-styled link (Green) `pending-commit`
+- [x] Task: Run full suite + lint + build in gshop; confirm green `pending-commit` (102+ tests, 86.76% overall coverage, App.tsx 100%)
+- [ ] Task: Conductor - User Manual Verification: live browser check — adjust real inventory via the admin screen and confirm it reflects in a fresh `GET /inventorys`; clear order history and confirm orders are gone (Protocol in workflow.md) — pending inventory-service redeploy

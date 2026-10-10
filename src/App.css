@@ -47,3 +47,17 @@
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
+
+.admin-entry {
+  position: fixed;
+  right: var(--space-sm);
+  bottom: var(--space-sm);
+  font-size: 0.7rem;
+  color: var(--color-border);
+  opacity: 0.6;
+}
+
+.admin-entry:hover {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
