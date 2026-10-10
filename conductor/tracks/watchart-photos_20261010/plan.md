@@ -7,10 +7,10 @@
 - [x] Task: Conductor - User Manual Verification 'Image data + lookup logic' (Protocol in workflow.md) — `scripts/verify-watchart-photos-phase1.sh`
 
 ## Phase 2: WatchArt component swap
-- [ ] Task: Update `WatchArt.test.tsx`: replace the hue/initials assertions with assertions that an `<img>` is rendered with the expected `src` (from `imageForSku`) and `alt` (the product name) (Red)
-- [ ] Task: Rewrite `WatchArt.tsx` to render the photo in the existing circular gold-bezel frame; update `WatchArt.css` (object-fit: cover, remove now-unused hue-background rule) (Green)
-- [ ] Task: Remove `hueFromSku`/`initialsFromName` from `watchArtLogic.ts` and their tests (now superseded by `imageForSku`) — delete the file entirely if nothing else uses it
-- [ ] Task: Refactor, keep tests green
+- [x] Task: Update `WatchArt.test.tsx`: replace the hue/initials assertions with assertions that an `<img>` is rendered with the expected `src` (from `imageForSku`) and `alt` (the product name) (Red) `pending-commit`
+- [x] Task: Rewrite `WatchArt.tsx` to render the photo in the existing circular gold-bezel frame; update `WatchArt.css` (object-fit: cover, remove now-unused hue-background rule) (Green) `pending-commit`
+- [x] Task: Remove `hueFromSku`/`initialsFromName` from `watchArtLogic.ts` and their tests (now superseded by `imageForSku`) — delete the file entirely if nothing else uses it `pending-commit` (confirmed no other importers, deleted both files)
+- [x] Task: Refactor, keep tests green `pending-commit` (no further refactor needed)
 - [ ] Task: Conductor - User Manual Verification 'WatchArt component swap' (Protocol in workflow.md)
 
 ## Phase 3: Verification

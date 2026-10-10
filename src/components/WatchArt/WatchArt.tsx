@@ -1,4 +1,4 @@
-import { hueFromSku, initialsFromName } from './watchArtLogic';
+import { imageForSku } from '../../data/watchImages';
 import './WatchArt.css';
 
 interface WatchArtProps {
@@ -8,24 +8,9 @@ interface WatchArtProps {
 }
 
 export default function WatchArt({ sku, name, size = 72 }: WatchArtProps) {
-  const hue = hueFromSku(sku);
-  const initials = initialsFromName(name);
-
   return (
-    <div
-      className="watch-art"
-      style={
-        // Type assertion justified: React's CSSProperties type has no index
-        // signature for custom properties (CSS variables), so TS can't infer
-        // this object shape on its own.
-        {
-          '--watch-hue': String(hue),
-          width: size,
-          height: size,
-        } as React.CSSProperties
-      }
-    >
-      <span className="watch-art__initials">{initials}</span>
+    <div className="watch-art" style={{ width: size, height: size }}>
+      <img className="watch-art__photo" src={imageForSku(sku)} alt={name} />
     </div>
   );
 }
