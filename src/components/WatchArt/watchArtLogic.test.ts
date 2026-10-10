@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hueFromSku, initialsFromName } from './watchArt';
+import { hueFromSku, initialsFromName } from './watchArtLogic';
 
 describe('hueFromSku', () => {
   it('returns the same hue for the same sku every time', () => {

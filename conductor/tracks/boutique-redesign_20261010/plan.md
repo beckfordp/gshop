@@ -2,12 +2,12 @@
 
 ## Phase 1: Design Tokens + WatchArt Component
 
-- [ ] Task: Write failing tests for `watchArt.ts`'s pure logic in `src/components/WatchArt/watchArt.test.ts` — covers: same sku always yields the same hue, different brand segments yield different hues, initials extracted correctly from multi-word names (Red)
-- [ ] Task: Implement `watchArt.ts` (hue-from-brand hashing, initials-from-name) to pass tests (Green)
-- [ ] Task: Refactor `watchArt.ts` if needed, keep tests green
-- [ ] Task: Add design-token CSS custom properties (colors, typography, spacing) to a shared stylesheet
-- [ ] Task: Add Playfair Display Google Font `<link>` to `index.html`
-- [ ] Task: Build `WatchArt.tsx` presentational component (dial, bezel, gradient, initials) consuming `watchArt.ts`, with a basic render test
+- [x] Task: Write failing tests for `watchArt.ts`'s pure logic in `src/components/WatchArt/watchArt.test.ts` — covers: same sku always yields the same hue, different brand segments yield different hues, initials extracted correctly from multi-word names (Red) `9a28cf6`
+- [x] Task: Implement `watchArt.ts` (hue-from-brand hashing, initials-from-name) to pass tests (Green) `9a28cf6`
+- [x] Task: Refactor `watchArt.ts` if needed, keep tests green `9a28cf6` (no refactor needed)
+- [x] Task: Add design-token CSS custom properties (colors, typography, spacing) to a shared stylesheet `pending-commit`
+- [x] Task: Add Playfair Display Google Font `<link>` to `index.html` `pending-commit`
+- [x] Task: Build `WatchArt.tsx` presentational component (dial, bezel, gradient, initials) consuming `watchArtLogic.ts`, with a basic render test `pending-commit` (renamed `watchArt.ts` → `watchArtLogic.ts`: this filesystem is case-insensitive and Vite resolves `.ts` before `.tsx`, so `./WatchArt` was wrongly matching the logic file)
 - [ ] Task: Conductor - User Manual Verification 'Design Tokens + WatchArt Component' (Protocol in workflow.md)
 
 ## Phase 2: Catalog Screen
