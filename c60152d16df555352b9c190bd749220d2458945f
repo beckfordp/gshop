@@ -1,0 +1,1 @@
+Phase 4: App shell header with serif 'gshop' wordmark + nav restyled as understated text links (still <button> elements -- role/behavior and existing tests unchanged, only className + CSS). Wrapped screens in <main>. Full coverage check: overall 84%+, App.tsx 100%. TDD red->green->no-refactor-needed.
