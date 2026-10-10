@@ -130,6 +130,20 @@ describe('Cart', () => {
     expect(screen.getByText(/Total: \$20\.00/)).toBeInTheDocument();
   });
 
+  it('renders a WatchArt thumbnail for each line item', async () => {
+    getStoredCartIdMock.mockReturnValue('cart-1');
+    get.mockResolvedValue(makeCart({ items: { 'WID-1': 2 } }));
+    list.mockResolvedValue({
+      items: [makeCatalogItem({ sku: 'WID-1', name: 'Widget', priceCents: 1000 })],
+      total: 1,
+    });
+
+    const { container } = renderCart();
+
+    await screen.findByText(/Widget/);
+    expect(container.querySelectorAll('.watch-art')).toHaveLength(1);
+  });
+
   it('falls back to the sku when the item is not found in the catalog', async () => {
     getStoredCartIdMock.mockReturnValue('cart-1');
     get.mockResolvedValue(makeCart({ items: { 'GONE-1': 1 } }));

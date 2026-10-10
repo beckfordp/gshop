@@ -106,6 +106,17 @@ describe('OrderHistory', () => {
     expect(gadgetLine.textContent).toContain('$5.00');
   });
 
+  it('renders each order as a styled card with a WatchArt thumbnail per item', async () => {
+    getStoredCustomerIdMock.mockReturnValue('customer-1');
+    list.mockResolvedValue([makeOrder()]);
+
+    const { container } = render(<OrderHistory />);
+
+    await screen.findByText(/Widget/);
+    expect(container.querySelectorAll('.order-history-card')).toHaveLength(1);
+    expect(container.querySelectorAll('.watch-art')).toHaveLength(1);
+  });
+
   it('shows an error and working Retry when the fetch fails', async () => {
     getStoredCustomerIdMock.mockReturnValue('customer-1');
     list

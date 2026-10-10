@@ -1,5 +1,6 @@
 import { formatPrice, formatStatus } from '../../lib/format';
 import type { Order } from '../../services/orderClient';
+import WatchArt from '../../components/WatchArt/WatchArt';
 import './Checkout.css';
 
 interface CheckoutProps {
@@ -16,13 +17,18 @@ export default function Checkout({ order, onContinueShopping }: CheckoutProps) {
       <ul className="checkout-list">
         {order.items.map((item) => (
           <li key={item.id} className="checkout-item">
-            {item.productName} — qty {item.quantity} —{' '}
-            {formatPrice(item.unitPriceCents * item.quantity)}
+            <WatchArt sku={item.sku} name={item.productName} size={56} />
+            <span className="checkout-item__details">
+              {item.productName} — qty {item.quantity} —{' '}
+              {formatPrice(item.unitPriceCents * item.quantity)}
+            </span>
           </li>
         ))}
       </ul>
       <p className="checkout-total">Total: {formatPrice(order.totalCents)}</p>
-      <button onClick={onContinueShopping}>Continue Shopping</button>
+      <button className="checkout-continue" onClick={onContinueShopping}>
+        Continue Shopping
+      </button>
     </div>
   );
 }

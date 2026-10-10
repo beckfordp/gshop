@@ -5,6 +5,7 @@ import { clearCartId, getStoredCartId } from '../../services/cartId';
 import { getOrCreateCustomerId } from '../../services/customerId';
 import { orderClient, type Order } from '../../services/orderClient';
 import { errorMessage, formatPrice } from '../../lib/format';
+import WatchArt from '../../components/WatchArt/WatchArt';
 import './Cart.css';
 
 // catalog-service has no lookup-by-sku endpoint, so the join below fetches
@@ -156,8 +157,11 @@ export default function Cart({ onCheckoutSuccess }: CartProps) {
       <ul className="cart-list">
         {lines.map((line) => (
           <li key={line.sku} className="cart-item">
-            {line.name} — qty {line.quantity}
-            {line.priceCents !== null && ` — ${formatPrice(line.priceCents * line.quantity)}`}
+            <WatchArt sku={line.sku} name={line.name} size={56} />
+            <span className="cart-item__details">
+              {line.name} — qty {line.quantity}
+              {line.priceCents !== null && ` — ${formatPrice(line.priceCents * line.quantity)}`}
+            </span>
             <button
               onClick={() => runAction(line.sku, (cartId) => cartClient.addItem(cartId, line.sku, 1))}
               disabled={actionLoading[line.sku]}
@@ -179,7 +183,7 @@ export default function Cart({ onCheckoutSuccess }: CartProps) {
         ))}
       </ul>
       <p className="cart-total">Total: {formatPrice(total)}</p>
-      <button onClick={handleCheckout} disabled={checkingOut}>
+      <button className="cart-checkout" onClick={handleCheckout} disabled={checkingOut}>
         {checkingOut ? 'Placing order...' : 'Checkout'}
       </button>
       {checkoutError && (

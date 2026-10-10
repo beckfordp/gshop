@@ -49,6 +49,14 @@ describe('Checkout', () => {
     expect(screen.getByText(/Total: \$34\.99/)).toBeInTheDocument();
   });
 
+  it('renders a WatchArt thumbnail for each order item', () => {
+    const order = makeOrder();
+
+    const { container } = render(<Checkout order={order} onContinueShopping={vi.fn()} />);
+
+    expect(container.querySelectorAll('.watch-art')).toHaveLength(2);
+  });
+
   it('formats a reservation_failed status for display', () => {
     render(<Checkout order={makeOrder({ status: 'reservation_failed' })} onContinueShopping={vi.fn()} />);
 

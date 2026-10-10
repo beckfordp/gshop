@@ -19,13 +19,13 @@
 
 ## Phase 3: Cart, Checkout, Order History
 
-- [ ] Task: Write failing tests asserting `Cart.tsx` renders `WatchArt` thumbnails per line item (Red)
-- [ ] Task: Integrate `WatchArt` into `Cart.tsx`, restyle buttons/total/gold-filled Checkout button (Green)
-- [ ] Task: Write failing tests asserting `Checkout.tsx`'s restyled confirmation still shows all order data (Red)
-- [ ] Task: Restyle `Checkout.tsx` to match Cart's line-item look (Green)
-- [ ] Task: Write failing tests asserting `OrderHistory.tsx` renders each order as a styled card with correct data (Red)
-- [ ] Task: Restyle `OrderHistory.tsx` as styled cards (Green)
-- [ ] Task: Refactor shared styling across the three screens, keep tests green
+- [x] Task: Write failing tests asserting `Cart.tsx` renders `WatchArt` thumbnails per line item (Red) `pending-commit`
+- [x] Task: Integrate `WatchArt` into `Cart.tsx`, restyle buttons/total/gold-filled Checkout button (Green) `pending-commit`
+- [x] Task: Write failing tests asserting `Checkout.tsx`'s restyled confirmation still shows all order data (Red) `pending-commit`
+- [x] Task: Restyle `Checkout.tsx` to match Cart's line-item look (Green) `pending-commit`
+- [x] Task: Write failing tests asserting `OrderHistory.tsx` renders each order as a styled card with correct data (Red) `pending-commit`
+- [x] Task: Restyle `OrderHistory.tsx` as styled cards (Green) `pending-commit`
+- [x] Task: Refactor shared styling across the three screens, keep tests green `pending-commit` (no further refactor needed; tokens already shared via index.css)
 - [ ] Task: Conductor - User Manual Verification 'Cart, Checkout, Order History' (Protocol in workflow.md)
 
 ## Phase 4: App Shell / Nav
