@@ -11,8 +11,8 @@
 - [x] Task: Rewrite `WatchArt.tsx` to render the photo in the existing circular gold-bezel frame; update `WatchArt.css` (object-fit: cover, remove now-unused hue-background rule) (Green) `pending-commit`
 - [x] Task: Remove `hueFromSku`/`initialsFromName` from `watchArtLogic.ts` and their tests (now superseded by `imageForSku`) — delete the file entirely if nothing else uses it `pending-commit` (confirmed no other importers, deleted both files)
 - [x] Task: Refactor, keep tests green `pending-commit` (no further refactor needed)
-- [ ] Task: Conductor - User Manual Verification 'WatchArt component swap' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'WatchArt component swap' (Protocol in workflow.md) — live browser check: Catalog grid, Cart, and Order History (including a pre-existing order from the original 10-item catalog) all render real distinct photos in the gold-bezel frame; one thumbnail needed an extra moment to finish loading on first paint (not a bug, confirmed via zoom after a short wait)
 
 ## Phase 3: Verification
-- [ ] Task: Run full suite + lint + build — confirm green, confirm Catalog/Cart/Checkout/OrderHistory tests needed no changes (WatchArt's props contract is unchanged)
-- [ ] Task: Conductor - User Manual Verification: live browser check that real photos render across Catalog, Cart, and Order History against the real 100-item catalog, and that a few spaced-apart repeats look as expected (Protocol in workflow.md)
+- [x] Task: Run full suite + lint + build — confirm green, confirm Catalog/Cart/Checkout/OrderHistory tests needed no changes (WatchArt's props contract is unchanged) `pending-commit`
+- [x] Task: Conductor - User Manual Verification: live browser check that real photos render across Catalog, Cart, and Order History against the real 100-item catalog, and that a few spaced-apart repeats look as expected (Protocol in workflow.md) — loaded all 100 catalog cards via "Load more", confirmed `watch-rolex-submariner` and `watch-franckmuller-vanguard` (60 positions apart) render the identical image URL; `scripts/verify-watchart-photos-phase3.sh`
