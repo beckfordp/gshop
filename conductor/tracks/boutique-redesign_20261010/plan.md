@@ -34,7 +34,7 @@
 - [x] Task: Restyle `App.tsx`'s header/nav — serif brand wordmark, text-link nav with accent hover underline (Green) `pending-commit`
 - [x] Task: Refactor, keep tests green `pending-commit` (no further refactor needed)
 - [x] Task: Run full suite + coverage check, confirm >80% maintained `pending-commit` (overall 84%+, App.tsx 100%)
-- [ ] Task: Conductor - User Manual Verification 'App Shell / Nav' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'App Shell / Nav' (Protocol in workflow.md) — live browser check: serif wordmark, gold text-link nav with divider, consistent with Catalog grid below it + `scripts/verify-boutique-phase4.sh`
 
 ## Phase 5: 100-Item Catalog Data (cross-repo)
 
