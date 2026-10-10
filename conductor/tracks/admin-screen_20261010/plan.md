@@ -1,6 +1,12 @@
 # Plan: Admin Screen (Order History Clear + Inventory Management)
 
 ## Phase 1: inventory-service — list/filter endpoint (separate repo, separate commit)
+
+**Cross-repo dependency**: tracked in full (spec/plan/archive) in
+`inventory-service`'s own conductor as
+[`list-inventory-endpoint_20261010`](https://github.com/beckfordp/inventory-service/tree/main/conductor/archive/list-inventory-endpoint_20261010) —
+done.
+
 - [x] Task: Write failing tests in `InventoryRoutesSuite.scala` and an in-memory-store test for `list`: no-filter returns all rows, `sku` filter returns just that row (or empty), logging assertions matching existing patterns (Red) `40d91ab`
 - [x] Task: Add `InventoryStore.list(skuFilter: Option[String])` to the trait + both `inMemory` and `postgres` implementations (Green) `40d91ab`
 - [x] Task: Add `GET /inventorys` (optional `sku` query param) to `InventoryRoutes.scala`, wire into `routes()` (Green) `40d91ab`

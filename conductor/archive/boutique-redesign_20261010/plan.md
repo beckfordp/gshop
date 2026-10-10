@@ -38,6 +38,12 @@
 
 ## Phase 5: 100-Item Catalog Data (cross-repo)
 
+**Cross-repo dependency**: tracked in full (spec/plan/archive) in
+`catalog-service`'s own conductor as
+[`expand-watch-catalog_20261010`](https://github.com/beckfordp/catalog-service/tree/main/conductor/archive/expand-watch-catalog_20261010) —
+done. (Added retroactively; the original implementation below predates
+the cross-repo tracking convention adopted mid-session.)
+
 - [x] Task: Draft 90 new real-brand/model watch entries (original one-line descriptions, `watch-<brand>-<model-slug>` SKUs, ~$4,300–$35,000 price band), avoiding duplicates with the existing 10
 - [x] Task: Append the 90 entries to `gluon/services/catalog-service/scripts/seed-watches.sh`'s `WATCHES` array (separate commit, in the `gluon` repo)
 - [x] Task: Run the script live against port-forwarded catalog-service — 90 created, 10 skipped (pre-existing), 0 failed
