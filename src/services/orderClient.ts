@@ -37,9 +37,12 @@ export interface Order {
 }
 
 export class OrderClientError extends Error {
-  constructor(message: string) {
+  readonly status?: number;
+
+  constructor(message: string, status?: number) {
     super(message);
     this.name = 'OrderClientError';
+    this.status = status;
   }
 }
 
@@ -85,7 +88,7 @@ async function remove(id: string): Promise<void> {
   }
 
   if (!response.ok) {
-    throw new OrderClientError(`Order request failed with status ${response.status}`);
+    throw new OrderClientError(`Order request failed with status ${response.status}`, response.status);
   }
 }
 

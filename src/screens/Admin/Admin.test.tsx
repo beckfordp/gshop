@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Admin from './Admin';
 import { catalogClient, type CatalogItem } from '../../services/catalogClient';
 import { inventoryClient, type InventoryItem } from '../../services/inventoryClient';
-import { orderClient, type Order } from '../../services/orderClient';
+import { orderClient, OrderClientError, type Order } from '../../services/orderClient';
 import { getStoredCustomerId } from '../../services/customerId';
 
 vi.mock('../../services/catalogClient', () => ({
@@ -14,9 +14,15 @@ vi.mock('../../services/inventoryClient', () => ({
   inventoryClient: { list: vi.fn(), adjust: vi.fn() },
 }));
 
-vi.mock('../../services/orderClient', () => ({
-  orderClient: { list: vi.fn(), remove: vi.fn() },
-}));
+vi.mock('../../services/orderClient', async () => {
+  const actual = await vi.importActual<typeof import('../../services/orderClient')>(
+    '../../services/orderClient',
+  );
+  return {
+    ...actual,
+    orderClient: { list: vi.fn(), remove: vi.fn() },
+  };
+});
 
 vi.mock('../../services/customerId', () => ({
   getStoredCustomerId: vi.fn(),
@@ -197,6 +203,25 @@ describe('Admin', () => {
     expect(orderList).toHaveBeenCalledWith('customer-1');
     expect(orderRemove).toHaveBeenCalledWith('order-1');
     expect(orderRemove).toHaveBeenCalledWith('order-2');
+  });
+
+  it('treats a 404 from orderClient.remove as already-cleared, not an error', async () => {
+    getStoredCustomerIdMock.mockReturnValue('customer-1');
+    orderList.mockResolvedValue([makeOrder({ id: 'order-1' }), makeOrder({ id: 'order-2' })]);
+    orderRemove.mockImplementation((id: string) =>
+      id === 'order-1'
+        ? Promise.reject(new OrderClientError('Order request failed with status 404', 404))
+        : Promise.resolve(undefined),
+    );
+
+    render(<Admin />);
+
+    await screen.findByText('Rolex Submariner');
+    fireEvent.click(screen.getByRole('button', { name: 'Clear order history' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, clear it' }));
+
+    await screen.findByText(/cleared/i);
+    expect(screen.queryByText(/failed with status 404/)).not.toBeInTheDocument();
   });
 
   it('shows an error and working Retry when clearing fails', async () => {

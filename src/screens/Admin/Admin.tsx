@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { catalogClient } from '../../services/catalogClient';
 import { inventoryClient } from '../../services/inventoryClient';
-import { orderClient } from '../../services/orderClient';
+import { orderClient, OrderClientError } from '../../services/orderClient';
 import { getStoredCustomerId } from '../../services/customerId';
 import { errorMessage } from '../../lib/format';
 import './Admin.css';
@@ -93,6 +93,22 @@ export default function Admin() {
     }
   };
 
+  // order-service's order-list read is cached with no invalidation on
+  // delete (see tech-stack.md), so a Retry after a partial failure can see
+  // a stale list that still includes orders already removed in the
+  // previous attempt — treat "already gone" (404) as success rather than
+  // a real failure.
+  const removeOrderIgnoringAlreadyGone = async (id: string) => {
+    try {
+      await orderClient.remove(id);
+    } catch (error) {
+      if (error instanceof OrderClientError && error.status === 404) {
+        return;
+      }
+      throw error;
+    }
+  };
+
   const handleClearHistory = async () => {
     const customerId = getStoredCustomerId();
     if (!customerId) {
@@ -103,7 +119,7 @@ export default function Admin() {
     setClearError(null);
     try {
       const orders = await orderClient.list(customerId);
-      await Promise.all(orders.map((order) => orderClient.remove(order.id)));
+      await Promise.all(orders.map((order) => removeOrderIgnoringAlreadyGone(order.id)));
       setClearStep('done');
     } catch (error) {
       setClearError(errorMessage(error));
