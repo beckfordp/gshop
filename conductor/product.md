@@ -97,6 +97,17 @@ All four in-scope user stories are live: US-1 (browse catalog), US-2
   reachable screens" per current screen (Catalog/Cart/History each show
   the other two; Checkout has its own "Continue Shopping" CTA instead of
   nav buttons).
+- **Visual design (as of the boutique-redesign track):** gshop is styled as
+  a dark-luxury watch-boutique storefront — explicitly a demonstration
+  skin only, never intended to go live as a real/sellable product. All
+  four screens share a token-based dark/gold/serif visual language (see
+  `tech-stack.md`), and every catalog/cart/checkout/history line item
+  renders a `WatchArt` dial (`src/components/WatchArt/`) — a deterministic
+  CSS-generated placeholder (per-brand accent hue, product initials), not
+  a real product photo. The catalog itself was grown from 10 to 100 real
+  luxury watches (real brand/model names, originally-written descriptions,
+  no scraped/real photography) via `gluon`'s
+  `services/catalog-service/scripts/seed-watches.sh`.
 - All screens currently need a Vite dev-server proxy to reach their
   backend services locally — catalog-service, cart-service, and
   order-service don't send CORS headers, so a browser blocks direct

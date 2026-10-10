@@ -43,6 +43,28 @@ pollution RCE (fixed at ≥2.1.2). Added an `"overrides": { "tinypool":
 working on Node 18.16 despite its own `engines` field claiming Node ≥20
 (ran a real test file through it, not just `--passWithNoTests`).
 
+## Design tokens / shared CSS (added 2026-10-10, track `boutique-redesign_20261010`)
+`product-guidelines.md`'s default is no shared CSS system (plain per-screen
+`.css` files). This track deliberately supersedes that for one real,
+cross-screen need: a consistent dark-luxury visual language. `src/index.css`
+defines CSS custom properties on `:root` (colors, typography, spacing —
+`--color-bg`, `--color-accent`, `--font-serif`, `--space-md`, etc.); every
+screen's own `.css` file consumes these tokens rather than hardcoding
+values. No new npm dependency — just one Google Fonts `<link>`
+(`index.html`, Playfair Display) plus plain CSS. `src/components/WatchArt/`
+(`watchArt...Logic.ts` pure hue/initials hashing + `WatchArt.tsx`
+presentational component) is the first component under `src/components/`
+— justified by reuse across all four screens per
+`product-guidelines.md`'s component-extraction bar.
+
+Note: `watchArtLogic.ts` is named that (not `watchArt.ts`) because this
+filesystem is case-insensitive (macOS default) while Vite's module
+resolver tries extensions in `.ts`-before-`.tsx` order — a bare import
+`./WatchArt` from a sibling file was silently resolving to the
+lowercase-named logic module instead of the capitalized component file.
+Keep component/logic sibling file names clearly distinct (not just a
+case difference) anywhere else this pattern is used.
+
 ## Local dev against a running backend (added 2026-10-08, extended 2026-10-09)
 Backend services in `gluon-local` (OrbStack k8s) have no local port map by
 default — forward the one(s) you need:
@@ -101,6 +123,22 @@ gap is worth fixing upstream in these services (and payment-service, if it
 ever gets a frontend-facing endpoint) rather than adding more proxy entries
 per-service indefinitely — noted in `gluon`'s `backlogs/catalog-service.md`
 and `backlogs/cart-service.md`.
+
+## Catalog-service's list cache appears to miss invalidation on write (found 2026-10-10)
+While seeding the boutique-redesign track's 90 new watches (catalog now
+100 items, see `product.md`), a `GET /catalogs?limit=100&offset=0` request
+made *before* seeding (via Cart's catalog join) kept returning the stale
+pre-seed 10-item result afterward, while other limit/offset windows never
+requested before seeding (e.g. the real Catalog screen's `limit=20`
+pages) returned fresh 100-item data immediately. Looks like a
+per-(limit,offset) cache key with no write-side invalidation — same shape
+as order-service's documented 60s history-cache TTL below, but
+undocumented here and with no visible TTL expiry observed in this
+session. Filed in `gluon`'s `backlogs/catalog-service.md`. Not a gshop
+bug and not fixed here — if it recurs, a hard refresh / waiting out
+whatever TTL exists clears it; gshop's own request shapes (`limit=20`
+Catalog paging, `limit=100&offset=0` Cart join) are unchanged by this
+track.
 
 ## Order-service's history cache has a 60s staleness window (found 2026-10-09)
 Confirmed live while verifying track `history_20261009`'s Phase 1 (same
