@@ -30,3 +30,6 @@ done.
 - [x] Task: Wire into `App.tsx`'s screen state + add the low-contrast corner-styled link (Green) `pending-commit`
 - [x] Task: Run full suite + lint + build in gshop; confirm green `pending-commit` (102+ tests, 86.76% overall coverage, App.tsx 100%)
 - [x] Task: Conductor - User Manual Verification: live browser check — adjust real inventory via the admin screen and confirm it reflects in a fresh `GET /inventorys`; clear order history and confirm orders are gone (Protocol in workflow.md) — discreet "Admin" link confirmed in the bottom-right corner (tiny, low-contrast, as designed), navigates correctly; see Phase 3's verification above for the inventory-adjust and clear-history checks run through it
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions — `ba91d6e`
