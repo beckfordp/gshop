@@ -4,7 +4,7 @@
 - [x] Task: Write failing tests for `imageForSku` in `src/data/watchImages.test.ts` — covers: same sku always returns the same URL, two known skus 60 apart in the fixed order map to the same image, an unknown sku still returns a valid URL from the pool (Red) `pending-commit`
 - [x] Task: Implement `src/data/watchImages.ts`: the 60 Unsplash URLs, the fixed 100-sku order table, round-robin `imageForSku(sku)` with hash-based fallback (Green) `pending-commit`
 - [x] Task: Refactor, keep tests green `pending-commit` (no refactor needed)
-- [ ] Task: Conductor - User Manual Verification 'Image data + lookup logic' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Image data + lookup logic' (Protocol in workflow.md) — `scripts/verify-watchart-photos-phase1.sh`
 
 ## Phase 2: WatchArt component swap
 - [ ] Task: Update `WatchArt.test.tsx`: replace the hue/initials assertions with assertions that an `<img>` is rendered with the expected `src` (from `imageForSku`) and `alt` (the product name) (Red)
