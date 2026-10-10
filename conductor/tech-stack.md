@@ -91,13 +91,14 @@ so the app never breaks. Verified live: `watch-rolex-submariner` (position
 0) and `watch-franckmuller-vanguard` (position 60) render the identical
 image URL once the full 100-item catalog is loaded.
 
-## Local dev against a running backend (added 2026-10-08, extended 2026-10-09)
+## Local dev against a running backend (added 2026-10-08, extended 2026-10-09, 2026-10-10)
 Backend services in `gluon-local` (OrbStack k8s) have no local port map by
-default — forward the one(s) you need:
+default — forward the ones you need:
 ```bash
 kubectl port-forward -n gluon-local svc/catalog-service 8081:8080
 kubectl port-forward -n gluon-local svc/cart-service 8082:8080
 kubectl port-forward -n gluon-local svc/order-service 8083:8080
+kubectl port-forward -n gluon-local svc/inventory-service 8084:8080
 ```
 **Do not** point `.env`'s service URLs straight at those forwarded ports
 (`VITE_CATALOG_SERVICE_URL=http://localhost:8081`) — catalog-service,
@@ -116,7 +117,21 @@ CORS):
 VITE_CATALOG_SERVICE_URL=/api/catalog
 VITE_CART_SERVICE_URL=/api/cart
 VITE_ORDER_SERVICE_URL=/api/order
+VITE_INVENTORY_SERVICE_URL=/api/inventory
 ```
+
+**`kubectl port-forward` doesn't survive a pod replacement** (found
+2026-10-10, track `admin-screen_20261010`'s live verification): running
+`bin/k8s-local-up [service]` deletes/recreates that service's pod (new pod
+name, new IP) as part of the Helm upgrade — any `port-forward` process
+already pointed at the old pod just hangs/connection-refuses silently
+rather than erroring immediately, so the dev server's proxy calls start
+failing with a generic 500 and no obvious cause. Symptom: `curl` to the
+forwarded port returns nothing (`HTTP 000`) or connection-refused. Fix:
+`pkill -f "kubectl port-forward"` and restart every forward you need
+(`ps aux | grep port-forward` to check which are still alive first) —
+cheap enough to always redo for any service you just redeployed, and for
+every service if you ran `bin/k8s-local-up` with no args.
 Verified end-to-end for cart-service 2026-10-09 (track `cart_20261008`
 Phase 2): clicking "Add to cart" in a real browser created a real cart via
 `POST /carts` and persisted the item via `POST /carts/{id}/items`,
@@ -182,3 +197,15 @@ Order History screen (US-8) just won't show a just-placed order
 immediately; it'll appear once the 60s TTL rolls over. No action needed
 here beyond this note — order-service's own docs already scope this as
 intentional, so no new upstream backlog item filed for it.
+
+**Same gap applies to `DELETE /orders/{id}`** (found 2026-10-10, track
+`admin-screen_20261010`'s Admin screen "Clear order history" feature):
+deleting every order for a customer doesn't invalidate the cached list
+either — `GET /orders?customerId=` kept reporting the pre-delete order
+count for up to a minute after 22 real orders were deleted and
+individually confirmed gone (`GET /orders/{id}` → 404 for each, which
+bypasses this list-level cache). Same "not a gshop bug, TTL-only cache is
+order-service's own deliberate design" reasoning as above — the Admin
+screen's "Order history cleared." message is accurate (the deletes did
+happen), the Order History *screen* just won't reflect it for up to a
+minute, same as a just-placed order's delayed appearance.

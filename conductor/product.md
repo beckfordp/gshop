@@ -115,6 +115,20 @@ All four in-scope user stories are live: US-1 (browse catalog), US-2
   luxury watches (real brand/model names, originally-written descriptions,
   no scraped/real photography) via `gluon`'s
   `services/catalog-service/scripts/seed-watches.sh`.
+- **Admin screen (as of the `admin-screen_20261010` track):** a discreet,
+  customer-hidden screen (`src/screens/Admin/Admin.tsx`), reachable only
+  via a small, low-contrast text link fixed to the page's bottom-right
+  corner — no auth/login, consistent with the rest of this demo app's
+  no-auth architecture, discretion only. Two features: "Clear order
+  history" (lists the current customer's orders and deletes each one,
+  behind a confirm step — irreversible, no undo); an inventory table
+  (real rows from `inventory-service`, joined against the catalog for
+  display names) with "+1"/"−1" buttons adjusting `quantityAvailable`
+  (`quantityReserved` shown read-only, system-managed by the
+  order/checkout flow). Required adding a previously-missing
+  `GET /inventorys` list/filter-by-sku endpoint to `inventory-service`
+  itself (tracked there as `list-inventory-endpoint_20261010`) — it only
+  had lookup-by-internal-UUID before, which gshop had no way to discover.
 - All screens currently need a Vite dev-server proxy to reach their
   backend services locally — catalog-service, cart-service, and
   order-service don't send CORS headers, so a browser blocks direct
