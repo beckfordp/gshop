@@ -1,0 +1,1 @@
+Phase 1, Task 1-3: watchArt.ts pure logic (hueFromSku, initialsFromName), TDD red->green, no refactor needed. hueFromSku hashes the sku's brand segment so all models of one brand share a hue.
