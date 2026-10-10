@@ -8,7 +8,7 @@
 - [x] Task: Add design-token CSS custom properties (colors, typography, spacing) to a shared stylesheet `pending-commit`
 - [x] Task: Add Playfair Display Google Font `<link>` to `index.html` `pending-commit`
 - [x] Task: Build `WatchArt.tsx` presentational component (dial, bezel, gradient, initials) consuming `watchArtLogic.ts`, with a basic render test `pending-commit` (renamed `watchArt.ts` → `watchArtLogic.ts`: this filesystem is case-insensitive and Vite resolves `.ts` before `.tsx`, so `./WatchArt` was wrongly matching the logic file)
-- [ ] Task: Conductor - User Manual Verification 'Design Tokens + WatchArt Component' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Design Tokens + WatchArt Component' (Protocol in workflow.md) — `scripts/verify-boutique-phase1.sh`, prompting off
 
 ## Phase 2: Catalog Screen
 
