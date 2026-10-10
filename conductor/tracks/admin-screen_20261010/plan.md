@@ -14,10 +14,10 @@
 - [ ] Task: Conductor - User Manual Verification 'Service clients' (Protocol in workflow.md) — pending inventory-service redeploy
 
 ## Phase 3: Admin screen
-- [ ] Task: Write failing tests for `Admin.tsx`: renders inventory table from `inventoryClient.list()` joined with catalog names, +/− adjusts via `inventoryClient` and re-renders the new quantity, "Clear order history" shows a confirm step then calls `orderClient.remove()` for every order from `orderClient.list()`, with success/error states (Red)
-- [ ] Task: Implement `src/screens/Admin/Admin.tsx` + `Admin.css` (styled consistently with the rest of the dark-luxury token system) (Green)
-- [ ] Task: Refactor, keep tests green
-- [ ] Task: Conductor - User Manual Verification 'Admin screen' (Protocol in workflow.md)
+- [x] Task: Write failing tests for `Admin.tsx`: renders inventory table from `inventoryClient.list()` joined with catalog names, +/− adjusts via `inventoryClient` and re-renders the new quantity, "Clear order history" shows a confirm step then calls `orderClient.remove()` for every order from `orderClient.list()`, with success/error states (Red) `pending-commit`
+- [x] Task: Implement `src/screens/Admin/Admin.tsx` + `Admin.css` (styled consistently with the rest of the dark-luxury token system) (Green) `pending-commit`
+- [x] Task: Refactor, keep tests green `pending-commit` (added a small `lastDelta` tracker so a failed adjustment's Retry button repeats the exact same +1/−1, not a no-op)
+- [ ] Task: Conductor - User Manual Verification 'Admin screen' (Protocol in workflow.md) — pending inventory-service redeploy
 
 ## Phase 4: App shell wiring + full verification
 - [ ] Task: Write failing test asserting the discreet "Admin" link appears and navigates to the Admin screen (Red)
