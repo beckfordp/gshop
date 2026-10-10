@@ -53,11 +53,13 @@
   right: var(--space-sm);
   bottom: var(--space-sm);
   font-size: 0.7rem;
-  color: var(--color-border);
-  opacity: 0.6;
+  color: var(--color-text-muted);
+  padding: 2px 6px;
+  border-radius: 3px;
+  background-color: rgba(201, 168, 97, 0.18);
 }
 
 .admin-entry:hover {
-  color: var(--color-text-muted);
-  opacity: 1;
+  color: var(--color-accent-strong);
+  background-color: rgba(201, 168, 97, 0.32);
 }
