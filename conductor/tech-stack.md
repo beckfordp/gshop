@@ -52,18 +52,44 @@ defines CSS custom properties on `:root` (colors, typography, spacing —
 screen's own `.css` file consumes these tokens rather than hardcoding
 values. No new npm dependency — just one Google Fonts `<link>`
 (`index.html`, Playfair Display) plus plain CSS. `src/components/WatchArt/`
-(`watchArt...Logic.ts` pure hue/initials hashing + `WatchArt.tsx`
-presentational component) is the first component under `src/components/`
-— justified by reuse across all four screens per
+(`WatchArt.tsx` — renders a real photo via `src/data/watchImages.ts`'s
+`imageForSku(sku)`, see "Real watch photos" below) is the first component
+under `src/components/` — justified by reuse across all four screens per
 `product-guidelines.md`'s component-extraction bar.
 
-Note: `watchArtLogic.ts` is named that (not `watchArt.ts`) because this
-filesystem is case-insensitive (macOS default) while Vite's module
-resolver tries extensions in `.ts`-before-`.tsx` order — a bare import
-`./WatchArt` from a sibling file was silently resolving to the
-lowercase-named logic module instead of the capitalized component file.
-Keep component/logic sibling file names clearly distinct (not just a
+Note (still relevant generally, even though the file that first hit it —
+`watchArtLogic.ts` — was later deleted in the `watchart-photos_20261010`
+track): this filesystem is case-insensitive (macOS default) while Vite's
+module resolver tries extensions in `.ts`-before-`.tsx` order — a bare
+import `./Foo` from a sibling file can silently resolve to a lowercase
+`foo.ts` instead of the intended `Foo.tsx`. Keep component/logic sibling
+file names clearly distinct (not just a
 case difference) anywhere else this pattern is used.
+
+## Real watch photos (added 2026-10-10, track `watchart-photos_20261010`)
+`WatchArt` originally rendered CSS-generated placeholder art (solid
+per-brand hue + initials) — replaced per explicit user feedback that it
+looked "made up." `src/data/watchImages.ts` now hotlinks 60 real,
+licensed, free-to-use watch photos directly from Unsplash's CDN
+(`images.unsplash.com/photo-<id>?w=400&h=400&fit=crop&auto=format`) — no
+binary assets added to the repo, no new npm dependency, no API key
+needed (Unsplash's CDN serves these URLs with
+`access-control-allow-origin: *`, verified via curl; their search *page*
+itself is bot-challenge-protected, so the 60 photo ids were sourced via a
+real browser session, not scraped programmatically).
+
+Only 60 unique usable photos were found for the 100-item catalog, so the
+photos don't claim to depict the specific brand/model shown (explicit
+user instruction — not required to match). `imageForSku(sku)` round-robins
+the 60 photos against `SKU_ORDER`, a fixed copy of the catalog's real
+seeding order (`gluon`'s `services/catalog-service/scripts/seed-watches.sh`'s
+`WATCHES` array) — `WATCH_IMAGES[index_in_SKU_ORDER % 60]` — so any reused
+photo is always exactly 60 catalog positions from its first use, as far
+apart as mathematically possible with 60 images across 100 items. An
+unknown/future sku (not in `SKU_ORDER`) falls back to a hash-based pick
+so the app never breaks. Verified live: `watch-rolex-submariner` (position
+0) and `watch-franckmuller-vanguard` (position 60) render the identical
+image URL once the full 100-item catalog is loaded.
 
 ## Local dev against a running backend (added 2026-10-08, extended 2026-10-09)
 Backend services in `gluon-local` (OrbStack k8s) have no local port map by

@@ -102,9 +102,16 @@ All four in-scope user stories are live: US-1 (browse catalog), US-2
   skin only, never intended to go live as a real/sellable product. All
   four screens share a token-based dark/gold/serif visual language (see
   `tech-stack.md`), and every catalog/cart/checkout/history line item
-  renders a `WatchArt` dial (`src/components/WatchArt/`) — a deterministic
-  CSS-generated placeholder (per-brand accent hue, product initials), not
-  a real product photo. The catalog itself was grown from 10 to 100 real
+  renders a `WatchArt` dial (`src/components/WatchArt/`) showing a real
+  watch photo in a circular gold-bezel frame — **as of the
+  `watchart-photos_20261010` track**, these are real photos licensed and
+  hotlinked directly from Unsplash's CDN (`src/data/watchImages.ts`), not
+  CSS-generated placeholder art. The photos are generic watch photography,
+  deliberately not matched to the specific brand/model shown (only 60
+  unique usable photos exist for the 100-item catalog, so
+  `imageForSku(sku)` round-robins them against the catalog's fixed
+  seeding order — any reused photo lands exactly 60 catalog positions
+  from its first use). The catalog itself was grown from 10 to 100 real
   luxury watches (real brand/model names, originally-written descriptions,
   no scraped/real photography) via `gluon`'s
   `services/catalog-service/scripts/seed-watches.sh`.
