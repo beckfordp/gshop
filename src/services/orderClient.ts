@@ -72,6 +72,23 @@ async function create({
   return (await response.json()) as Order;
 }
 
+async function remove(id: string): Promise<void> {
+  if (!orderClient.baseUrl) {
+    throw new OrderClientError('Order service URL is not configured');
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`${orderClient.baseUrl}/orders/${id}`, { method: 'DELETE' });
+  } catch (error) {
+    throw new OrderClientError(`Failed to reach order service: ${errorMessage(error)}`);
+  }
+
+  if (!response.ok) {
+    throw new OrderClientError(`Order request failed with status ${response.status}`);
+  }
+}
+
 async function list(customerId: string): Promise<Order[]> {
   if (!orderClient.baseUrl) {
     throw new OrderClientError('Order service URL is not configured');
@@ -98,9 +115,11 @@ export const orderClient: {
   health: () => Promise<boolean>;
   create: typeof create;
   list: typeof list;
+  remove: typeof remove;
 } = {
   baseUrl: ORDER_SERVICE_URL,
   health: () => checkHealth(ORDER_SERVICE_URL),
   create,
   list,
+  remove,
 };

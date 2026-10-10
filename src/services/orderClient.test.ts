@@ -153,3 +153,43 @@ describe('orderClient.list', () => {
     await expect(orderClient.list('customer-1')).rejects.toThrow(OrderClientError);
   });
 });
+
+describe('orderClient.remove', () => {
+  const baseUrl = 'http://order.test';
+
+  afterEach(() => {
+    orderClient.baseUrl = baseUrl;
+    vi.restoreAllMocks();
+  });
+
+  it('DELETEs /orders/{id}', async () => {
+    orderClient.baseUrl = baseUrl;
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 204 }));
+
+    await orderClient.remove('order-1');
+
+    expect(fetchMock).toHaveBeenCalledWith(`${baseUrl}/orders/order-1`, { method: 'DELETE' });
+  });
+
+  it('throws OrderClientError on a non-2xx response', async () => {
+    orderClient.baseUrl = baseUrl;
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 404 }));
+
+    await expect(orderClient.remove('order-1')).rejects.toThrow(OrderClientError);
+  });
+
+  it('throws OrderClientError when the network request fails', async () => {
+    orderClient.baseUrl = baseUrl;
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
+
+    await expect(orderClient.remove('order-1')).rejects.toThrow(OrderClientError);
+  });
+
+  it('throws OrderClientError when the base URL is not configured', async () => {
+    orderClient.baseUrl = undefined;
+
+    await expect(orderClient.remove('order-1')).rejects.toThrow(OrderClientError);
+  });
+});

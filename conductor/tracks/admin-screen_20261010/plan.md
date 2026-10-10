@@ -8,10 +8,10 @@
 - [x] Task: Run this repo's full test suite; commit directly (prompt-off is active there too) `40d91ab`, `be581b9` (85/85 tests, including testcontainers-backed Postgres tests) — live redeploy to local k8s pending (user redeploying via `bin/k8s-local-up inventory-service`)
 
 ## Phase 2: gshop service clients
-- [ ] Task: Write failing tests for `inventoryClient.list()` and `orderClient.remove(id)` (Red)
-- [ ] Task: Implement both against the real endpoints; add the inventory-service Vite proxy entry + `.env` var (Green)
-- [ ] Task: Refactor, keep tests green
-- [ ] Task: Conductor - User Manual Verification 'Service clients' (Protocol in workflow.md)
+- [x] Task: Write failing tests for `inventoryClient.list()` and `orderClient.remove(id)` (Red) `pending-commit`
+- [x] Task: Implement both against the real endpoints; add the inventory-service Vite proxy entry + `.env` var (Green) `pending-commit`
+- [x] Task: Refactor, keep tests green `pending-commit` (no refactor needed)
+- [ ] Task: Conductor - User Manual Verification 'Service clients' (Protocol in workflow.md) — pending inventory-service redeploy
 
 ## Phase 3: Admin screen
 - [ ] Task: Write failing tests for `Admin.tsx`: renders inventory table from `inventoryClient.list()` joined with catalog names, +/− adjusts via `inventoryClient` and re-renders the new quantity, "Clear order history" shows a confirm step then calls `orderClient.remove()` for every order from `orderClient.list()`, with success/error states (Red)
