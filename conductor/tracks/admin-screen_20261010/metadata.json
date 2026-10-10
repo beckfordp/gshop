@@ -1,0 +1,8 @@
+{
+  "track_id": "admin-screen_20261010",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-10-10T00:00:00Z",
+  "updated_at": "2026-10-10T00:00:00Z",
+  "description": "Add a discreet admin screen to gshop for clearing order history and listing/adjusting real inventory, including a new GET /inventorys list/filter endpoint on inventory-service (previously missing)"
+}

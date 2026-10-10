@@ -6,6 +6,9 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
+- [~] **Track: Admin Screen (Order History Clear + Inventory Management)**
+  *Link: [./tracks/admin-screen_20261010/](./tracks/admin-screen_20261010/)*
+
 ---
 
 ## Backlog
