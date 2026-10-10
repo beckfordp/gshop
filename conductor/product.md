@@ -129,11 +129,10 @@ All four in-scope user stories are live: US-1 (browse catalog), US-2
   `GET /inventorys` list/filter-by-sku endpoint to `inventory-service`
   itself (tracked there as `list-inventory-endpoint_20261010`) — it only
   had lookup-by-internal-UUID before, which gshop had no way to discover.
-- All screens currently need a Vite dev-server proxy to reach their
-  backend services locally — catalog-service, cart-service, and
-  order-service don't send CORS headers, so a browser blocks direct
-  cross-origin calls to them (see `tech-stack.md`'s "Local dev against a
-  running backend"). Also found during US-3: `inventory-service` has no
+- All screens connect directly to their backend services locally via
+  cluster DNS (no proxy, no port-forward — see `tech-stack.md`'s "Local
+  dev against a running backend", resolved 2026-10-10). Also found during
+  US-3: `inventory-service` has no
   stock seeded for any sku, so real checkouts currently all come back
   `reservation_failed` unless test stock is seeded by hand (see
   `gluon`'s `backlogs/inventory-service.md`). And found during US-8:

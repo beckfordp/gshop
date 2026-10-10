@@ -91,79 +91,66 @@ so the app never breaks. Verified live: `watch-rolex-submariner` (position
 0) and `watch-franckmuller-vanguard` (position 60) render the identical
 image URL once the full 100-item catalog is loaded.
 
-## Local dev against a running backend (added 2026-10-08, extended 2026-10-09, 2026-10-10)
-Backend services in `gluon-local` (OrbStack k8s) have no local port map by
-default — forward the ones you need:
-```bash
-kubectl port-forward -n gluon-local svc/catalog-service 8081:8080
-kubectl port-forward -n gluon-local svc/cart-service 8082:8080
-kubectl port-forward -n gluon-local svc/order-service 8083:8080
-kubectl port-forward -n gluon-local svc/inventory-service 8084:8080
+## Local dev against a running backend (added 2026-10-08, extended 2026-10-09, resolved 2026-10-10)
+Backend services run in `gluon-local` (OrbStack k8s). `.env` (gitignored,
+not committed) points each service's client straight at that service's
+own cluster-DNS address:
 ```
-**Do not** point `.env`'s service URLs straight at those forwarded ports
-(`VITE_CATALOG_SERVICE_URL=http://localhost:8081`) — catalog-service,
-cart-service, and order-service all send no `Access-Control-Allow-Origin`
-header, so the browser blocks the cross-origin `fetch()` even though the
-server itself responds fine (curl works, browser throws `TypeError: Failed
-to fetch`). Confirmed via `curl -i -H "Origin: http://localhost:5173" ...`
-returning 200/201 with no ACAO header, for all three services.
+VITE_CATALOG_SERVICE_URL=http://catalog-service.gluon-local.svc.cluster.local:8080
+VITE_CART_SERVICE_URL=http://cart-service.gluon-local.svc.cluster.local:8080
+VITE_ORDER_SERVICE_URL=http://order-service.gluon-local.svc.cluster.local:8080
+VITE_INVENTORY_SERVICE_URL=http://inventory-service.gluon-local.svc.cluster.local:8080
+```
+No `kubectl port-forward`, no Vite proxy. OrbStack bridges the cluster's
+own DNS/network straight to the host — that hostname resolves and the
+connection works from a plain `curl`, confirmed, with no forwarding set
+up — and because `.env` points at the Service's own stable DNS name rather
+than a forwarded port tied to one specific pod, a `bin/k8s-local-up`
+redeploy (new pod, new ClusterIP, same Service/DNS name) keeps working
+with no manual re-forwarding step afterward.
 
-Worked around with Vite dev-server proxy entries (`vite.config.ts`'s
-`server.proxy`, one per service), so the browser's request stays
-same-origin and Vite forwards it server-to-server (not subject to browser
-CORS):
-```
-# .env (gitignored, not committed)
-VITE_CATALOG_SERVICE_URL=/api/catalog
-VITE_CART_SERVICE_URL=/api/cart
-VITE_ORDER_SERVICE_URL=/api/order
-VITE_INVENTORY_SERVICE_URL=/api/inventory
-```
+**Resolved 2026-10-10:** catalog-service, cart-service, and order-service
+used to send no `Access-Control-Allow-Origin` header, so even though the
+server responded fine (`curl` worked), the browser blocked the
+cross-origin `fetch()` (`TypeError: Failed to fetch`) — confirmed via
+`curl -i -H "Origin: http://localhost:5173" ...` returning 200/201 with no
+ACAO header, for all three services. Worked around at the time with
+`kubectl port-forward` + Vite dev-server proxy entries (`vite.config.ts`'s
+`server.proxy`) so the browser's request stayed same-origin and Vite
+forwarded it server-to-server, not subject to browser CORS. Fixed upstream
+via Rework 1/TD-1 (each service's own `cors_20261010` Conductor track,
+implemented/reviewed/archived) — every service now sends
+`Access-Control-Allow-Origin`, so the direct-connection `.env` above works
+from a real browser with zero console errors. Verified live: Catalog load,
+Add to cart, View Cart, Order History all round-trip through
+catalog-service/cart-service/order-service directly. Proxy config removed
+from `vite.config.ts`.
 
-**`kubectl port-forward` doesn't survive a pod replacement** (found
-2026-10-10, track `admin-screen_20261010`'s live verification): running
-`bin/k8s-local-up [service]` deletes/recreates that service's pod (new pod
-name, new IP) as part of the Helm upgrade — any `port-forward` process
-already pointed at the old pod just hangs/connection-refuses silently
-rather than erroring immediately, so the dev server's proxy calls start
-failing with a generic 500 and no obvious cause. Symptom: `curl` to the
-forwarded port returns nothing (`HTTP 000`) or connection-refused. Fix:
-`pkill -f "kubectl port-forward"` and restart every forward you need
-(`ps aux | grep port-forward` to check which are still alive first) —
-cheap enough to always redo for any service you just redeployed, and for
-every service if you ran `bin/k8s-local-up` with no args.
 Verified end-to-end for cart-service 2026-10-09 (track `cart_20261008`
-Phase 2): clicking "Add to cart" in a real browser created a real cart via
-`POST /carts` and persisted the item via `POST /carts/{id}/items`,
-confirmed by re-fetching `GET /carts/{id}`.
+Phase 2, via the then-current proxy setup): clicking "Add to cart" in a
+real browser created a real cart via `POST /carts` and persisted the item
+via `POST /carts/{id}/items`, confirmed by re-fetching `GET /carts/{id}`.
 
-Verified for order-service 2026-10-09 (track `checkout_20261009` Phase 2):
-clicking "Checkout" in a real browser called the real `POST /orders`
-through the proxy and got back a genuine `reservation_failed` response —
-**`inventory-service` has no stock seeded for any sku** (`GET
-/inventory/<sku>` returns 404 for real catalog skus), so every real
-reservation currently fails. Cart correctly stayed un-cleared and showed
-the "Some items are out of stock." error — this is gshop behaving
-correctly against real (if unseeded) data, not a gshop bug. Noted in
-`gluon`'s `backlogs/inventory-service.md`.
+Verified for order-service 2026-10-09 (track `checkout_20261009` Phase 2,
+via the then-current proxy setup): clicking "Checkout" in a real browser
+called the real `POST /orders` and got back a genuine
+`reservation_failed` response — **`inventory-service` has no stock seeded
+for any sku** (`GET /inventory/<sku>` returns 404 for real catalog skus),
+so every real reservation currently fails. Cart correctly stayed
+un-cleared and showed the "Some items are out of stock." error — this is
+gshop behaving correctly against real (if unseeded) data, not a gshop bug.
+Noted in `gluon`'s `backlogs/inventory-service.md`.
 
 Verified the full success path too, Phase 4 2026-10-09: manually seeded
 one sku (`POST /inventorys {"sku":"watch-rolex-submariner",
-"quantityAvailable":5}` against the port-forwarded inventory-service) so
-a real reservation could succeed. End-to-end in a real browser: Catalog →
-Add to cart → View Cart → Checkout → real `POST /orders` with
-`status: "pending"` (reservation succeeded) → Checkout screen showing the
-correct order id/status/items/total → `gshop:cartId` cleared from
-`localStorage` → "Continue Shopping" back to Catalog. No console errors
-at any step. This seeded row is local-k8s test data only, not part of
-the official seed script — it'll persist until `inventory-postgres`'s
-volume is reset.
-
-See `conductor/tracks.md`'s backlog item on local-k8s dev wiring — the CORS
-gap is worth fixing upstream in these services (and payment-service, if it
-ever gets a frontend-facing endpoint) rather than adding more proxy entries
-per-service indefinitely — noted in `gluon`'s `backlogs/catalog-service.md`
-and `backlogs/cart-service.md`.
+"quantityAvailable":5}`) so a real reservation could succeed. End-to-end
+in a real browser: Catalog → Add to cart → View Cart → Checkout → real
+`POST /orders` with `status: "pending"` (reservation succeeded) →
+Checkout screen showing the correct order id/status/items/total →
+`gshop:cartId` cleared from `localStorage` → "Continue Shopping" back to
+Catalog. No console errors at any step. This seeded row is local-k8s test
+data only, not part of the official seed script — it'll persist until
+`inventory-postgres`'s volume is reset.
 
 ## Catalog-service's list cache appears to miss invalidation on write (found 2026-10-10)
 While seeding the boutique-redesign track's 90 new watches (catalog now

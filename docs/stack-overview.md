@@ -53,9 +53,8 @@ Vite does two jobs:
   files into a handful of optimized files in `dist/`, ready to be hosted
   for real.
 
-`vite.config.ts` is Vite's configuration — in this project it also
-configures a **dev-only proxy** (see "Talking to real backend services"
-below) and wires up the test runner.
+`vite.config.ts` is Vite's configuration — in this project it wires up the
+test runner and the React plugin.
 
 ### npm / `package.json` — dependencies and scripts
 `package.json` lists every library the project depends on
@@ -123,34 +122,28 @@ running it — separate from TypeScript's type checking.
 
 ## Talking to real backend services (local dev)
 
-The backend services (catalog/cart/order) run in a local Kubernetes
-cluster (via OrbStack) and aren't reachable from your laptop's browser by
-default. Two things have to happen:
-
-1. **`kubectl port-forward`** — makes one backend service reachable at a
-   `localhost` port, e.g.:
-   ```bash
-   kubectl port-forward -n gluon-local svc/catalog-service 8081:8080
-   ```
-2. **A Vite dev-only proxy** — the backend services don't send the CORS
-   headers browsers require for cross-origin requests, so gshop's own
-   `fetch()` calls would otherwise be silently blocked by the browser. To
-   work around this in dev, `vite.config.ts` proxies requests
-   (`/api/catalog/...` → `http://localhost:8081/...`) so the browser only
-   ever talks to its own origin, and Vite forwards the request
-   server-to-server (not subject to browser CORS). `.env` (gitignored,
-   not committed) points each service's client at its proxy path, e.g.
-   `VITE_CATALOG_SERVICE_URL=/api/catalog`.
-
-See `conductor/tech-stack.md`'s "Local dev against a running backend"
-section for the full up-to-date picture, including known gotchas.
+The backend services (catalog/cart/order/inventory) run in a local
+Kubernetes cluster via OrbStack. `.env` (gitignored, not committed) points
+each service's client straight at that service's address:
+```
+VITE_CATALOG_SERVICE_URL=http://catalog-service.gluon-local.svc.cluster.local:8080
+```
+No `kubectl port-forward` and no Vite proxy are needed — OrbStack bridges
+the cluster's own DNS and network straight to your laptop (confirmed: that
+hostname resolves and the connection works from a plain `curl`, with no
+forwarding set up), and each service now sends the
+`Access-Control-Allow-Origin` header the browser requires for a
+cross-origin `fetch()`. This used to need both a port-forward and a Vite
+proxy as a CORS workaround — see `conductor/tech-stack.md`'s "Local dev
+against a running backend" section for that history and the full
+up-to-date picture.
 
 ## A couple of terms you'll see mentioned around this project
 
 - **CORS** (Cross-Origin Resource Sharing): a browser security rule that
   blocks a website from calling a *different* website's API unless that
-  API explicitly allows it. The proxy above is how gshop works around
-  backend services that don't allow it yet.
+  API explicitly allows it. Each backend service now sends the header that
+  allows it, so gshop calls them directly.
 - **SKU**: short for "stock keeping unit" — the unique code identifying a
   specific product (e.g. `watch-rolex-submariner`).
 
