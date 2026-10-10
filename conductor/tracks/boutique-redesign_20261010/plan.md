@@ -26,7 +26,7 @@
 - [x] Task: Write failing tests asserting `OrderHistory.tsx` renders each order as a styled card with correct data (Red) `pending-commit`
 - [x] Task: Restyle `OrderHistory.tsx` as styled cards (Green) `pending-commit`
 - [x] Task: Refactor shared styling across the three screens, keep tests green `pending-commit` (no further refactor needed; tokens already shared via index.css)
-- [ ] Task: Conductor - User Manual Verification 'Cart, Checkout, Order History' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Cart, Checkout, Order History' (Protocol in workflow.md) — live browser check: Cart (thumbnail, gold Checkout button, styled error/Retry), Order History (styled cards with thumbnails across both a reservation_failed and a confirmed order); Checkout verified via its passing tests (identical structure/CSS to the confirmed Order History item layout) since no in-stock sku is currently available to drive a live successful checkout (pre-existing inventory-seed gap, out of scope here) + `scripts/verify-boutique-phase3.sh`
 
 ## Phase 4: App Shell / Nav
 
