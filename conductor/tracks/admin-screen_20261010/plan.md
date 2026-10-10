@@ -1,11 +1,11 @@
 # Plan: Admin Screen (Order History Clear + Inventory Management)
 
 ## Phase 1: inventory-service — list/filter endpoint (separate repo, separate commit)
-- [ ] Task: Write failing tests in `InventoryRoutesSuite.scala` and an in-memory-store test for `list`: no-filter returns all rows, `sku` filter returns just that row (or empty), logging assertions matching existing patterns (Red)
-- [ ] Task: Add `InventoryStore.list(skuFilter: Option[String])` to the trait + both `inMemory` and `postgres` implementations (Green)
-- [ ] Task: Add `GET /inventorys` (optional `sku` query param) to `InventoryRoutes.scala`, wire into `routes()` (Green)
-- [ ] Task: Refactor, keep tests green
-- [ ] Task: Run this repo's full test suite; commit directly (prompt-off is active there too)
+- [x] Task: Write failing tests in `InventoryRoutesSuite.scala` and an in-memory-store test for `list`: no-filter returns all rows, `sku` filter returns just that row (or empty), logging assertions matching existing patterns (Red) `40d91ab`
+- [x] Task: Add `InventoryStore.list(skuFilter: Option[String])` to the trait + both `inMemory` and `postgres` implementations (Green) `40d91ab`
+- [x] Task: Add `GET /inventorys` (optional `sku` query param) to `InventoryRoutes.scala`, wire into `routes()` (Green) `40d91ab`
+- [x] Task: Refactor, keep tests green `40d91ab` (no refactor needed; also wired into Main.scala's explicit endpoint list and two pre-existing stub InventoryStore impls in HealthRoutesSuite.scala)
+- [x] Task: Run this repo's full test suite; commit directly (prompt-off is active there too) `40d91ab`, `be581b9` (85/85 tests, including testcontainers-backed Postgres tests) — live redeploy to local k8s pending (user redeploying via `bin/k8s-local-up inventory-service`)
 
 ## Phase 2: gshop service clients
 - [ ] Task: Write failing tests for `inventoryClient.list()` and `orderClient.remove(id)` (Red)
