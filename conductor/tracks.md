@@ -6,9 +6,6 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [x] **Track: Classy Watch Boutique Redesign + 100-Item Catalog**
-  *Link: [./tracks/boutique-redesign_20261010/](./tracks/boutique-redesign_20261010/)*
-
 ---
 
 ## Backlog
