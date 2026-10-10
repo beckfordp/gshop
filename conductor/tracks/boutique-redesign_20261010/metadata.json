@@ -1,0 +1,8 @@
+{
+  "track_id": "boutique-redesign_20261010",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-10-10T00:00:00Z",
+  "updated_at": "2026-10-10T00:00:00Z",
+  "description": "Redesign gshop into a classy dark-luxury watch-boutique shop front, with CSS-generated placeholder art (no real photos) across all screens, and extend the catalog to 100 real luxury watches (90 new, original descriptions, real brand/model names matching the existing 10's style) by updating catalog-service's scripts/seed-watches.sh"
+}
