@@ -1,0 +1,1 @@
+Phase 2: Catalog restyled as a card grid with WatchArt dials; name/sku/price kept as separate text nodes so prior assertions on raw text still pass. Loading/error/Load-more states restyled via token-based CSS. TDD red->green->no-refactor-needed.
