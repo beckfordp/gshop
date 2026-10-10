@@ -6,7 +6,7 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [~] **Track: Real Unsplash Photos for WatchArt**
+- [x] **Track: Real Unsplash Photos for WatchArt**
   *Link: [./tracks/watchart-photos_20261010/](./tracks/watchart-photos_20261010/)*
 
 ---
