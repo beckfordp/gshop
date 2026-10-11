@@ -152,6 +152,24 @@ Catalog. No console errors at any step. This seeded row is local-k8s test
 data only, not part of the official seed script — it'll persist until
 `inventory-postgres`'s volume is reset.
 
+## Catalog "Load more" regression from the CORS rollout (found and fixed 2026-10-11)
+The direct cluster-DNS CORS fix above (resolved 2026-10-10) introduced a
+side effect: catalog-service's CORS middleware allowed the cross-origin
+request but didn't expose the custom `X-Total-Count` header, so browsers
+hid it from JS by default (only the small CORS-safelisted header set is
+exposed without an explicit `Access-Control-Expose-Headers`) — `curl` saw
+`X-Total-Count` fine, a real browser's `fetch()` reported it `null` and
+omitted it from `response.headers.keys()` entirely.
+`catalogClient.list()`'s fallback (`items.length` when the header is
+missing) made `total === items.length` on every page, so the Catalog
+screen's "Load more" button silently stopped appearing even though 100
+items existed. **Fixed entirely in `catalog-service`'s own conductor**, no
+gshop code change — see its archived track
+[`expose-x-total-count_20261011`](https://github.com/beckfordp/catalog-service/tree/main/conductor/archive/expose-x-total-count_20261011)
+(`Cors.scala` now calls `.withExposeHeadersIn(Set(ci"X-Total-Count"))`).
+Live-verified after redeploy: real browser `fetch()` reads `X-Total-Count`
+correctly, "Load more" pages through all 100 real items again.
+
 ## Catalog-service's list cache appears to miss invalidation on write (found 2026-10-10)
 While seeding the boutique-redesign track's 90 new watches (catalog now
 100 items, see `product.md`), a `GET /catalogs?limit=100&offset=0` request
