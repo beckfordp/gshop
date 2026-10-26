@@ -19,11 +19,11 @@ None of its own — gshop is a pure client. It consumes five backend services'
 REST APIs (catalog, cart, order, inventory, payment), whose contracts live in
 gluon's `system-design.md`, not duplicated here. `src/services/*Client.ts` are
 the thin per-service client modules — `catalogClient.ts` (US-1),
-`cartClient.ts` (US-2), and `orderClient.ts` (`create()` from US-3,
-`list()` from US-8) now have real methods; `inventoryClient.ts` and
-`paymentClient.ts` are still base URL + health check only stubs — see
-Status below and the Open question below (inventory confirmed unneeded
-during US-3; payment still open).
+`cartClient.ts` (US-2), `orderClient.ts` (`create()` from US-3,
+`list()` from US-8, extended for the checkout form), `inventoryClient.ts`
+(Admin stock table), and `paymentClient.ts` (`createMethod()` for
+`POST /payments/methods`, US-13). gshop never calls
+`POST /payments/authorize` — order-service does, server-side.
 
 ## User stories in scope
 From `../../../docs/user-stories.md` (UI realization, not new stories):
@@ -31,23 +31,22 @@ From `../../../docs/user-stories.md` (UI realization, not new stories):
 - **US-2** — Add to cart
 - **US-3** — Checkout
 - **US-8** — Order history / status
+- **US-11/US-12** — shipping + billing address in the checkout form
+- **US-13** — payment method (card) collection
+- **US-14** — authorised/declined result of the synchronous checkout call
+
+US-11–US-14 are implemented against the in-browser mock until
+payment-service/order-service land their contracts (Checkout Journey 1).
 
 Out of scope: **US-7** (order status notifications) has no UI surface — it's
 email-only, nothing for this app to call.
 
-## Open question (partially resolved during US-3)
-Per `system-design.md`'s sync/async boundaries, `inventoryClient.ts` and
-`paymentClient.ts` may be unneeded — both look server-to-server/event-driven
-only, no documented frontend-facing endpoint.
-- **`inventoryClient.ts`: confirmed unneeded.** US-3's checkout flow
-  verified this directly — order-service itself calls inventory-service
-  server-to-server (synchronous reservation inside `POST /orders`); gshop
-  never calls inventory-service. The stub is still present but unused;
-  dropping it is a small separate cleanup, not done as part of US-3.
-- **`paymentClient.ts`: still open.** No payment-collection story has been
-  built (US-3 explicitly left it out of scope — `payment_failed` is an
-  async order status, not something gshop triggers or waits for). Revisit
-  during US-8 or whenever a payment-collection story is scoped.
+## Client scope (resolved 2026-10-26)
+`inventoryClient.ts` is used by the Admin screen only (stock list/adjust) —
+checkout reservation remains server-to-server inside `POST /orders`.
+`paymentClient.ts` now has `createMethod()` for the gshop-facing
+`POST /payments/methods` (US-13); authorization stays server-side in
+order-service. The earlier "paymentClient still open" question is closed.
 
 ## Sequencing
 Per `../../../PLAN.md`'s Phase 9 — depends on catalog-service, cart-service,
@@ -68,15 +67,19 @@ All four in-scope user stories are live: US-1 (browse catalog), US-2
   lookup-by-sku endpoint exists yet — see `backlogs/catalog-service.md` in
   `gluon`). Supports "+1" and "Remove" per line; no quantity decrement or
   set-to-exact-quantity (cart-service's HTTP API doesn't expose that). A
-  "Checkout" button places a real order (`orderClient.create()`), waiting
-  for order-service's synchronous stock-reservation result: on success it
-  navigates to the Checkout screen and clears the local cart id; on
-  `reservation_failed` (or a request error) it shows an inline error +
-  Retry and stays put — checkout never silently "succeeds" over a real
-  stock problem.
-- `src/screens/Checkout/Checkout.tsx` is a pure confirmation display (order
-  id, status, line items, total) for the order just placed — passed in
-  from `App.tsx`, not re-fetched. "Continue Shopping" returns to Catalog.
+  "Checkout" button now hands the priced lines to the Checkout form; Cart
+  no longer places the order itself.
+- `src/screens/Checkout/Checkout.tsx` is the single-page form: shipping
+  address, billing address with a defaulted "same as shipping" checkbox,
+  card number/expiry, and an order summary. Submit creates a
+  `PaymentMethod` then `POST /orders`; `authorized` clears the cart and
+  moves to confirmation, `payment_failed` shows the decline reason inline
+  (card editable, retry), `reservation_failed` names the failed line with
+  a Remove action, then retry. A dev-only prototype scenario control is
+  shown when `VITE_CHECKOUT_MOCK=true`.
+- `src/screens/OrderConfirmation/OrderConfirmation.tsx` is the post-order
+  display (order id, status, "Payment authorised", shipping address, line
+  items, total). "Continue Shopping" returns to Catalog.
 - `src/screens/OrderHistory/OrderHistory.tsx` lists all past orders for
   this customer (`orderClient.list()`), newest first (server-sorted, no
   client re-sort), each with id/status/items/total/date. Empty state when
@@ -92,11 +95,11 @@ All four in-scope user stories are live: US-1 (browse catalog), US-2
   clears the cart id, so each checkout got a different "customer". US-8
   fixed this by introducing the separate identity and updating Cart's
   checkout to send it instead.
-- `App.tsx` toggles between four screens via local `useState` — no router
-  yet (deliberately deferred, see `tech-stack.md`). Nav shows "the other
-  reachable screens" per current screen (Catalog/Cart/History each show
-  the other two; Checkout has its own "Continue Shopping" CTA instead of
-  nav buttons).
+- `App.tsx` toggles between six views via a local `AppView` union — no
+  router yet (deliberately deferred, see `tech-stack.md`): Catalog, Cart,
+  Checkout, OrderConfirmation, Order History, Admin. Nav shows "the other
+  reachable screens" per current screen; Checkout and OrderConfirmation
+  hide both nav and the Admin link, using their own Back/Continue CTAs.
 - **Visual design (as of the boutique-redesign track):** gshop is styled as
   a dark-luxury watch-boutique storefront — explicitly a demonstration
   skin only, never intended to go live as a real/sellable product. All

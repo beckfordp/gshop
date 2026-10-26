@@ -11,3 +11,8 @@ export const CART_SERVICE_URL = import.meta.env.VITE_CART_SERVICE_URL;
 export const ORDER_SERVICE_URL = import.meta.env.VITE_ORDER_SERVICE_URL;
 export const INVENTORY_SERVICE_URL = import.meta.env.VITE_INVENTORY_SERVICE_URL;
 export const PAYMENT_SERVICE_URL = import.meta.env.VITE_PAYMENT_SERVICE_URL;
+
+// Prototype flag: when true, Checkout talks to an in-browser mock instead of
+// payment-service/order-service. Set VITE_CHECKOUT_MOCK=true for local UX
+// tryouts; unset/false uses the real clients. See README.md.
+export const CHECKOUT_MOCK_ENABLED = import.meta.env.VITE_CHECKOUT_MOCK === 'true';

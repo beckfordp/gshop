@@ -1,13 +1,17 @@
 import { ORDER_SERVICE_URL } from './env';
 import { checkHealth } from './health';
 import { errorMessage } from '../lib/format';
+import type { Address, PaymentFailure, ReservationFailure } from './checkoutTypes';
+
+export type { Address, PaymentFailure, ReservationFailure } from './checkoutTypes';
 
 // Real POST /orders contract:
 // gluon/services/order-service/src/main/scala/orderservice/OrderRoutes.scala
 //
-// Note: a 201 here does not mean the order's stock reservation succeeded —
-// check the returned `status`. 'reservation_failed' is still a successful
-// HTTP response, not an error (see Checkout/Cart screens' spec.md).
+// Note: a 201 here does not mean checkout fully succeeded — check the
+// returned `status`. 'reservation_failed' and 'payment_failed' are both
+// successful HTTP responses, not errors, carrying ephemeral failure detail
+// (`reservationFailure`, `paymentFailure`) for this response only.
 
 export interface NewOrderItem {
   sku: string;
@@ -20,20 +24,35 @@ export interface OrderItem extends NewOrderItem {
   id: string;
 }
 
-export interface ReservationFailure {
-  sku: string;
-  reason: string;
-}
+export type OrderStatus =
+  | 'pending'
+  | 'reserved'
+  | 'reservation_failed'
+  | 'authorized'
+  | 'payment_failed'
+  | 'dispatched'
+  | 'dispatch_failed'
+  | 'confirmed'
+  | 'cancelled';
 
 export interface Order {
   id: string;
   customerId: string;
   totalCents: number;
-  status: string;
+  status: OrderStatus;
   items: OrderItem[];
   createdAt: string;
   updatedAt: string;
+  shippingAddress: Address | null;
   reservationFailure: ReservationFailure | null;
+  paymentFailure: PaymentFailure | null;
+}
+
+export interface CreateOrderInput {
+  customerId: string;
+  items: NewOrderItem[];
+  shippingAddress: Address;
+  paymentMethodId: string;
 }
 
 export class OrderClientError extends Error {
@@ -46,13 +65,10 @@ export class OrderClientError extends Error {
   }
 }
 
-async function create({
-  customerId,
-  items,
-}: {
-  customerId: string;
-  items: NewOrderItem[];
-}): Promise<Order> {
+async function create(
+  input: CreateOrderInput,
+  options: { signal?: AbortSignal } = {},
+): Promise<Order> {
   if (!orderClient.baseUrl) {
     throw new OrderClientError('Order service URL is not configured');
   }
@@ -62,7 +78,8 @@ async function create({
     response = await fetch(`${orderClient.baseUrl}/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ customerId, items }),
+      body: JSON.stringify(input),
+      ...(options.signal ? { signal: options.signal } : {}),
     });
   } catch (error) {
     throw new OrderClientError(`Failed to reach order service: ${errorMessage(error)}`);

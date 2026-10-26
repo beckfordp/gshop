@@ -100,6 +100,7 @@ VITE_CATALOG_SERVICE_URL=http://catalog-service.gluon-local.svc.cluster.local:80
 VITE_CART_SERVICE_URL=http://cart-service.gluon-local.svc.cluster.local:8080
 VITE_ORDER_SERVICE_URL=http://order-service.gluon-local.svc.cluster.local:8080
 VITE_INVENTORY_SERVICE_URL=http://inventory-service.gluon-local.svc.cluster.local:8080
+VITE_PAYMENT_SERVICE_URL=http://payment-service.gluon-local.svc.cluster.local:8080
 ```
 No `kubectl port-forward`, no Vite proxy. OrbStack bridges the cluster's
 own DNS/network straight to the host — that hostname resolves and the
@@ -151,6 +152,28 @@ Checkout screen showing the correct order id/status/items/total →
 Catalog. No console errors at any step. This seeded row is local-k8s test
 data only, not part of the official seed script — it'll persist until
 `inventory-postgres`'s volume is reset.
+
+**Superseded 2026-10-26:** the Cart "Checkout" button now opens the
+single-page Checkout form; it no longer places the order itself. Real
+`POST /orders` now needs `shippingAddress` + `paymentMethodId`, neither of
+which the backend serves yet — use mock mode below until Checkout Journey 1
+lands.
+
+### Checkout prototype mode (added 2026-10-26)
+
+```sh
+VITE_CHECKOUT_MOCK=true npm run dev
+```
+
+`src/services/checkoutGateway.ts` selects the in-browser mock
+(`checkoutMock.ts`) instead of `paymentClient.createMethod()` +
+`orderClient.create()`. Catalog/cart still talk to real services; only
+checkout submission is mocked. Test controls: a dev-only "Prototype
+scenario" select (normal / some items unavailable / card declined / service
+error); cards ending `0002` decline and `0003` report an unavailable item.
+Raw card details stay in component state only — never localStorage or logs
+— and the mock never leaves the browser. A real provider integration must
+use hosted fields/tokenization, not this form's direct PAN handling.
 
 ## Catalog "Load more" regression from the CORS rollout (found and fixed 2026-10-11)
 The direct cluster-DNS CORS fix above (resolved 2026-10-10) introduced a

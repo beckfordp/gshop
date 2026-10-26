@@ -2,7 +2,8 @@
 
 The first frontend app on the Gluon platform. Walks a user through the
 shopping workflow — browse catalog → cart → checkout → order status — by
-calling the real backend services directly, no mock data. Intended to be
+calling the real backend services directly, except the opt-in checkout
+prototype mock described below. Intended to be
 one of potentially many frontend apps the platform hosts simultaneously
 (see `../README.md`).
 
@@ -21,16 +22,35 @@ system-design.md`.
 
 | Service | Client | Status |
 |---|---|---|
-| catalog-service | `src/services/catalogClient.ts` | base URL + health only — browse screen not built yet |
-| cart-service | `src/services/cartClient.ts` | base URL + health only — cart screen not built yet |
-| order-service | `src/services/orderClient.ts` | base URL + health only — checkout/status screens not built yet |
-| inventory-service | `src/services/inventoryClient.ts` | likely called only server-side by order-service, not directly — kept for symmetry |
-| payment-service | `src/services/paymentClient.ts` | fully event-driven today, no documented frontend-facing endpoint — kept for symmetry |
+| catalog-service | `src/services/catalogClient.ts` | live — Catalog screen |
+| cart-service | `src/services/cartClient.ts` | live — Cart screen |
+| order-service | `src/services/orderClient.ts` | live — Checkout (`POST /orders`, extended with address/payment method), Order History |
+| inventory-service | `src/services/inventoryClient.ts` | live — Admin screen stock table |
+| payment-service | `src/services/paymentClient.ts` | live once the backend lands — `POST /payments/methods` (US-13); mocked in prototype mode |
 
 Base URLs are read from Vite env vars (`VITE_<NAME>_SERVICE_URL`, see
 `src/services/env.ts`) — there's no documented local port map yet for
 running every service at once, so set these in a local `.env` (gitignored)
 before running against real backends.
+
+## Checkout prototype (mock mode)
+
+The checkout form can run without the US-11–US-14 backend contracts:
+
+```sh
+VITE_CHECKOUT_MOCK=true npm run dev
+```
+
+A dev-only "Prototype scenario" control then drives the in-browser mock:
+normal, some items unavailable, card declined, service error. Cards ending
+`0002` also decline; `0003` reports an unavailable item. The mock returns
+the target response shape (`authorized` / `payment_failed` /
+`reservation_failed` with ephemeral failure detail) and never stores or
+logs the card number.
+
+Prototype caveat: collecting a raw PAN in browser state is acceptable only
+for the simulator. A real provider integration needs hosted fields or
+provider-side tokenization.
 
 ## Scripts
 
@@ -40,6 +60,9 @@ before running against real backends.
 
 ## Status
 
-Scaffold only — no real UI screens yet. Next: seed `conductor/tracks.md`
-from the UI-side tasks in `../../backlogs/gshop-frontend.md` and start
-building against US-1 (`../../docs/user-stories.md`).
+Catalog, Cart, Checkout (form + confirmation), Order History, and Admin
+screens are live. Checkout collects shipping/billing addresses and card
+details; submission is prototyped against the in-browser mock until
+payment-service/order-service implement `POST /payments/methods`,
+`POST /payments/authorize`, and the extended `POST /orders` contract. See
+`gluon/docs/system-design.md`'s "REST contracts" and Checkout Journey 1.

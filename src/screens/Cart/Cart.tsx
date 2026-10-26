@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { cartClient } from '../../services/cartClient';
 import { catalogClient } from '../../services/catalogClient';
-import { clearCartId, getStoredCartId } from '../../services/cartId';
-import { getOrCreateCustomerId } from '../../services/customerId';
-import { orderClient, type Order } from '../../services/orderClient';
+import { getStoredCartId } from '../../services/cartId';
+import type { NewOrderItem } from '../../services/orderClient';
 import { errorMessage, formatPrice } from '../../lib/format';
 import WatchArt from '../../components/WatchArt/WatchArt';
 import './Cart.css';
@@ -20,17 +19,18 @@ interface CartLine {
   priceCents: number | null;
 }
 
+type PricedCartLine = CartLine & { priceCents: number };
+
 interface CartProps {
-  onCheckoutSuccess: (order: Order) => void;
+  onProceedToCheckout: (items: NewOrderItem[]) => void;
 }
 
-export default function Cart({ onCheckoutSuccess }: CartProps) {
+export default function Cart({ onProceedToCheckout }: CartProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lines, setLines] = useState<CartLine[]>([]);
   const [actionError, setActionError] = useState<Record<string, string>>({});
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
-  const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -91,46 +91,29 @@ export default function Cart({ onCheckoutSuccess }: CartProps) {
     }
   };
 
-  const handleCheckout = async () => {
+  const handleProceedToCheckout = () => {
     const cartId = getStoredCartId();
     if (!cartId) {
       return;
     }
-    if (lines.some((line) => line.priceCents === null)) {
+
+    const pricedLines = lines.filter(
+      (line): line is PricedCartLine => line.priceCents !== null,
+    );
+    if (pricedLines.length !== lines.length) {
       setCheckoutError('Remove unavailable items before checking out.');
       return;
     }
 
-    setCheckingOut(true);
     setCheckoutError(null);
-    try {
-      const order = await orderClient.create({
-        customerId: getOrCreateCustomerId(),
-        // Safe: the `lines.some(...)` guard above already returned early
-        // if any line's priceCents is null, so every line here has a
-        // resolved price — TypeScript just can't see that across the
-        // .some()/.map() boundary.
-        items: lines.map((line) => ({
-          sku: line.sku,
-          productName: line.name,
-          unitPriceCents: line.priceCents as number,
-          quantity: line.quantity,
-        })),
-      });
-      if (order.status === 'reservation_failed') {
-        const failedSku = order.reservationFailure?.sku;
-        const failedLine = lines.find((line) => line.sku === failedSku);
-        const itemLabel = failedLine?.name ?? failedSku ?? 'An item';
-        setCheckoutError(`${itemLabel} is out of stock.`);
-        return;
-      }
-      clearCartId();
-      onCheckoutSuccess(order);
-    } catch (err) {
-      setCheckoutError(errorMessage(err));
-    } finally {
-      setCheckingOut(false);
-    }
+    onProceedToCheckout(
+      pricedLines.map((line) => ({
+        sku: line.sku,
+        productName: line.name,
+        unitPriceCents: line.priceCents,
+        quantity: line.quantity,
+      })),
+    );
   };
 
   if (loading) {
@@ -183,13 +166,12 @@ export default function Cart({ onCheckoutSuccess }: CartProps) {
         ))}
       </ul>
       <p className="cart-total">Total: {formatPrice(total)}</p>
-      <button className="cart-checkout" onClick={handleCheckout} disabled={checkingOut}>
-        {checkingOut ? 'Placing order...' : 'Checkout'}
+      <button className="cart-checkout" onClick={handleProceedToCheckout}>
+        Checkout
       </button>
       {checkoutError && (
         <div className="cart-error">
           <p role="alert">{checkoutError}</p>
-          <button onClick={handleCheckout}>Retry</button>
         </div>
       )}
     </div>

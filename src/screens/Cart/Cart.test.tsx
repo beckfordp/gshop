@@ -3,9 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Cart from './Cart';
 import { cartClient, type Cart as CartData } from '../../services/cartClient';
 import { catalogClient, type CatalogItem } from '../../services/catalogClient';
-import { getStoredCartId, clearCartId } from '../../services/cartId';
-import { getOrCreateCustomerId } from '../../services/customerId';
-import { orderClient, type Order } from '../../services/orderClient';
+import { getStoredCartId } from '../../services/cartId';
 
 vi.mock('../../services/cartClient', () => ({
   cartClient: { get: vi.fn(), addItem: vi.fn(), removeItem: vi.fn() },
@@ -17,15 +15,6 @@ vi.mock('../../services/catalogClient', () => ({
 
 vi.mock('../../services/cartId', () => ({
   getStoredCartId: vi.fn(),
-  clearCartId: vi.fn(),
-}));
-
-vi.mock('../../services/customerId', () => ({
-  getOrCreateCustomerId: vi.fn(),
-}));
-
-vi.mock('../../services/orderClient', () => ({
-  orderClient: { create: vi.fn() },
 }));
 
 const get = vi.mocked(cartClient.get);
@@ -33,23 +22,6 @@ const addItem = vi.mocked(cartClient.addItem);
 const removeItem = vi.mocked(cartClient.removeItem);
 const list = vi.mocked(catalogClient.list);
 const getStoredCartIdMock = vi.mocked(getStoredCartId);
-const clearCartIdMock = vi.mocked(clearCartId);
-const getOrCreateCustomerIdMock = vi.mocked(getOrCreateCustomerId);
-const createOrder = vi.mocked(orderClient.create);
-
-function makeOrder(overrides: Partial<Order> = {}): Order {
-  return {
-    id: 'order-1',
-    customerId: 'cart-1',
-    totalCents: 2000,
-    status: 'pending',
-    items: [],
-    createdAt: '2026-01-01T00:00:00Z',
-    updatedAt: '2026-01-01T00:00:00Z',
-    reservationFailure: null,
-    ...overrides,
-  };
-}
 
 function makeCart(overrides: Partial<CartData> = {}): CartData {
   return {
@@ -75,10 +47,10 @@ function makeCatalogItem(overrides: Partial<CatalogItem> = {}): CatalogItem {
 }
 
 describe('Cart', () => {
-  const onCheckoutSuccess = vi.fn();
+  const onProceedToCheckout = vi.fn();
 
   function renderCart() {
-    return render(<Cart onCheckoutSuccess={onCheckoutSuccess} />);
+    return render(<Cart onProceedToCheckout={onProceedToCheckout} />);
   }
 
   beforeEach(() => {
@@ -87,11 +59,7 @@ describe('Cart', () => {
     removeItem.mockReset();
     list.mockReset();
     getStoredCartIdMock.mockReset();
-    clearCartIdMock.mockReset();
-    getOrCreateCustomerIdMock.mockReset();
-    getOrCreateCustomerIdMock.mockReturnValue('customer-1');
-    createOrder.mockReset();
-    onCheckoutSuccess.mockReset();
+    onProceedToCheckout.mockReset();
   });
 
   it('shows an empty-cart message when no cart id is stored, with no API calls', async () => {
@@ -243,100 +211,24 @@ describe('Cart', () => {
     expect(
       await screen.findByText('Remove unavailable items before checking out.'),
     ).toBeInTheDocument();
-    expect(createOrder).not.toHaveBeenCalled();
+    expect(onProceedToCheckout).not.toHaveBeenCalled();
   });
 
-  it('shows a waiting state while checkout is in flight', async () => {
+  it('calls onProceedToCheckout with the priced items and its own cart id', async () => {
     getStoredCartIdMock.mockReturnValue('cart-1');
-    get.mockResolvedValue(makeCart({ items: { 'WID-1': 1 } }));
-    list.mockResolvedValue({
-      items: [makeCatalogItem({ sku: 'WID-1', priceCents: 1000 })],
-      total: 1,
-    });
-    createOrder.mockReturnValue(new Promise(() => {}));
-
-    renderCart();
-
-    await screen.findByText(/Widget/);
-    fireEvent.click(screen.getByRole('button', { name: 'Checkout' }));
-
-    expect(await screen.findByRole('button', { name: 'Placing order...' })).toBeDisabled();
-  });
-
-  it('on success, calls onCheckoutSuccess with the order and clears the cart id', async () => {
-    getStoredCartIdMock.mockReturnValue('cart-1');
-    get.mockResolvedValue(makeCart({ items: { 'WID-1': 1 } }));
+    get.mockResolvedValue(makeCart({ items: { 'WID-1': 2 } }));
     list.mockResolvedValue({
       items: [makeCatalogItem({ sku: 'WID-1', name: 'Widget', priceCents: 1000 })],
       total: 1,
     });
-    const order = makeOrder({ status: 'pending' });
-    createOrder.mockResolvedValue(order);
 
     renderCart();
 
     await screen.findByText(/Widget/);
     fireEvent.click(screen.getByRole('button', { name: 'Checkout' }));
 
-    await waitFor(() => expect(onCheckoutSuccess).toHaveBeenCalledWith(order));
-    expect(createOrder).toHaveBeenCalledWith({
-      customerId: 'customer-1',
-      items: [{ sku: 'WID-1', productName: 'Widget', unitPriceCents: 1000, quantity: 1 }],
-    });
-    expect(clearCartIdMock).toHaveBeenCalledOnce();
-  });
-
-  it('on reservation_failed, shows an inline error, stays on Cart, and Retry resubmits', async () => {
-    getStoredCartIdMock.mockReturnValue('cart-1');
-    get.mockResolvedValue(makeCart({ items: { 'WID-1': 1 } }));
-    list.mockResolvedValue({
-      items: [makeCatalogItem({ sku: 'WID-1', priceCents: 1000 })],
-      total: 1,
-    });
-    createOrder
-      .mockResolvedValueOnce(
-        makeOrder({
-          status: 'reservation_failed',
-          reservationFailure: { sku: 'WID-1', reason: "insufficient stock for sku 'WID-1'" },
-        }),
-      )
-      .mockResolvedValueOnce(makeOrder({ status: 'pending' }));
-
-    renderCart();
-
-    await screen.findByText(/Widget/);
-    fireEvent.click(screen.getByRole('button', { name: 'Checkout' }));
-
-    await screen.findByText('Widget is out of stock.');
-    expect(onCheckoutSuccess).not.toHaveBeenCalled();
-    expect(clearCartIdMock).not.toHaveBeenCalled();
-    expect(screen.getByText(/qty 1/)).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
-
-    await waitFor(() => expect(onCheckoutSuccess).toHaveBeenCalled());
-    expect(createOrder).toHaveBeenCalledTimes(2);
-  });
-
-  it('on a request error, shows an inline error and working Retry', async () => {
-    getStoredCartIdMock.mockReturnValue('cart-1');
-    get.mockResolvedValue(makeCart({ items: { 'WID-1': 1 } }));
-    list.mockResolvedValue({
-      items: [makeCatalogItem({ sku: 'WID-1', priceCents: 1000 })],
-      total: 1,
-    });
-    createOrder
-      .mockRejectedValueOnce(new Error('order service down'))
-      .mockResolvedValueOnce(makeOrder({ status: 'pending' }));
-
-    renderCart();
-
-    await screen.findByText(/Widget/);
-    fireEvent.click(screen.getByRole('button', { name: 'Checkout' }));
-
-    await screen.findByText('order service down');
-    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
-
-    await waitFor(() => expect(onCheckoutSuccess).toHaveBeenCalled());
+    expect(onProceedToCheckout).toHaveBeenCalledWith([
+      { sku: 'WID-1', productName: 'Widget', unitPriceCents: 1000, quantity: 2 },
+    ]);
   });
 });
