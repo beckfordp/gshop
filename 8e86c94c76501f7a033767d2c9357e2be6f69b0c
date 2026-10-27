@@ -1,0 +1,1 @@
+Checkout real-wiring phases 1-4: status-code result model (orderClient/paymentClient/checkoutGateway), multi-line 409 failure UI, mock parity, docs. 159 tests green, 96.88% statements. Live k8s verification (Phase 5) still pending.
