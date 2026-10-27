@@ -1,5 +1,6 @@
 import { ORDER_SERVICE_URL } from './env';
 import { checkHealth } from './health';
+import { serverErrorMessage } from './httpError';
 import { errorMessage } from '../lib/format';
 import type { Address, ReservationFailure } from './checkoutTypes';
 
@@ -81,15 +82,6 @@ function messageFor(status: number): string {
   return `Order request failed with status ${status}`;
 }
 
-async function parseError(response: Response): Promise<string> {
-  try {
-    const body = (await response.json()) as { error?: string };
-    return body.error ?? messageFor(response.status);
-  } catch {
-    return messageFor(response.status);
-  }
-}
-
 async function create(
   input: CreateOrderInput,
   options: { signal?: AbortSignal } = {},
@@ -111,7 +103,12 @@ async function create(
   }
 
   if (response.status === 201) {
-    return { kind: 'created', order: (await response.json()) as Order };
+    const order = (await response.json()) as Order;
+    if (order.status !== 'authorized') {
+      // ADR 0018: POST /orders only ever persists an authorized order.
+      throw new OrderClientError(`Unexpected order status: ${order.status}`, 201);
+    }
+    return { kind: 'created', order };
   }
 
   if (response.status === 402) {
@@ -127,7 +124,8 @@ async function create(
     return { kind: 'stock_unavailable', failures: body.reservationFailures ?? [] };
   }
 
-  throw new OrderClientError(await parseError(response), response.status);
+  const message = await serverErrorMessage(response, messageFor(response.status));
+  throw new OrderClientError(message, response.status);
 }
 
 async function remove(id: string): Promise<void> {

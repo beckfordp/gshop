@@ -68,6 +68,20 @@ describe('orderClient.create', () => {
     expect(result).toEqual({ kind: 'created', order: orderBody });
   });
 
+  it('throws if a 201 carries a status other than authorized', async () => {
+    orderClient.baseUrl = baseUrl;
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ ...orderBody, status: 'pending' }), {
+        status: 201,
+      }),
+    );
+
+    const error = await captureError(orderClient.create(createInput));
+
+    expect(error.status).toBe(201);
+    expect(error.message).toBe('Unexpected order status: pending');
+  });
+
   it('maps 402 to a decline with the response reason', async () => {
     orderClient.baseUrl = baseUrl;
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(

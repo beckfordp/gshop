@@ -13,10 +13,13 @@ PAYMENT_URL="${PAYMENT_URL:-http://localhost:18081}"
 INVENTORY_URL="${INVENTORY_URL:-http://localhost:18082}"
 
 PIDS=()
+TMP_DIR="$(mktemp -d)"
 cleanup() {
   for pid in "${PIDS[@]}"; do
     kill "$pid" 2>/dev/null || true
+    wait "$pid" 2>/dev/null || true
   done
+  rm -rf "$TMP_DIR"
 }
 trap cleanup EXIT
 
@@ -83,15 +86,15 @@ history_count() {
 }
 
 echo "-- 201: approved card authorizes and persists an order --"
-STATUS="$(create_method "4242424242424242" /tmp/gshop-pm-approve.json)"
-[ "$STATUS" = "201" ] || { echo "FAIL: payment method returned $STATUS" >&2; cat /tmp/gshop-pm-approve.json >&2; exit 1; }
-APPROVE_PM="$(json_field '["id"]' < /tmp/gshop-pm-approve.json)"
+STATUS="$(create_method "4242424242424242" "$TMP_DIR/gshop-pm-approve.json")"
+[ "$STATUS" = "201" ] || { echo "FAIL: payment method returned $STATUS" >&2; cat "$TMP_DIR/gshop-pm-approve.json" >&2; exit 1; }
+APPROVE_PM="$(json_field '["id"]' < "$TMP_DIR/gshop-pm-approve.json")"
 ORDER_BODY="{\"customerId\":\"$CUSTOMER_ID\",\"items\":[{\"sku\":\"$SKU\",\"productName\":\"Verification Widget\",\"unitPriceCents\":100,\"quantity\":1}],\"shippingAddress\":$ADDRESS,\"paymentMethodId\":\"$APPROVE_PM\"}"
-STATUS="$(post_order "$ORDER_BODY" /tmp/gshop-order-ok.json)"
-[ "$STATUS" = "201" ] || { echo "FAIL: expected 201, got $STATUS" >&2; cat /tmp/gshop-order-ok.json >&2; exit 1; }
-ORDER_STATUS="$(json_field '["status"]' < /tmp/gshop-order-ok.json)"
+STATUS="$(post_order "$ORDER_BODY" "$TMP_DIR/gshop-order-ok.json")"
+[ "$STATUS" = "201" ] || { echo "FAIL: expected 201, got $STATUS" >&2; cat "$TMP_DIR/gshop-order-ok.json" >&2; exit 1; }
+ORDER_STATUS="$(json_field '["status"]' < "$TMP_DIR/gshop-order-ok.json")"
 [ "$ORDER_STATUS" = "authorized" ] || { echo "FAIL: expected authorized, got $ORDER_STATUS" >&2; exit 1; }
-ORDER_ID="$(json_field '["id"]' < /tmp/gshop-order-ok.json)"
+ORDER_ID="$(json_field '["id"]' < "$TMP_DIR/gshop-order-ok.json")"
 echo "   order $ORDER_ID authorized"
 
 echo "-- cleanup: release reservation, delete order --"
@@ -100,30 +103,30 @@ curl -sf -X DELETE "$ORDER_URL/orders/$ORDER_ID" >/dev/null
 [ "$(history_count)" = "0" ] || { echo "FAIL: history not empty after cleanup" >&2; exit 1; }
 
 echo "-- 402: declining card returns the decline reason --"
-STATUS="$(create_method "4000000000000002" /tmp/gshop-pm-decline.json)"
+STATUS="$(create_method "4000000000000002" "$TMP_DIR/gshop-pm-decline.json")"
 [ "$STATUS" = "201" ] || { echo "FAIL: payment method returned $STATUS" >&2; exit 1; }
-DECLINE_PM="$(json_field '["id"]' < /tmp/gshop-pm-decline.json)"
+DECLINE_PM="$(json_field '["id"]' < "$TMP_DIR/gshop-pm-decline.json")"
 DECLINE_BODY="{\"customerId\":\"$CUSTOMER_ID\",\"items\":[{\"sku\":\"$SKU\",\"productName\":\"Verification Widget\",\"unitPriceCents\":100,\"quantity\":1}],\"shippingAddress\":$ADDRESS,\"paymentMethodId\":\"$DECLINE_PM\"}"
-STATUS="$(post_order "$DECLINE_BODY" /tmp/gshop-order-decline.json)"
-[ "$STATUS" = "402" ] || { echo "FAIL: expected 402, got $STATUS" >&2; cat /tmp/gshop-order-decline.json >&2; exit 1; }
-REASON="$(json_field '["paymentFailure"]["reason"]' < /tmp/gshop-order-decline.json)"
+STATUS="$(post_order "$DECLINE_BODY" "$TMP_DIR/gshop-order-decline.json")"
+[ "$STATUS" = "402" ] || { echo "FAIL: expected 402, got $STATUS" >&2; cat "$TMP_DIR/gshop-order-decline.json" >&2; exit 1; }
+REASON="$(json_field '["paymentFailure"]["reason"]' < "$TMP_DIR/gshop-order-decline.json")"
 [ "$REASON" = "insufficient_funds" ] || { echo "FAIL: expected insufficient_funds, got $REASON" >&2; exit 1; }
 [ "$(history_count)" = "0" ] || { echo "FAIL: declined checkout left an order row" >&2; exit 1; }
 echo "   decline reason: $REASON"
 
 echo "-- 409: every failed line is reported in one response --"
 CONFLICT_BODY="{\"customerId\":\"$CUSTOMER_ID\",\"items\":[{\"sku\":\"$SKU\",\"productName\":\"Verification Widget\",\"unitPriceCents\":100,\"quantity\":1000000},{\"sku\":\"does-not-exist\",\"productName\":\"Ghost\",\"unitPriceCents\":100,\"quantity\":1}],\"shippingAddress\":$ADDRESS,\"paymentMethodId\":\"$APPROVE_PM\"}"
-STATUS="$(post_order "$CONFLICT_BODY" /tmp/gshop-order-conflict.json)"
-[ "$STATUS" = "409" ] || { echo "FAIL: expected 409, got $STATUS" >&2; cat /tmp/gshop-order-conflict.json >&2; exit 1; }
-FAILED_LINES="$(json_field '["reservationFailures"].__len__()' < /tmp/gshop-order-conflict.json)"
-[ "$FAILED_LINES" = "2" ] || { echo "FAIL: expected 2 failed lines, got $FAILED_LINES" >&2; cat /tmp/gshop-order-conflict.json >&2; exit 1; }
+STATUS="$(post_order "$CONFLICT_BODY" "$TMP_DIR/gshop-order-conflict.json")"
+[ "$STATUS" = "409" ] || { echo "FAIL: expected 409, got $STATUS" >&2; cat "$TMP_DIR/gshop-order-conflict.json" >&2; exit 1; }
+FAILED_LINES="$(json_field '["reservationFailures"].__len__()' < "$TMP_DIR/gshop-order-conflict.json")"
+[ "$FAILED_LINES" = "2" ] || { echo "FAIL: expected 2 failed lines, got $FAILED_LINES" >&2; cat "$TMP_DIR/gshop-order-conflict.json" >&2; exit 1; }
 [ "$(history_count)" = "0" ] || { echo "FAIL: rejected checkout left an order row" >&2; exit 1; }
 echo "   failed lines: $FAILED_LINES"
 
 echo "-- 400: an invalid paymentMethodId is rejected before reserving --"
 BAD_BODY="{\"customerId\":\"$CUSTOMER_ID\",\"items\":[{\"sku\":\"$SKU\",\"productName\":\"Verification Widget\",\"unitPriceCents\":100,\"quantity\":1}],\"shippingAddress\":$ADDRESS,\"paymentMethodId\":\"not-a-uuid\"}"
-STATUS="$(post_order "$BAD_BODY" /tmp/gshop-order-bad.json)"
-[ "$STATUS" = "400" ] || { echo "FAIL: expected 400, got $STATUS" >&2; cat /tmp/gshop-order-bad.json >&2; exit 1; }
+STATUS="$(post_order "$BAD_BODY" "$TMP_DIR/gshop-order-bad.json")"
+[ "$STATUS" = "400" ] || { echo "FAIL: expected 400, got $STATUS" >&2; cat "$TMP_DIR/gshop-order-bad.json" >&2; exit 1; }
 [ "$(history_count)" = "0" ] || { echo "FAIL: invalid checkout left an order row" >&2; exit 1; }
 
 echo "All live checkout checks passed."

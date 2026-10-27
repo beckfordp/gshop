@@ -1,5 +1,6 @@
 import { PAYMENT_SERVICE_URL } from './env';
 import { checkHealth } from './health';
+import { serverErrorMessage } from './httpError';
 import { errorMessage } from '../lib/format';
 import type { Address, PaymentMethod } from './checkoutTypes';
 
@@ -51,22 +52,14 @@ async function createMethod(
   }
 
   if (!response.ok) {
+    const fallback = `Payment method request failed with status ${response.status}`;
     throw new PaymentClientError(
-      await errorBody(response, `Payment method request failed with status ${response.status}`),
+      await serverErrorMessage(response, fallback),
       response.status,
     );
   }
 
   return (await response.json()) as PaymentMethod;
-}
-
-async function errorBody(response: Response, fallback: string): Promise<string> {
-  try {
-    const body = (await response.json()) as { error?: string };
-    return body.error ?? fallback;
-  } catch {
-    return fallback;
-  }
 }
 
 export const paymentClient: {
