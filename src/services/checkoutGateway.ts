@@ -1,13 +1,22 @@
 import { CHECKOUT_MOCK_ENABLED } from './env';
 import { paymentClient } from './paymentClient';
 import { orderClient, type NewOrderItem, type Order } from './orderClient';
-import type { Address, CardDetails } from './checkoutTypes';
+import {
+  type Address,
+  type CardDetails,
+  type ReservationFailure,
+} from './checkoutTypes';
 import { createMockCheckoutGateway, type MockCheckoutOptions } from './checkoutMock';
+
+export { CheckoutGatewayError } from './checkoutTypes';
 
 // One submission = create a PaymentMethod, then place the order. order-service
 // does bulk reserve + authorize synchronously; the response status decides
 // what the Checkout screen shows. Real contract:
 // gluon/docs/system-design.md's "REST contracts" (US-11..US-14).
+//
+// ADR 0018: a failed checkout (decline or insufficient stock) persists no
+// order, so only the success variant carries one.
 
 export interface CheckoutRequest {
   customerId: string;
@@ -19,8 +28,8 @@ export interface CheckoutRequest {
 
 export type CheckoutResult =
   | { kind: 'authorized'; order: Order }
-  | { kind: 'payment_failed'; order: Order; reason: string }
-  | { kind: 'reservation_failed'; order: Order };
+  | { kind: 'declined'; reason: string }
+  | { kind: 'stock_unavailable'; failures: ReservationFailure[] };
 
 export interface CheckoutGateway {
   submit(
@@ -32,13 +41,6 @@ export interface CheckoutGateway {
 export interface CheckoutGatewayDeps {
   paymentClient: Pick<typeof paymentClient, 'createMethod'>;
   orderClient: Pick<typeof orderClient, 'create'>;
-}
-
-export class CheckoutGatewayError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'CheckoutGatewayError';
-  }
 }
 
 export function createHttpCheckoutGateway(
@@ -56,7 +58,7 @@ export function createHttpCheckoutGateway(
         options,
       );
 
-      const order = await deps.orderClient.create(
+      const result = await deps.orderClient.create(
         {
           customerId: request.customerId,
           items: request.items,
@@ -66,19 +68,13 @@ export function createHttpCheckoutGateway(
         options,
       );
 
-      switch (order.status) {
-        case 'authorized':
-          return { kind: 'authorized', order };
-        case 'payment_failed':
-          return {
-            kind: 'payment_failed',
-            order,
-            reason: order.paymentFailure?.reason ?? 'declined',
-          };
-        case 'reservation_failed':
-          return { kind: 'reservation_failed', order };
-        default:
-          throw new CheckoutGatewayError(`Unexpected order status: ${order.status}`);
+      switch (result.kind) {
+        case 'created':
+          return { kind: 'authorized', order: result.order };
+        case 'declined':
+          return { kind: 'declined', reason: result.reason };
+        case 'stock_unavailable':
+          return { kind: 'stock_unavailable', failures: result.failures };
       }
     },
   };

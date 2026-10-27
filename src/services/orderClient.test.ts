@@ -25,8 +25,6 @@ const orderBody: Order = {
   createdAt: '2026-01-01T00:00:00Z',
   updatedAt: '2026-01-01T00:00:00Z',
   shippingAddress,
-  reservationFailure: null,
-  paymentFailure: null,
 };
 
 const createInput = {
@@ -44,7 +42,17 @@ describe('orderClient.create', () => {
     vi.restoreAllMocks();
   });
 
-  it('POSTs to /orders with the checkout payload and returns the parsed order', async () => {
+  async function captureError(promise: Promise<unknown>): Promise<OrderClientError> {
+    try {
+      await promise;
+      expect.unreachable();
+    } catch (error) {
+      expect(error).toBeInstanceOf(OrderClientError);
+      return error as OrderClientError;
+    }
+  }
+
+  it('POSTs to /orders with the checkout payload and returns the created order', async () => {
     orderClient.baseUrl = baseUrl;
     const fetchMock = vi
       .spyOn(globalThis, 'fetch')
@@ -57,47 +65,101 @@ describe('orderClient.create', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(createInput),
     });
-    expect(result).toEqual(orderBody);
+    expect(result).toEqual({ kind: 'created', order: orderBody });
   });
 
-  it('returns the order even when status is reservation_failed, including the failed line', async () => {
+  it('maps 402 to a decline with the response reason', async () => {
     orderClient.baseUrl = baseUrl;
-    const failedOrder: Order = {
-      ...orderBody,
-      status: 'reservation_failed',
-      reservationFailure: {
-        sku: 'WID-1',
-        reason: "insufficient stock for sku 'WID-1'",
-      },
-    };
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify(failedOrder), { status: 201 }),
+      new Response(
+        JSON.stringify({
+          error: 'Payment declined',
+          paymentFailure: { reason: 'insufficient_funds' },
+        }),
+        { status: 402 },
+      ),
     );
 
     const result = await orderClient.create(createInput);
 
-    expect(result.status).toBe('reservation_failed');
-    expect(result.reservationFailure).toEqual({
-      sku: 'WID-1',
-      reason: "insufficient stock for sku 'WID-1'",
+    expect(result).toEqual({ kind: 'declined', reason: 'insufficient_funds' });
+  });
+
+  it('falls back to a generic decline reason when the body omits one', async () => {
+    orderClient.baseUrl = baseUrl;
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ error: 'Payment declined' }), { status: 402 }),
+    );
+
+    const result = await orderClient.create(createInput);
+
+    expect(result).toEqual({ kind: 'declined', reason: 'declined' });
+  });
+
+  it('maps 409 to every failed reservation line', async () => {
+    orderClient.baseUrl = baseUrl;
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          error: 'Insufficient stock',
+          reservationFailures: [
+            { sku: 'WID-1', reason: 'insufficient_stock' },
+            { sku: 'GAD-1', reason: 'unknown_sku' },
+          ],
+        }),
+        { status: 409 },
+      ),
+    );
+
+    const result = await orderClient.create(createInput);
+
+    expect(result).toEqual({
+      kind: 'stock_unavailable',
+      failures: [
+        { sku: 'WID-1', reason: 'insufficient_stock' },
+        { sku: 'GAD-1', reason: 'unknown_sku' },
+      ],
     });
   });
 
-  it('returns the order when status is payment_failed, including the decline reason', async () => {
+  it('throws OrderClientError with the server error message on 400', async () => {
     orderClient.baseUrl = baseUrl;
-    const declinedOrder: Order = {
-      ...orderBody,
-      status: 'payment_failed',
-      paymentFailure: { reason: 'insufficient_funds' },
-    };
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify(declinedOrder), { status: 201 }),
+      new Response(JSON.stringify({ error: 'Order must have at least one item' }), {
+        status: 400,
+      }),
     );
 
-    const result = await orderClient.create(createInput);
+    const error = await captureError(orderClient.create({ ...createInput, items: [] }));
 
-    expect(result.status).toBe('payment_failed');
-    expect(result.paymentFailure).toEqual({ reason: 'insufficient_funds' });
+    expect(error.status).toBe(400);
+    expect(error.message).toBe('Order must have at least one item');
+  });
+
+  it('throws OrderClientError with the server error message on 503', async () => {
+    orderClient.baseUrl = baseUrl;
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ error: 'Payment service unavailable' }), {
+        status: 503,
+      }),
+    );
+
+    const error = await captureError(orderClient.create(createInput));
+
+    expect(error.status).toBe(503);
+    expect(error.message).toBe('Payment service unavailable');
+  });
+
+  it('falls back to a status-based message when an error body is not JSON', async () => {
+    orderClient.baseUrl = baseUrl;
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response('<html>boom</html>', { status: 500 }),
+    );
+
+    const error = await captureError(orderClient.create(createInput));
+
+    expect(error.status).toBe(500);
+    expect(error.message).toBe('Order request failed with status 500');
   });
 
   it('forwards an AbortSignal when supplied', async () => {
@@ -117,24 +179,13 @@ describe('orderClient.create', () => {
     });
   });
 
-  it('throws OrderClientError on a non-2xx response', async () => {
-    orderClient.baseUrl = baseUrl;
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ error: 'Order must have at least one item' }), {
-        status: 400,
-      }),
-    );
-
-    await expect(
-      orderClient.create({ ...createInput, items: [] }),
-    ).rejects.toThrow(OrderClientError);
-  });
-
   it('throws OrderClientError when the network request fails', async () => {
     orderClient.baseUrl = baseUrl;
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
 
-    await expect(orderClient.create(createInput)).rejects.toThrow(OrderClientError);
+    const error = await captureError(orderClient.create(createInput));
+
+    expect(error.status).toBeUndefined();
   });
 
   it('throws OrderClientError when the base URL is not configured', async () => {

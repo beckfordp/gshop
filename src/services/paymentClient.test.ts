@@ -63,7 +63,7 @@ describe('paymentClient.createMethod', () => {
     });
   });
 
-  it('throws PaymentClientError on a non-2xx response, carrying the HTTP status', async () => {
+  it('throws PaymentClientError with the server error message on a non-2xx response', async () => {
     paymentClient.baseUrl = baseUrl;
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ error: 'Invalid card number' }), { status: 400 }),
@@ -75,6 +75,24 @@ describe('paymentClient.createMethod', () => {
     } catch (error) {
       expect(error).toBeInstanceOf(PaymentClientError);
       expect((error as PaymentClientError).status).toBe(400);
+      expect((error as PaymentClientError).message).toBe('Invalid card number');
+    }
+  });
+
+  it('falls back to a status-based message when the error body is not JSON', async () => {
+    paymentClient.baseUrl = baseUrl;
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response('unavailable', { status: 503 }),
+    );
+
+    try {
+      await paymentClient.createMethod(input);
+      expect.unreachable();
+    } catch (error) {
+      expect(error).toBeInstanceOf(PaymentClientError);
+      expect((error as PaymentClientError).message).toBe(
+        'Payment method request failed with status 503',
+      );
     }
   });
 

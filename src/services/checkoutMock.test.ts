@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   createMockCheckoutGateway,
+  getMockScenario,
   setMockScenario,
   type MockScenario,
 } from './checkoutMock';
+import { CheckoutGatewayError } from './checkoutTypes';
 import type { CheckoutRequest } from './checkoutGateway';
 
 const shippingAddress = {
@@ -45,15 +47,16 @@ describe('createMockCheckoutGateway', () => {
     const result = await gateway.submit(request);
 
     expect(result.kind).toBe('authorized');
+    if (result.kind !== 'authorized') {
+      return;
+    }
     expect(result.order.status).toBe('authorized');
     expect(result.order.totalCents).toBe(2750);
     expect(result.order.shippingAddress).toEqual(shippingAddress);
-    expect(result.order.reservationFailure).toBeNull();
-    expect(result.order.paymentFailure).toBeNull();
     expect(result.order.items).toHaveLength(3);
   });
 
-  it('declines a card ending 0002', async () => {
+  it('declines a card ending 0002 without fabricating an order', async () => {
     const gateway = createMockCheckoutGateway({ delayMs: 0, createId, now });
 
     const result = await gateway.submit({
@@ -61,15 +64,11 @@ describe('createMockCheckoutGateway', () => {
       card: { cardNumber: '4242424242420002', expiry: '12/30' },
     });
 
-    expect(result).toMatchObject({
-      kind: 'payment_failed',
-      reason: 'insufficient_funds',
-    });
-    expect(result.order.status).toBe('payment_failed');
-    expect(result.order.paymentFailure).toEqual({ reason: 'insufficient_funds' });
+    expect(result).toEqual({ kind: 'declined', reason: 'insufficient_funds' });
+    expect(result).not.toHaveProperty('order');
   });
 
-  it('reports the failed line for a card ending 0003', async () => {
+  it('reports a single failed line for a card ending 0003', async () => {
     const gateway = createMockCheckoutGateway({ delayMs: 0, createId, now });
 
     const result = await gateway.submit({
@@ -77,15 +76,29 @@ describe('createMockCheckoutGateway', () => {
       card: { cardNumber: '4242424242420003', expiry: '12/30' },
     });
 
-    expect(result.kind).toBe('reservation_failed');
-    expect(result.order.status).toBe('reservation_failed');
-    expect(result.order.reservationFailure).toEqual({
-      sku: 'WID-1',
-      reason: "insufficient stock for sku 'WID-1'",
+    expect(result).toEqual({
+      kind: 'stock_unavailable',
+      failures: [{ sku: 'WID-1', reason: 'insufficient_stock' }],
+    });
+    expect(result).not.toHaveProperty('order');
+  });
+
+  it('reports every failed line for the items_unavailable scenario', async () => {
+    setMockScenario('items_unavailable');
+    const gateway = createMockCheckoutGateway({ delayMs: 0, createId, now });
+
+    const result = await gateway.submit(request);
+
+    expect(result).toEqual({
+      kind: 'stock_unavailable',
+      failures: [
+        { sku: 'WID-1', reason: 'insufficient_stock' },
+        { sku: 'GAD-1', reason: 'unknown_sku' },
+      ],
     });
   });
 
-  it.each<MockScenario>(['items_unavailable', 'card_declined', 'service_error'])(
+  it.each<MockScenario>(['card_declined', 'service_error'])(
     'honours the prototype scenario %s',
     async (scenario) => {
       setMockScenario(scenario);
@@ -94,14 +107,34 @@ describe('createMockCheckoutGateway', () => {
       const submit = gateway.submit(request);
 
       if (scenario === 'service_error') {
-        await expect(submit).rejects.toThrow('Mock checkout service is unavailable');
-      } else if (scenario === 'card_declined') {
-        await expect(submit).resolves.toMatchObject({ kind: 'payment_failed' });
+        await expect(submit).rejects.toBeInstanceOf(CheckoutGatewayError);
       } else {
-        await expect(submit).resolves.toMatchObject({ kind: 'reservation_failed' });
+        await expect(submit).resolves.toEqual({
+          kind: 'declined',
+          reason: 'insufficient_funds',
+        });
       }
     },
   );
+
+  it('round-trips the prototype scenario', () => {
+    setMockScenario('items_unavailable');
+    expect(getMockScenario()).toBe('items_unavailable');
+
+    setMockScenario('normal');
+    expect(getMockScenario()).toBe('normal');
+  });
+
+  it('never returns or stores the card number', async () => {    const gateway = createMockCheckoutGateway({ delayMs: 0, createId, now });
+
+    const authorized = await gateway.submit(request);
+    const declined = await gateway.submit({
+      ...request,
+      card: { cardNumber: '4242424242420002', expiry: '12/30' },
+    });
+
+    expect(JSON.stringify({ authorized, declined })).not.toContain('4242');
+  });
 
   it('waits for the configured delay before resolving', async () => {
     vi.useFakeTimers();

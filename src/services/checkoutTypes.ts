@@ -34,3 +34,12 @@ export interface CardDetails {
   cardNumber: string;
   expiry: string;
 }
+
+// Kept here rather than in checkoutGateway.ts so the mock can throw it
+// without importing the module that imports the mock.
+export class CheckoutGatewayError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'CheckoutGatewayError';
+  }
+}

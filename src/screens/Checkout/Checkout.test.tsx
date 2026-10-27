@@ -53,8 +53,6 @@ function makeOrder(overrides: Partial<Order> = {}): Order {
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-01-01T00:00:00Z',
     shippingAddress,
-    reservationFailure: null,
-    paymentFailure: null,
     ...overrides,
   };
 }
@@ -166,15 +164,7 @@ describe('Checkout', () => {
 
   it('shows a decline reason, keeps the form values, and does not clear the cart', async () => {
     const onOrderPlaced = vi.fn();
-    const order = makeOrder({
-      status: 'payment_failed',
-      paymentFailure: { reason: 'insufficient_funds' },
-    });
-    submit.mockResolvedValue({
-      kind: 'payment_failed',
-      order,
-      reason: 'insufficient_funds',
-    });
+    submit.mockResolvedValue({ kind: 'declined', reason: 'insufficient_funds' });
 
     renderCheckout({ onOrderPlaced });
     fillForm();
@@ -190,18 +180,59 @@ describe('Checkout', () => {
     expect(screen.getByLabelText('Address line 1')).toHaveValue('1 Watchmaker Lane');
   });
 
-  it('removes a failed reservation line and allows a retry', async () => {
+  it('resubmits after a decline without creating a new order row', async () => {
+    const onOrderPlaced = vi.fn();
+    submit
+      .mockResolvedValueOnce({ kind: 'declined', reason: 'insufficient_funds' })
+      .mockResolvedValueOnce({ kind: 'authorized', order: makeOrder() });
+
+    renderCheckout({ onOrderPlaced });
+    fillForm();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Place order' }));
+    await screen.findByText(/Payment declined/);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Place order' }));
+
+    await waitFor(() => expect(onOrderPlaced).toHaveBeenCalledOnce());
+    expect(submit).toHaveBeenCalledTimes(2);
+  });
+
+  it('lists every failed line with its own Remove action', async () => {
+    submit.mockResolvedValue({
+      kind: 'stock_unavailable',
+      failures: [
+        { sku: 'WID-1', reason: 'insufficient_stock' },
+        { sku: 'GAD-1', reason: 'unknown_sku' },
+      ],
+    });
+    removeItem.mockResolvedValue({} as Cart);
+
+    renderCheckout();
+    fillForm();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Place order' }));
+
+    expect(await screen.findByText(/Widget: insufficient stock/)).toBeInTheDocument();
+    expect(screen.getByText(/Gadget: unknown item/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Remove Widget from cart' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Remove Gadget from cart' }),
+    ).toBeInTheDocument();
+    expect(submit).toHaveBeenCalledOnce();
+  });
+
+  it('removes only the chosen failed line and retries with the rest', async () => {
     const onOrderPlaced = vi.fn();
     submit
       .mockResolvedValueOnce({
-        kind: 'reservation_failed',
-        order: makeOrder({
-          status: 'reservation_failed',
-          reservationFailure: {
-            sku: 'WID-1',
-            reason: "insufficient stock for sku 'WID-1'",
-          },
-        }),
+        kind: 'stock_unavailable',
+        failures: [
+          { sku: 'WID-1', reason: 'insufficient_stock' },
+          { sku: 'GAD-1', reason: 'unknown_sku' },
+        ],
       })
       .mockResolvedValueOnce({ kind: 'authorized', order: makeOrder() });
     removeItem.mockResolvedValue({} as Cart);
@@ -210,16 +241,15 @@ describe('Checkout', () => {
     fillForm();
 
     fireEvent.click(screen.getByRole('button', { name: 'Place order' }));
+    await screen.findByText(/Widget: insufficient stock/);
 
-    expect(await screen.findByText(/Widget could not be reserved/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Widget from cart' }));
 
-    fireEvent.click(screen.getByRole('button', { name: 'Remove from cart' }));
-
-    await waitFor(() =>
-      expect(removeItem).toHaveBeenCalledWith('cart-1', 'WID-1'),
-    );
-    expect(screen.queryByText(/Widget could not be reserved/)).not.toBeInTheDocument();
+    await waitFor(() => expect(removeItem).toHaveBeenCalledWith('cart-1', 'WID-1'));
+    expect(screen.queryByText(/Widget: insufficient stock/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Gadget: unknown item/)).toBeInTheDocument();
     expect(screen.queryByText(/Widget — qty 2/)).not.toBeInTheDocument();
+    expect(submit).toHaveBeenCalledOnce();
 
     fireEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
@@ -228,23 +258,42 @@ describe('Checkout', () => {
     expect(submit.mock.calls[1][0].items).toEqual([items[1]]);
   });
 
-  it('shows a request error and allows a retry', async () => {
+  it('shows the empty state once every failed line is removed', async () => {
+    submit.mockResolvedValue({
+      kind: 'stock_unavailable',
+      failures: [{ sku: 'WID-1', reason: 'insufficient_stock' }],
+    });
+    removeItem.mockResolvedValue({} as Cart);
+
+    renderCheckout({ items: [items[0]] });
+    fillForm();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Place order' }));
+    await screen.findByText(/Widget: insufficient stock/);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Widget from cart' }));
+
+    expect(await screen.findByText('Your cart is empty.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Place order' })).not.toBeInTheDocument();
+  });
+
+  it('shows the service error and allows a retry', async () => {
     const onOrderPlaced = vi.fn();
-    const order = makeOrder();
     submit
-      .mockRejectedValueOnce(new Error('order service down'))
-      .mockResolvedValueOnce({ kind: 'authorized', order });
+      .mockRejectedValueOnce(new Error('Payment service unavailable'))
+      .mockResolvedValueOnce({ kind: 'authorized', order: makeOrder() });
 
     renderCheckout({ onOrderPlaced });
     fillForm();
 
     fireEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
-    expect(await screen.findByText('order service down')).toBeInTheDocument();
+    expect(await screen.findByText('Payment service unavailable')).toBeInTheDocument();
+    expect(screen.getByLabelText('Address line 1')).toHaveValue('1 Watchmaker Lane');
 
     fireEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
-    await waitFor(() => expect(onOrderPlaced).toHaveBeenCalledWith(order));
+    await waitFor(() => expect(onOrderPlaced).toHaveBeenCalledOnce());
     expect(submit).toHaveBeenCalledTimes(2);
   });
 
@@ -272,11 +321,7 @@ describe('Checkout', () => {
   });
 
   it('does not persist card details', async () => {
-    submit.mockResolvedValue({
-      kind: 'payment_failed',
-      order: makeOrder({ status: 'payment_failed' }),
-      reason: 'declined',
-    });
+    submit.mockResolvedValue({ kind: 'declined', reason: 'declined' });
     renderCheckout();
     fillForm();
 

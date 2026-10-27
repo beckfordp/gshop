@@ -1,10 +1,12 @@
 import type { CheckoutGateway, CheckoutRequest } from './checkoutGateway';
+import { CheckoutGatewayError, type ReservationFailure } from './checkoutTypes';
 import type { Order, OrderItem } from './orderClient';
 
 // In-browser stand-in for payment-service + order-service, used only when
-// VITE_CHECKOUT_MOCK=true. It assumes the target contracts: create a payment
+// VITE_CHECKOUT_MOCK=true. It mirrors the ADR 0018 contract: create a payment
 // method, then one synchronous POST /orders that bulk-reserves every line and
-// authorizes. No PAN is stored or logged; nothing leaves the browser.
+// authorizes. A decline or stock failure persists no order. No PAN is stored
+// or logged; nothing leaves the browser.
 
 export type MockScenario =
   | 'normal'
@@ -40,7 +42,7 @@ export function createMockCheckoutGateway({
       await abortableDelay(delayMs, options.signal);
 
       if (scenario === 'service_error') {
-        throw new Error('Mock checkout service is unavailable');
+        throw new CheckoutGatewayError('Mock checkout service is unavailable');
       }
 
       const last4 = request.card.cardNumber.replace(/\D/g, '').slice(-4);
@@ -50,43 +52,38 @@ export function createMockCheckoutGateway({
       // Reservation runs before authorization in the real checkout flow, so a
       // reservation failure wins when both are triggered.
       if (unavailable) {
-        const failed = request.items[0];
         return {
-          kind: 'reservation_failed',
-          order: makeOrder(request, createId, now, {
-            status: 'reservation_failed',
-            reservationFailure: {
-              sku: failed.sku,
-              reason: `insufficient stock for sku '${failed.sku}'`,
-            },
-          }),
+          kind: 'stock_unavailable',
+          failures: failedLines(request, scenario === 'items_unavailable'),
         };
       }
 
       if (declined) {
-        return {
-          kind: 'payment_failed',
-          order: makeOrder(request, createId, now, {
-            status: 'payment_failed',
-            paymentFailure: { reason: 'insufficient_funds' },
-          }),
-          reason: 'insufficient_funds',
-        };
+        return { kind: 'declined', reason: 'insufficient_funds' };
       }
 
-      return {
-        kind: 'authorized',
-        order: makeOrder(request, createId, now, { status: 'authorized' }),
-      };
+      return { kind: 'authorized', order: makeOrder(request, createId, now) };
     },
   };
+}
+
+// The scenario control is meant to exercise the multi-line 409 path; the card
+// trick (0003) reports a single unavailable line, like a one-line cart.
+function failedLines(
+  request: CheckoutRequest,
+  multiple: boolean,
+): ReservationFailure[] {
+  const lines = multiple ? request.items.slice(0, 2) : request.items.slice(0, 1);
+  return lines.map((item, index) => ({
+    sku: item.sku,
+    reason: index === 0 ? 'insufficient_stock' : 'unknown_sku',
+  }));
 }
 
 function makeOrder(
   request: CheckoutRequest,
   createId: () => string,
   now: () => Date,
-  overrides: Partial<Order>,
 ): Order {
   const timestamp = now().toISOString();
   const items: OrderItem[] = request.items.map((item) => ({
@@ -106,9 +103,6 @@ function makeOrder(
     createdAt: timestamp,
     updatedAt: timestamp,
     shippingAddress: request.shippingAddress,
-    reservationFailure: null,
-    paymentFailure: null,
-    ...overrides,
   };
 }
 

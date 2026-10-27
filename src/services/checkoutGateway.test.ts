@@ -5,7 +5,7 @@ import {
   createHttpCheckoutGateway,
   type CheckoutRequest,
 } from './checkoutGateway';
-import type { Order } from './orderClient';
+import type { CreateOrderResult, Order } from './orderClient';
 import { setMockScenario } from './checkoutMock';
 
 const shippingAddress = {
@@ -33,20 +33,18 @@ function makeOrder(overrides: Partial<Order> = {}): Order {
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-01-01T00:00:00Z',
     shippingAddress,
-    reservationFailure: null,
-    paymentFailure: null,
     ...overrides,
   };
 }
 
-function fakeDeps(order: Order) {
+function fakeDeps(createResult: CreateOrderResult) {
   const createMethod = vi.fn().mockResolvedValue({
     id: 'pm-1',
     last4: '4242',
     brand: 'visa',
     expiry: '12/30',
   });
-  const create = vi.fn().mockResolvedValue(order);
+  const create = vi.fn().mockResolvedValue(createResult);
   return {
     deps: {
       paymentClient: { createMethod },
@@ -60,7 +58,7 @@ function fakeDeps(order: Order) {
 describe('createHttpCheckoutGateway', () => {
   it('creates a payment method, then the order, and returns authorized', async () => {
     const order = makeOrder();
-    const { deps, createMethod, create } = fakeDeps(order);
+    const { deps, createMethod, create } = fakeDeps({ kind: 'created', order });
     const gateway = createHttpCheckoutGateway(deps);
 
     const result = await gateway.submit(request);
@@ -86,66 +84,63 @@ describe('createHttpCheckoutGateway', () => {
     expect(result).toEqual({ kind: 'authorized', order });
   });
 
-  it('maps payment_failed using the response reason', async () => {
-    const order = makeOrder({
-      status: 'payment_failed',
-      paymentFailure: { reason: 'insufficient_funds' },
-    });
-    const { deps } = fakeDeps(order);
+  it('maps a declined order to a decline result with no order', async () => {
+    const { deps } = fakeDeps({ kind: 'declined', reason: 'insufficient_funds' });
 
     const result = await createHttpCheckoutGateway(deps).submit(request);
 
-    expect(result).toMatchObject({
-      kind: 'payment_failed',
-      reason: 'insufficient_funds',
-      order,
-    });
+    expect(result).toEqual({ kind: 'declined', reason: 'insufficient_funds' });
+    expect(result).not.toHaveProperty('order');
   });
 
-  it('falls back to a generic decline reason when paymentFailure is null', async () => {
-    const order = makeOrder({ status: 'payment_failed', paymentFailure: null });
-    const { deps } = fakeDeps(order);
+  it('maps stock failures as every failed line, with no order', async () => {
+    const { deps } = fakeDeps({
+      kind: 'stock_unavailable',
+      failures: [
+        { sku: 'WID-1', reason: 'insufficient_stock' },
+        { sku: 'GAD-1', reason: 'unknown_sku' },
+      ],
+    });
 
     const result = await createHttpCheckoutGateway(deps).submit(request);
 
-    expect(result).toMatchObject({ kind: 'payment_failed', reason: 'declined' });
-  });
-
-  it('maps reservation_failed with the failed line', async () => {
-    const order = makeOrder({
-      status: 'reservation_failed',
-      reservationFailure: { sku: 'WID-1', reason: 'insufficient stock' },
+    expect(result).toEqual({
+      kind: 'stock_unavailable',
+      failures: [
+        { sku: 'WID-1', reason: 'insufficient_stock' },
+        { sku: 'GAD-1', reason: 'unknown_sku' },
+      ],
     });
-    const { deps } = fakeDeps(order);
+    expect(result).not.toHaveProperty('order');
+  });
 
-    const result = await createHttpCheckoutGateway(deps).submit(request);
-
-    expect(result).toEqual({ kind: 'reservation_failed', order });
-    expect(result.order.reservationFailure).toEqual({
-      sku: 'WID-1',
-      reason: 'insufficient stock',
+  it('propagates payment method errors', async () => {
+    const { deps, createMethod, create } = fakeDeps({
+      kind: 'created',
+      order: makeOrder(),
     });
-  });
-
-  it('throws on an unexpected status instead of treating it as success', async () => {
-    const { deps } = fakeDeps(makeOrder({ status: 'pending' }));
-
-    await expect(createHttpCheckoutGateway(deps).submit(request)).rejects.toThrow(
-      CheckoutGatewayError,
-    );
-  });
-
-  it('propagates client errors', async () => {
-    const { deps, createMethod } = fakeDeps(makeOrder());
     createMethod.mockRejectedValue(new Error('payment down'));
 
     await expect(createHttpCheckoutGateway(deps).submit(request)).rejects.toThrow(
       'payment down',
     );
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('propagates order client errors with their status message', async () => {
+    const { deps, create } = fakeDeps({ kind: 'created', order: makeOrder() });
+    create.mockRejectedValue(new Error('Payment service unavailable'));
+
+    await expect(createHttpCheckoutGateway(deps).submit(request)).rejects.toThrow(
+      'Payment service unavailable',
+    );
   });
 
   it('forwards the signal to both calls', async () => {
-    const { deps, createMethod, create } = fakeDeps(makeOrder());
+    const { deps, createMethod, create } = fakeDeps({
+      kind: 'created',
+      order: makeOrder(),
+    });
     const controller = new AbortController();
 
     await createHttpCheckoutGateway(deps).submit(request, { signal: controller.signal });
@@ -161,7 +156,7 @@ describe('createHttpCheckoutGateway', () => {
 
 describe('createConfiguredCheckoutGateway', () => {
   it('uses the HTTP gateway when mock mode is off', async () => {
-    const { deps, create } = fakeDeps(makeOrder());
+    const { deps, create } = fakeDeps({ kind: 'created', order: makeOrder() });
 
     const result = await createConfiguredCheckoutGateway(false, deps).submit(request);
 
@@ -178,9 +173,13 @@ describe('createConfiguredCheckoutGateway', () => {
       card: { cardNumber: '4242424242420002', expiry: '12/30' },
     });
 
-    expect(result).toMatchObject({
-      kind: 'payment_failed',
-      reason: 'insufficient_funds',
-    });
+    expect(result).toEqual({ kind: 'declined', reason: 'insufficient_funds' });
+  });
+
+  it('throws CheckoutGatewayError when the mock reports a service error', async () => {
+    setMockScenario('service_error');
+    const gateway = createConfiguredCheckoutGateway(true, undefined, { delayMs: 0 });
+
+    await expect(gateway.submit(request)).rejects.toThrow(CheckoutGatewayError);
   });
 });

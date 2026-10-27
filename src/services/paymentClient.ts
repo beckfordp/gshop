@@ -52,12 +52,21 @@ async function createMethod(
 
   if (!response.ok) {
     throw new PaymentClientError(
-      `Payment method request failed with status ${response.status}`,
+      await errorBody(response, `Payment method request failed with status ${response.status}`),
       response.status,
     );
   }
 
   return (await response.json()) as PaymentMethod;
+}
+
+async function errorBody(response: Response, fallback: string): Promise<string> {
+  try {
+    const body = (await response.json()) as { error?: string };
+    return body.error ?? fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 export const paymentClient: {

@@ -6,6 +6,7 @@ import { checkoutGateway } from '../../services/checkoutGateway';
 import { setMockScenario, type MockScenario } from '../../services/checkoutMock';
 import { CHECKOUT_MOCK_ENABLED } from '../../services/env';
 import type { NewOrderItem, Order } from '../../services/orderClient';
+import type { ReservationFailure } from '../../services/checkoutTypes';
 import { errorMessage, formatPrice } from '../../lib/format';
 import WatchArt from '../../components/WatchArt/WatchArt';
 import AddressFields from './AddressFields';
@@ -27,8 +28,8 @@ interface CheckoutProps {
 }
 
 type Failure =
-  | { kind: 'payment'; reason: string }
-  | { kind: 'reservation'; sku: string; reason: string }
+  | { kind: 'declined'; reason: string }
+  | { kind: 'stock_unavailable'; failures: ReservationFailure[] }
   | { kind: 'request'; message: string };
 
 const initialForm: CheckoutFormValues = {
@@ -138,17 +139,7 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
         return;
       }
 
-      if (result.kind === 'payment_failed') {
-        setFailure({ kind: 'payment', reason: result.reason });
-        return;
-      }
-
-      const failed = result.order.reservationFailure;
-      setFailure({
-        kind: 'reservation',
-        sku: failed?.sku ?? '',
-        reason: failed?.reason ?? 'item unavailable',
-      });
+      setFailure(result);
     } catch (error) {
       if (isAbortError(error)) {
         return;
@@ -169,7 +160,13 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
         await cartClient.removeItem(cartId, sku);
       }
       setItems((prev) => prev.filter((item) => item.sku !== sku));
-      setFailure(null);
+      setFailure((prev) => {
+        if (prev?.kind !== 'stock_unavailable') {
+          return prev;
+        }
+        const failures = prev.failures.filter((failure) => failure.sku !== sku);
+        return failures.length > 0 ? { kind: 'stock_unavailable', failures } : null;
+      });
     } catch (error) {
       setFailure({ kind: 'request', message: errorMessage(error) });
     }
@@ -179,11 +176,6 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
     (sum, item) => sum + item.unitPriceCents * item.quantity,
     0,
   );
-
-  const failedItem =
-    failure?.kind === 'reservation'
-      ? items.find((item) => item.sku === failure.sku)
-      : undefined;
 
   return (
     <div className="checkout">
@@ -214,25 +206,37 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
               tabIndex={-1}
               data-kind={failure.kind}
             >
-              {failure.kind === 'payment' && (
+              {failure.kind === 'declined' && (
                 <p>
                   Payment declined: {failure.reason}. Try another card and submit
                   again.
                 </p>
               )}
-              {failure.kind === 'reservation' && (
+              {failure.kind === 'stock_unavailable' && (
                 <div className="checkout-alert__reservation">
-                  <p>
-                    {failedItem?.productName ?? failure.sku ?? 'An item'} could not be
-                    reserved: {failure.reason}.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveFailedItem(failure.sku)}
-                    disabled={submitting || !failure.sku}
-                  >
-                    Remove from cart
-                  </button>
+                  <p>The following items could not be reserved:</p>
+                  <ul className="checkout-alert__lines">
+                    {failure.failures.map((failed) => {
+                      const name =
+                        items.find((item) => item.sku === failed.sku)?.productName ??
+                        failed.sku;
+                      return (
+                        <li key={failed.sku} className="checkout-alert__line">
+                          <span>
+                            {name}: {describeReservationReason(failed.reason)}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFailedItem(failed.sku)}
+                            disabled={submitting}
+                          >
+                            Remove {name} from cart
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <p>Remove the unavailable items, then submit again.</p>
                 </div>
               )}
               {failure.kind === 'request' && <p>{failure.message}</p>}
@@ -394,4 +398,15 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
 
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'AbortError';
+}
+
+function describeReservationReason(reason: string): string {
+  switch (reason) {
+    case 'insufficient_stock':
+      return 'insufficient stock';
+    case 'unknown_sku':
+      return 'unknown item';
+    default:
+      return reason;
+  }
 }
