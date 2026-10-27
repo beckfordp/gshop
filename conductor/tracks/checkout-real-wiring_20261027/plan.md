@@ -2,33 +2,33 @@
 
 ## Phase 1: Status-code result model (clients + gateway)
 
-- [ ] Task: Write failing tests for `orderClient.create()` mapping the real `POST /orders` responses — 201 → `created` with the `authorized` order; 402 → `declined` with `paymentFailure.reason`; 409 → `stock_unavailable` with **every** `reservationFailures` entry; 400/503/500 → thrown `OrderClientError` carrying status and the body's `error`; non-JSON body → fallback message; network failure → `OrderClientError` (Red)
-- [ ] Task: Write failing tests for `paymentClient.createMethod()` surfacing the server's `error` on 400 (Red)
-- [ ] Task: Implement the discriminated `CreateOrderResult` in `orderClient.ts`, drop the stale `reservationFailure`/`paymentFailure` fields from `Order`, and parse error bodies in both clients (Green)
-- [ ] Task: Write failing tests for `checkoutGateway.submit()` mapping the client result to `CheckoutResult` (`authorized`/`declined`/`stock_unavailable`, no order on failure) and propagating `CheckoutGatewayError` with the server message (Red)
-- [ ] Task: Reshape `CheckoutResult`/`createHttpCheckoutGateway` to the ADR 0018 model (Green)
-- [ ] Task: Refactor, keep tests green
-- [ ] Task: Conductor - User Manual Verification 'Status-code result model' (Protocol in workflow.md)
+- [x] Task: Write failing tests for `orderClient.create()` mapping the real `POST /orders` responses — 201 → `created` with the `authorized` order; 402 → `declined` with `paymentFailure.reason`; 409 → `stock_unavailable` with **every** `reservationFailures` entry; 400/503/500 → thrown `OrderClientError` carrying status and the body's `error`; non-JSON body → fallback message; network failure → `OrderClientError` (Red) `8e86c94`
+- [x] Task: Write failing tests for `paymentClient.createMethod()` surfacing the server's `error` on 400 (Red) `8e86c94`
+- [x] Task: Implement the discriminated `CreateOrderResult` in `orderClient.ts`, drop the stale `reservationFailure`/`paymentFailure` fields from `Order`, and parse error bodies in both clients (Green) `8e86c94`
+- [x] Task: Write failing tests for `checkoutGateway.submit()` mapping the client result to `CheckoutResult` (`authorized`/`declined`/`stock_unavailable`, no order on failure) and propagating `CheckoutGatewayError` with the server message (Red) `8e86c94`
+- [x] Task: Reshape `CheckoutResult`/`createHttpCheckoutGateway` to the ADR 0018 model (Green) `8e86c94`
+- [x] Task: Refactor, keep tests green `8e86c94` (moved `CheckoutGatewayError` into `checkoutTypes.ts` so the mock can throw it without a circular import)
+- [x] Task: Conductor - User Manual Verification 'Status-code result model' (Protocol in workflow.md) — `scripts/verify-checkout-real-wiring.sh`: build, lint, 159 tests, 96.88% statements green; the HTTP paths themselves are exercised live in Phase 5
 
 ## Phase 2: Checkout form failure handling
 
-- [ ] Task: Write failing `Checkout.test.tsx` tests — 201 clears cart and calls `onOrderPlaced`; 402 shows the reason inline, keeps typed values, resubmit re-invokes the gateway; 409 renders **every** failed line with its own Remove; removing one line calls `cartClient.removeItem` and leaves the others; no auto-resubmit; emptying all lines shows the empty state; `CheckoutGatewayError` (400/503/500) shows the server message and keeps the form (Red)
-- [ ] Task: Implement the new failure model in `Checkout.tsx` + `Checkout.css` (multi-line failure list, per-line Remove, generic error) (Green)
-- [ ] Task: Refactor, keep tests green
-- [ ] Task: Conductor - User Manual Verification 'Checkout form failure handling' (Protocol in workflow.md)
+- [x] Task: Write failing `Checkout.test.tsx` tests — 201 clears cart and calls `onOrderPlaced`; 402 shows the reason inline, keeps typed values, resubmit re-invokes the gateway; 409 renders **every** failed line with its own Remove; removing one line calls `cartClient.removeItem` and leaves the others; no auto-resubmit; emptying all lines shows the empty state; `CheckoutGatewayError` (400/503/500) shows the server message and keeps the form (Red) `8e86c94`
+- [x] Task: Implement the new failure model in `Checkout.tsx` + `Checkout.css` (multi-line failure list, per-line Remove, generic error) (Green) `8e86c94`
+- [x] Task: Refactor, keep tests green `8e86c94` (reservation reason codes formatted for display; no other cleanup needed)
+- [x] Task: Conductor - User Manual Verification 'Checkout form failure handling' (Protocol in workflow.md) — `scripts/verify-checkout-real-wiring.sh` green (13 Checkout tests)
 
 ## Phase 3: Mock parity + scenario control
 
-- [ ] Task: Write failing `checkoutMock.test.ts` — every scenario returns the new result kinds; `items_unavailable` returns 2+ failed lines; `card_declined` → `declined`; `service_error` throws `CheckoutGatewayError`; no `Order` is fabricated on failure; no PAN in any returned value (Red)
-- [ ] Task: Rewrite `checkoutMock.ts` (and the Checkout scenario-selector wiring if needed) to the new model, keeping it dev-only under `VITE_CHECKOUT_MOCK` (Green)
-- [ ] Task: Refactor, keep tests green
-- [ ] Task: Conductor - User Manual Verification 'Mock parity' (Protocol in workflow.md)
+- [x] Task: Write failing `checkoutMock.test.ts` — every scenario returns the new result kinds; `items_unavailable` returns 2+ failed lines; `card_declined` → `declined`; `service_error` throws `CheckoutGatewayError`; no `Order` is fabricated on failure; no PAN in any returned value (Red) `8e86c94`
+- [x] Task: Rewrite `checkoutMock.ts` (and the Checkout scenario-selector wiring if needed) to the new model, keeping it dev-only under `VITE_CHECKOUT_MOCK` (Green) `8e86c94` (selector needed no change)
+- [x] Task: Refactor, keep tests green `8e86c94` (extracted `failedLines`; mock at 100% statements/83.33% branches)
+- [x] Task: Conductor - User Manual Verification 'Mock parity' (Protocol in workflow.md) — `scripts/verify-checkout-real-wiring.sh` green (11 mock tests)
 
 ## Phase 4: Docs + full suite
 
-- [ ] Task: Update `README.md`, `conductor/tech-stack.md`, `conductor/product.md` — status-code contract, retained dev-only mock, no-order-on-failure
-- [ ] Task: Run full `npm test`, `npm run lint`, `npm run build`, `npm run test:coverage`; confirm green and >80%
-- [ ] Task: Conductor - User Manual Verification 'Docs + full suite' (Protocol in workflow.md)
+- [x] Task: Update `README.md`, `conductor/tech-stack.md`, `conductor/product.md` — status-code contract, retained dev-only mock, no-order-on-failure `5133d23`
+- [x] Task: Run full `npm test`, `npm run lint`, `npm run build`, `npm run test:coverage`; confirm green and >80% `5133d23` (159/159 tests, 96.88% statements)
+- [x] Task: Conductor - User Manual Verification 'Docs + full suite' (Protocol in workflow.md) — `scripts/verify-checkout-real-wiring.sh` committed and green
 
 ## Phase 5: Live end-to-end against local k8s
 
