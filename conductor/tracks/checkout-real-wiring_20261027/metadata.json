@@ -1,0 +1,8 @@
+{
+  "track_id": "checkout-real-wiring_20261027",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-10-27T18:16:37Z",
+  "updated_at": "2026-10-27T18:16:37Z",
+  "description": "US-11–US-14 real backend wiring — wire the checkout form to the real payment-service/order-service contracts (US-11.2, US-12.2, US-13.3, US-14.4, TD-7.4)"
+}
