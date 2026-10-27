@@ -6,9 +6,6 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [ ] **Track: US-11–US-14 real backend wiring**
-  *Link: [./tracks/checkout-real-wiring_20261027/](./tracks/checkout-real-wiring_20261027/)*
-
 ---
 
 ## Backlog

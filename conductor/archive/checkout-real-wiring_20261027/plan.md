@@ -35,8 +35,8 @@
 - [x] Task: Redeploy order-service and payment-service from current `main` (`bin/k8s-local-up …`) and wait for rollout `8ae1ae5` (also redeployed inventory-service — its pod predated TD-7.1/7.2's bulk-reserve endpoint, which surfaced as `503 Inventory service unavailable` on the first run)
 - [x] Task: Write and run `scripts/verify-checkout-real.sh` — through port-forwarded services: approve card → create payment method → `POST /orders` → 201 `authorized`; card `4000 0000 0000 0002` → 402; a known under-stocked sku → 409 listing every failed line; invalid `paymentMethodId` → 400; assert Order History unchanged after each failure and clean up the successful order `8ae1ae5` (all four paths passed; successful order released + deleted)
 - [x] Task: Run gshop dev server against real services (`npm run dev` with `VITE_*_SERVICE_URL`s) and click through authorized / declined / stock-failure paths; confirm failures leave no Order History row `8ae1ae5` — dev server restarted with `VITE_PAYMENT_SERVICE_URL`; host resolves the cluster DNS names directly (health 200 on catalog/payment/order). Browser click-through deferred to the user; the same real paths are asserted by the committed script
-- [ ] Task: Check off US-11.2/12.2/13.3/14.4 and TD-7.4 in `gluon` docs; mark Journey 1 gshop rows done in `PLAN.md`
-- [ ] Task: Conductor - User Manual Verification 'Live end-to-end' (Protocol in workflow.md)
+- [x] Task: Check off US-11.2/12.2/13.3/14.4 and TD-7.4 in `gluon` docs; mark Journey 1 gshop rows done in `PLAN.md` (done in the `gluon` repo's checkoff commit)
+- [x] Task: Conductor - User Manual Verification 'Live end-to-end' (Protocol in workflow.md) — `scripts/verify-checkout-real.sh` passed twice against the redeployed cluster; review then applied `1c47e13` and the script re-passed
 
 ## Risks / notes
 
