@@ -44,3 +44,7 @@
 - A declined (402) resubmit mints a fresh PaymentMethod per attempt; fine until TD-10's authorize idempotency lands.
 - The live script must use a throwaway customerId and delete its successful order, so the demo history stays clean.
 - The mock stays opt-in (`VITE_CHECKOUT_MOCK=true`) and never ships as the default path.
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions — extracted shared `serverErrorMessage` (orderClient/paymentClient dedupe), restored the 201-must-be-`authorized` guard (ADR 0018), and moved the live script's JSON files into a `mktemp -d` dir with clean port-forward teardown `1c47e13`
+
