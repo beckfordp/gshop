@@ -35,8 +35,9 @@ From `../../../docs/user-stories.md` (UI realization, not new stories):
 - **US-13** — payment method (card) collection
 - **US-14** — authorised/declined result of the synchronous checkout call
 
-US-11–US-14 are implemented against the in-browser mock until
-payment-service/order-service land their contracts (Checkout Journey 1).
+US-11–US-14 are implemented against the real contracts (Checkout Journey 1,
+wired 2026-10-27); the in-browser mock remains available as an optional
+dev-only mode.
 
 Out of scope: **US-7** (order status notifications) has no UI surface — it's
 email-only, nothing for this app to call.
@@ -72,11 +73,13 @@ All four in-scope user stories are live: US-1 (browse catalog), US-2
 - `src/screens/Checkout/Checkout.tsx` is the single-page form: shipping
   address, billing address with a defaulted "same as shipping" checkbox,
   card number/expiry, and an order summary. Submit creates a
-  `PaymentMethod` then `POST /orders`; `authorized` clears the cart and
-  moves to confirmation, `payment_failed` shows the decline reason inline
-  (card editable, retry), `reservation_failed` names the failed line with
-  a Remove action, then retry. A dev-only prototype scenario control is
-  shown when `VITE_CHECKOUT_MOCK=true`.
+  `PaymentMethod` then `POST /orders`; `201` clears the cart and moves to
+  confirmation, `402` shows the decline reason inline (card editable,
+  retry), `409` lists **every** failed line with its own Remove action
+  (removes it from cart-service, then retry the rest), and
+  `400`/`503`/`500` show the server error. A failed attempt persists no
+  order. A dev-only prototype scenario control is shown when
+  `VITE_CHECKOUT_MOCK=true`.
 - `src/screens/OrderConfirmation/OrderConfirmation.tsx` is the post-order
   display (order id, status, "Payment authorised", shipping address, line
   items, total). "Continue Shopping" returns to Catalog.

@@ -154,12 +154,19 @@ data only, not part of the official seed script — it'll persist until
 `inventory-postgres`'s volume is reset.
 
 **Superseded 2026-10-26:** the Cart "Checkout" button now opens the
-single-page Checkout form; it no longer places the order itself. Real
-`POST /orders` now needs `shippingAddress` + `paymentMethodId`, neither of
-which the backend serves yet — use mock mode below until Checkout Journey 1
-lands.
+single-page Checkout form; it no longer places the order itself.
 
-### Checkout prototype mode (added 2026-10-26)
+**Wired to the real contract 2026-10-27** (track
+`checkout-real-wiring_20261027`): Checkout Journey 1's services landed, so
+`orderClient.create()` now reads ADR 0018's status codes rather than a
+status field on the response — `201` returns the `authorized` order, `402`
+a decline reason, `409` every failed reservation line, and `400`/`503`/`500`
+the server's error message. A failed checkout persists no order, so only
+the success result carries one. The Checkout screen maps each result to its
+own UI (confirmation / inline decline with the card editable / per-line
+Remove plus retry / generic error).
+
+### Checkout mock mode (dev-only, added 2026-10-26)
 
 ```sh
 VITE_CHECKOUT_MOCK=true npm run dev
@@ -168,12 +175,16 @@ VITE_CHECKOUT_MOCK=true npm run dev
 `src/services/checkoutGateway.ts` selects the in-browser mock
 (`checkoutMock.ts`) instead of `paymentClient.createMethod()` +
 `orderClient.create()`. Catalog/cart still talk to real services; only
-checkout submission is mocked. Test controls: a dev-only "Prototype
+checkout submission is mocked. The mock mirrors the real result model
+(`authorized` / `declined` / `stock_unavailable`, no order on failure)
+rather than a separate shape. Test controls: a dev-only "Prototype
 scenario" select (normal / some items unavailable / card declined / service
-error); cards ending `0002` decline and `0003` report an unavailable item.
-Raw card details stay in component state only — never localStorage or logs
-— and the mock never leaves the browser. A real provider integration must
-use hosted fields/tokenization, not this form's direct PAN handling.
+error); cards ending `0002` decline and `0003` report an unavailable item,
+and the scenario control reports two failed lines so the multi-line 409 UI
+can be exercised without a real stock shortfall. Raw card details stay in
+component state only — never localStorage or logs — and the mock never
+leaves the browser. A real provider integration must use
+hosted fields/tokenization, not this form's direct PAN handling.
 
 ## Catalog "Load more" regression from the CORS rollout (found and fixed 2026-10-11)
 The direct cluster-DNS CORS fix above (resolved 2026-10-10) introduced a

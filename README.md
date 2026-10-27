@@ -26,27 +26,28 @@ system-design.md`.
 | cart-service | `src/services/cartClient.ts` | live — Cart screen |
 | order-service | `src/services/orderClient.ts` | live — Checkout (`POST /orders`, extended with address/payment method), Order History |
 | inventory-service | `src/services/inventoryClient.ts` | live — Admin screen stock table |
-| payment-service | `src/services/paymentClient.ts` | live once the backend lands — `POST /payments/methods` (US-13); mocked in prototype mode |
+| payment-service | `src/services/paymentClient.ts` | live — `POST /payments/methods` (US-13) |
 
 Base URLs are read from Vite env vars (`VITE_<NAME>_SERVICE_URL`, see
 `src/services/env.ts`) — there's no documented local port map yet for
 running every service at once, so set these in a local `.env` (gitignored)
 before running against real backends.
 
-## Checkout prototype (mock mode)
+## Checkout mock mode (dev-only)
 
-The checkout form can run without the US-11–US-14 backend contracts:
+Checkout runs against real payment-service/order-service by default. To try
+the UX without backends:
 
 ```sh
 VITE_CHECKOUT_MOCK=true npm run dev
 ```
 
 A dev-only "Prototype scenario" control then drives the in-browser mock:
-normal, some items unavailable, card declined, service error. Cards ending
-`0002` also decline; `0003` reports an unavailable item. The mock returns
-the target response shape (`authorized` / `payment_failed` /
-`reservation_failed` with ephemeral failure detail) and never stores or
-logs the card number.
+normal, some items unavailable (reports two failed lines), card declined,
+service error. Cards ending `0002` also decline; `0003` reports an
+unavailable item. The mock returns the same result model as the real
+contract — `authorized` / `declined` / `stock_unavailable`, with no order
+on failure (ADR 0018) — and never stores or logs the card number.
 
 Prototype caveat: collecting a raw PAN in browser state is acceptable only
 for the simulator. A real provider integration needs hosted fields or
@@ -62,7 +63,8 @@ provider-side tokenization.
 
 Catalog, Cart, Checkout (form + confirmation), Order History, and Admin
 screens are live. Checkout collects shipping/billing addresses and card
-details; submission is prototyped against the in-browser mock until
-payment-service/order-service implement `POST /payments/methods`,
-`POST /payments/authorize`, and the extended `POST /orders` contract. See
+details, creates a payment method, then submits the order against the real
+`POST /orders` contract: `201` → confirmation, `402` → inline decline with
+the card editable, `409` → every failed line with its own Remove action,
+`400`/`503`/`500` → error. Failed attempts persist no order. See
 `gluon/docs/system-design.md`'s "REST contracts" and Checkout Journey 1.
