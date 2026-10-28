@@ -6,9 +6,6 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [ ] **Track: US-17.6/18.5 — Order History dispatch statuses**
-  *Link: [./tracks/fulfilment-history_20261028/](./tracks/fulfilment-history_20261028/)*
-
 ---
 
 ## Backlog
