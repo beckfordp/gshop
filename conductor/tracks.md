@@ -6,8 +6,6 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [~] **Track: US-16.5 real wiring — real user-service auth**
-  *Link: [./tracks/auth-real-wiring_20261028/](./tracks/auth-real-wiring_20261028/)*
 ---
 
 ## Backlog
