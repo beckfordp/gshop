@@ -27,7 +27,7 @@
 - [x] Task: Update README/tech-stack/product for the prototype flag, queue and preview `e6292c6`
 - [x] Task: Add `scripts/verify-fulfilment-prototype.sh` (build/lint/test/coverage) and run it `e6292c6`
 - [x] Task: Hand the dev server URL with a walkthrough and **stop for the user's manual approval** `e6292c6`
-- [ ] Task: Conductor - User Manual Verification 'Journey 3 prototype review' (Protocol in workflow.md) — waiting on the user; fulfilment-service work does not start until sign-off
+- [x] Task: Conductor - User Manual Verification 'Journey 3 prototype review' (Protocol in workflow.md) — **approved by the user 2026-10-28**; backend work may start
 
 ## Risks / notes
 
