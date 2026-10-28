@@ -6,21 +6,21 @@
 - [x] Task: Implement `src/services/mockAuth.ts` + `authTypes.ts` behind `AUTH_MOCK_ENABLED` (default on until user-service lands) (Green) `bb931ca`
 - [x] Task: Write failing validation tests (email format, password ≥ 8, confirm match) and implement `authValidation.ts` (Red → Green) `bb931ca`
 - [x] Task: Refactor, tests green `bb931ca`
-- [ ] Task: Conductor - User Manual Verification 'Mock auth + validation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Mock auth + validation' (Protocol in workflow.md) — `scripts/verify-auth-prototype.sh` green
 
 ## Phase 2: Auth screen
 
 - [x] Task: Write failing `Auth.test.tsx` — Sign in / Create account toggle, validation and focus handling, aria-live form error, submitting state, back returns to checkout, success calls `onAuthenticated` (Red) `bb931ca`
 - [x] Task: Implement `src/screens/Auth/Auth.tsx` + `Auth.css` in the boutique design language (Green) `bb931ca`
 - [x] Task: Refactor, tests green `bb931ca`
-- [ ] Task: Conductor - User Manual Verification 'Auth screen' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Auth screen' (Protocol in workflow.md) — `scripts/verify-auth-prototype.sh` green
 
 ## Phase 3: Checkout + Order History identity
 
 - [x] Task: Write failing tests — Checkout shows "Sign in / Create account" when signed out and the email + Sign out when signed in; opening Auth and returning preserves the checkout form; signed-in submit sends the mock `userId` as `customerId`, signed-out sends the anonymous id; Order History lists with the signed-in id (Red) `bb931ca`
 - [x] Task: Implement the Checkout auth state/identity wiring and the Order History identity fallback (Green) `bb931ca`
 - [x] Task: Refactor, tests green `bb931ca`
-- [ ] Task: Conductor - User Manual Verification 'Checkout + Order History identity' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Checkout + Order History identity' (Protocol in workflow.md) — `scripts/verify-auth-prototype.sh` green
 
 ## Phase 4: Docs + full suite + review handoff
 
@@ -33,5 +33,5 @@
 
 - Auth remains local to Checkout (a local view state) rather than an App-level route, so checkout values survive the round trip; this is prototype-only and can become a route when the real flow lands.
 - `crypto.subtle` is async; the mock auth API is promise-based to match the real client shape, and tests await it.
-- Mock user/token live in localStorage under `gshop:authUser`/`gshop:authToken`, wiped on sign out; no password is ever sent or logged.
+- Mock users/session live in localStorage under `gshop:mockUsers`/`gshop:authSession`; sign out removes the session, and no password is ever sent or logged.
 - The two new PLAN checklist items map to this track's Phase 4 review handoff.
