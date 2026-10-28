@@ -6,6 +6,9 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
+- [ ] **Track: Real fulfilment queue — wire gshop order processing to fulfilment-service**
+  *Link: [./tracks/fulfilment-queue_20261028/](./tracks/fulfilment-queue_20261028/)*
+
 ---
 
 ## Backlog
