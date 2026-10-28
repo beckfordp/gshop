@@ -1,0 +1,8 @@
+{
+  "track_id": "auth-real-wiring_20261028",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-10-28T14:00:00Z",
+  "updated_at": "2026-10-28T14:00:00Z",
+  "description": "US-16.5 real wiring — replace the mock auth with user-service's signup/login contracts, keeping the approved UI"
+}
