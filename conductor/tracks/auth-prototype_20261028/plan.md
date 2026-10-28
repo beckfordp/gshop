@@ -38,9 +38,9 @@
 
 ## Phase 5: Review changes (2026-10-28)
 
-- [ ] Task: Prominence — accent-bordered auth banner at the top of Checkout: primary "Sign in" + secondary "Create account"; signed-in identity bar with email + Sign out (Red → Green)
-- [ ] Task: Presentation — auth becomes a modal dialog over Checkout (full-screen sheet on mobile): Esc/backdrop close, focus trap, return focus, `role="dialog"`/`aria-modal`; Auth gains `initialMode` and a Cancel close (Red → Green)
-- [ ] Task: Ownership — Order History gains a large identity header (signed-in email vs anonymous) and a prominent User/Anonymous badge per card, resolving ids through the mock users (`resolveIdentity`) (Red → Green)
-- [ ] Task: Admin copy clarifies that Clear history affects this browser's anonymous history; Admin all-orders listing deferred to a follow-up order-service track (no backend change here)
-- [ ] Task: Docs updated; full suite green
-- [ ] Task: Conductor - User Manual Verification 'Review changes' — hand back to the user for a second manual review
+- [x] Task: Prominence — accent-bordered auth banner at the top of Checkout: primary "Sign in" + secondary "Create account"; signed-in identity bar with email + Sign out (Red → Green) `b01912f`
+- [x] Task: Presentation — auth becomes a modal dialog over Checkout (full-screen sheet on mobile): Esc/backdrop close, focus trap, return focus, `role="dialog"`/`aria-modal`; Auth gains `initialMode` and a Cancel close (Red → Green) `b01912f`
+- [x] Task: Ownership — Order History gains a large identity header (signed-in email vs anonymous) and a prominent User/Anonymous badge per card, resolving ids through the mock users (`resolveIdentity`) (Red → Green) `b01912f`
+- [x] Task: Admin copy clarifies that Clear history affects this browser's anonymous history; Admin all-orders listing deferred to a follow-up order-service track (no backend change here) `b01912f`
+- [x] Task: Docs updated; full suite green `b01912f`
+- [ ] Task: Conductor - User Manual Verification 'Review changes' — **waiting on the user** for a second manual review (`b01912f`)
