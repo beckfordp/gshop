@@ -8,10 +8,10 @@
 
 ## Phase 2: Docs + live proof
 
-- [ ] Task: Update README, `conductor/product.md`, `conductor/tech-stack.md`; add the `gluon/CHANGELOG.md` entry
-- [ ] Task: Add `scripts/verify-capture-history.sh` — port-forwards, an approving-card order and a capture-decline-card (`5555 5555 5555 4444`) order, drive both to `DISPATCHED`, poll order-service for `confirmed` / `payment_failed`, clean up order/payment/fulfilment rows — and run it against `gluon-local`
-- [ ] Task: Run build/lint/test/coverage; hand over the dev-server URL for an optional browser click-through
-- [ ] Task: Conductor - User Manual Verification 'Docs + live proof' (Protocol in workflow.md) — `verify-capture-history.sh` green against the real cluster
+- [x] Task: Update README, `conductor/product.md`, `conductor/tech-stack.md`; add the `gluon/CHANGELOG.md` entry `5ac48b2` (`a88b416` in gluon)
+- [x] Task: Add `scripts/verify-capture-history.sh` — port-forwards, an approving-card order and a capture-decline-card (`5555 5555 5555 4444`) order, drive both to `DISPATCHED`, poll order-service for `confirmed` / `payment_failed`, clean up order/payment/fulfilment rows — and run it against `gluon-local` `21d5de6`
+- [x] Task: Run build/lint/test/coverage; hand over the dev-server URL for an optional browser click-through — build/lint/test green, coverage 96.59% (OrderHistory 100%) `21d5de6`
+- [x] Task: Conductor - User Manual Verification 'Docs + live proof' (Protocol in workflow.md) — `verify-capture-history.sh` green against the real cluster `21d5de6`
 
 ## Risks / notes
 
