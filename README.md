@@ -63,6 +63,9 @@ user-service lands. It is on by default; set `VITE_AUTH_MOCK=false` to hide it.
   mobile; Esc/backdrop close, focus trapped and returned to the trigger).
 - Order History shows a large identity header and a User/Anonymous badge on
   every card (mock-user join); anonymous orders show a short id.
+- A signed-in user's shipping/billing address (and the "same as shipping"
+  choice) is saved after a successful checkout and prefilled next time
+  (`gshop:savedAddress:<userId>`); card details are never saved.
 - Accounts and the fake session live in `localStorage` (`gshop:mockUsers`,
   `gshop:authSession`); the password is stored only as a SHA-256 hash and
   nothing leaves the browser.

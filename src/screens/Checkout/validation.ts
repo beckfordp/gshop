@@ -123,6 +123,16 @@ export function toAddress(values: AddressValues): Address {
   };
 }
 
+export function toAddressValues(address: Address): AddressValues {
+  return {
+    line1: address.line1,
+    line2: address.line2 ?? '',
+    city: address.city,
+    postalCode: address.postalCode,
+    country: address.country,
+  };
+}
+
 function isValidExpiry(raw: string, now: Date): boolean {
   const match = /^(0[1-9]|1[0-2])\/(\d{2})$/.exec(raw.trim());
   if (!match) {

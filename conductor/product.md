@@ -84,8 +84,9 @@ All four in-scope user stories are live: US-1 (browse catalog), US-2
   in a modal opened from a prominent Checkout banner; backed by `mockAuth` in
   the browser until user-service lands. Signed-in checkout sends the mock
   `userId` as `customerId`; Order History reads that user's orders and badges
-  each order User/Anonymous. Admin-wide order listing is deferred until the
-  order-service API exists.
+  each order User/Anonymous. A signed-in user's addresses are saved after a
+  successful checkout and prefilled next time. Admin-wide order listing is
+  deferred until the order-service API exists.
 - `src/screens/OrderConfirmation/OrderConfirmation.tsx` is the post-order
   display (order id, status, "Payment authorised", shipping address, line
   items, total). "Continue Shopping" returns to Catalog.

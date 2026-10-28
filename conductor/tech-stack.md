@@ -266,3 +266,9 @@ overlay (`role="dialog"`, `aria-modal`, Esc/backdrop close, Tab trap, focus
 returned to the trigger; full-screen under 640px). Order History resolves
 `order.customerId` through `resolveIdentity` to a User/Anonymous badge.
 Admin-wide order listing needs a new order-service endpoint and is deferred.
+
+`src/services/savedAddress.ts` stores a signed-in user's shipping/billing
+address + "same as shipping" under `gshop:savedAddress:<userId>`, written on a
+successful checkout and prefilled on mount or sign-in (never overwriting an
+address already being typed). Card details are never stored. Replace it with
+user-service's address storage when it lands.

@@ -6,6 +6,11 @@ import { checkoutGateway } from '../../services/checkoutGateway';
 import { setMockScenario, type MockScenario } from '../../services/checkoutMock';
 import { AUTH_MOCK_ENABLED, CHECKOUT_MOCK_ENABLED } from '../../services/env';
 import { getSession, signOut } from '../../services/mockAuth';
+import {
+  getCheckoutAddress,
+  saveCheckoutAddress,
+  type SavedCheckoutAddress,
+} from '../../services/savedAddress';
 import type { AuthSession } from '../../services/authTypes';
 import Auth from '../Auth/Auth';
 import type { NewOrderItem, Order } from '../../services/orderClient';
@@ -17,6 +22,7 @@ import {
   EMPTY_ADDRESS,
   normalizeCardNumber,
   toAddress,
+  toAddressValues,
   validateCheckout,
   type AddressValues,
   type CheckoutErrors,
@@ -43,9 +49,25 @@ const initialForm: CheckoutFormValues = {
   expiry: '',
 };
 
+function formFromSaved(saved: SavedCheckoutAddress): CheckoutFormValues {
+  return {
+    shipping: toAddressValues(saved.shipping),
+    sameAsShipping: saved.sameAsShipping,
+    billing: toAddressValues(saved.billing),
+    cardNumber: '',
+    expiry: '',
+  };
+}
+
 export default function Checkout({ items: initialItems, onOrderPlaced, onBackToCart }: CheckoutProps) {
   const [items, setItems] = useState<NewOrderItem[]>(initialItems);
-  const [form, setForm] = useState<CheckoutFormValues>(initialForm);
+  const [form, setForm] = useState<CheckoutFormValues>(() => {
+    const session = AUTH_MOCK_ENABLED ? getSession() : null;
+    const saved = session
+      ? getCheckoutAddress(session.user.userId)
+      : null;
+    return saved ? formFromSaved(saved) : initialForm;
+  });
   const [errors, setErrors] = useState<CheckoutErrors>({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -84,6 +106,21 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
       alertRef.current?.focus();
     }
   }, [failure]);
+
+  // A signed-in user's saved address prefills checkout after sign-in, but
+  // never overwrites an address the customer has already started typing.
+  useEffect(() => {
+    if (!authSession) {
+      return;
+    }
+    const saved = getCheckoutAddress(authSession.user.userId);
+    if (!saved) {
+      return;
+    }
+    setForm((prev) =>
+      prev.shipping.line1.trim() ? prev : formFromSaved(saved),
+    );
+  }, [authSession]);
 
   // Modal semantics for the auth dialog: Esc closes it, Tab cycles inside it,
   // and closing returns focus to whatever opened it. The Auth screen moves
@@ -185,6 +222,15 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
       }
 
       if (result.kind === 'authorized') {
+        if (authSession) {
+          saveCheckoutAddress(authSession.user.userId, {
+            shipping: toAddress(form.shipping),
+            billing: toAddress(
+              form.sameAsShipping ? form.shipping : form.billing,
+            ),
+            sameAsShipping: form.sameAsShipping,
+          });
+        }
         clearCartId();
         onOrderPlaced(result.order);
         return;

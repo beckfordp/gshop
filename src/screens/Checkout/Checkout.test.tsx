@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Checkout from './Checkout';
@@ -6,7 +6,11 @@ import { checkoutGateway } from '../../services/checkoutGateway';
 import { cartClient, type Cart } from '../../services/cartClient';
 import { clearCartId, getStoredCartId } from '../../services/cartId';
 import { getOrCreateCustomerId } from '../../services/customerId';
-import { getSession, signOut } from '../../services/mockAuth';
+import { getSession, signOut, signUp } from '../../services/mockAuth';
+import {
+  getCheckoutAddress,
+  saveCheckoutAddress,
+} from '../../services/savedAddress';
 import type { NewOrderItem, Order } from '../../services/orderClient';
 
 vi.mock('../../services/checkoutGateway', () => ({
@@ -438,5 +442,106 @@ describe('Checkout', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
+  });
+
+  const savedAddress = {
+    shipping: {
+      line1: '1 Watchmaker Lane',
+      city: 'London',
+      postalCode: 'EC1A 1BB',
+      country: 'GB',
+    },
+    billing: {
+      line1: '2 Billing Road',
+      city: 'London',
+      postalCode: 'EC1A 1BB',
+      country: 'GB',
+    },
+    sameAsShipping: false,
+  };
+
+  it("prepopulates a signed-in user's saved address", () => {
+    getSessionMock.mockReturnValue({
+      user: { userId: 'user-1', email: 'ada@example.com' },
+      token: 'token-1',
+    });
+    saveCheckoutAddress('user-1', savedAddress);
+
+    renderCheckout();
+
+    const line1Inputs = screen.getAllByLabelText('Address line 1');
+    expect(line1Inputs).toHaveLength(2);
+    expect(line1Inputs[0]).toHaveValue('1 Watchmaker Lane');
+    expect(line1Inputs[1]).toHaveValue('2 Billing Road');
+    expect(
+      screen.getByRole('checkbox', { name: 'Billing address same as shipping' }),
+    ).not.toBeChecked();
+  });
+
+  it('saves the address after a successful signed-in checkout', async () => {
+    getSessionMock.mockReturnValue({
+      user: { userId: 'user-1', email: 'ada@example.com' },
+      token: 'token-1',
+    });
+    submit.mockResolvedValue({ kind: 'authorized', order: makeOrder() });
+
+    renderCheckout();
+    fillForm();
+    fireEvent.click(screen.getByRole('button', { name: 'Place order' }));
+
+    await waitFor(() => expect(submit).toHaveBeenCalled());
+    expect(getCheckoutAddress('user-1')).toEqual({
+      shipping: {
+        line1: '1 Watchmaker Lane',
+        city: 'London',
+        postalCode: 'EC1A 1BB',
+        country: 'GB',
+      },
+      billing: {
+        line1: '1 Watchmaker Lane',
+        city: 'London',
+        postalCode: 'EC1A 1BB',
+        country: 'GB',
+      },
+      sameAsShipping: true,
+    });
+  });
+
+  it('does not save an address for an anonymous checkout', async () => {
+    submit.mockResolvedValue({ kind: 'authorized', order: makeOrder() });
+
+    renderCheckout();
+    fillForm();
+    fireEvent.click(screen.getByRole('button', { name: 'Place order' }));
+
+    await waitFor(() => expect(submit).toHaveBeenCalled());
+    expect(
+      Object.keys(localStorage).filter((key) =>
+        key.startsWith('gshop:savedAddress:'),
+      ),
+    ).toEqual([]);
+  });
+
+  it('prefills after signing in mid-checkout', async () => {
+    const created = await signUp('ada@example.com', 'correct horse');
+    saveCheckoutAddress(created.user.userId, savedAddress);
+
+    renderCheckout();
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+
+    const dialog = screen.getByRole('dialog');
+    fireEvent.change(within(dialog).getByLabelText('Email'), {
+      target: { value: 'ada@example.com' },
+    });
+    fireEvent.change(within(dialog).getByLabelText('Password'), {
+      target: { value: 'correct horse' },
+    });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Sign in' }));
+
+    await waitFor(() =>
+      expect(screen.getAllByLabelText('Address line 1')[0]).toHaveValue(
+        '1 Watchmaker Lane',
+      ),
+    );
   });
 });
