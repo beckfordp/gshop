@@ -28,6 +28,7 @@ system-design.md`.
 | inventory-service | `src/services/inventoryClient.ts` | live — Admin screen stock table |
 | payment-service | `src/services/paymentClient.ts` | live — `POST /payments/methods` (US-13) |
 | user-service | `src/services/userClient.ts` | live — `POST /auth/signup`, `POST /auth/login` (US-16) |
+| fulfilment-service | `src/services/fulfilmentClient.ts` | live — Admin order-processing queue (US-17.7) |
 
 Base URLs are read from Vite env vars (`VITE_<NAME>_SERVICE_URL`, see
 `src/services/env.ts`) — there's no documented local port map yet for
@@ -80,20 +81,21 @@ the in-browser mock instead.
 
 The mock remains available only via `VITE_AUTH_MOCK=true`.
 
-## Fulfilment (operator prototype, mock mode)
+## Fulfilment (operator queue)
 
-The operator order-processing screen runs on a seeded, localStorage-persisted
-queue — fulfilment-service's operator REST is internal and not wired to gshop
-yet (`VITE_FULFILMENT_MOCK=false` hides the screen).
+Admin → **Open order processing** lists the real fulfilment-service queue
+(tasks appear when an order's payment is authorized) and drives its operator
+API:
 
-- Admin → **Open order processing** lists the queue with customer, items,
-  total and state: Pending → Picking → Packed → Dispatched, or Dispatch
-  failed with a reason. Dispatch requires a tracking number + carrier;
-  failure requires a reason. **Reset demo queue** restores the seed.
+- Start picking → Mark packed → Dispatch (tracking number + carrier
+  required) or Report problem (reason required); server errors surface in the
+  banner. **Refresh** refetches the list.
+- Cards show the shipping-address snapshot, items, computed total and state:
+  Pending → Picking → Packed → Dispatched, or Dispatch failed with a reason.
+  The API carries no customer identity, so the ship-to address replaces the
+  old prototype's customer line.
 - Order History shows the real `Dispatched` / `Dispatch failed` / `Confirmed` /
-  `Payment failed` statuses from order-service (US-17.6/18.5, US-19.5) — the
-  old mock preview is gone.
-- Queue state lives under `gshop:fulfilmentQueue`; nothing leaves the browser.
+  `Payment failed` statuses from order-service (US-17.6/18.5, US-19.5).
 
 ## Scripts
 

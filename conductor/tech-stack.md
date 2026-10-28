@@ -101,6 +101,8 @@ VITE_CART_SERVICE_URL=http://cart-service.gluon-local.svc.cluster.local:8080
 VITE_ORDER_SERVICE_URL=http://order-service.gluon-local.svc.cluster.local:8080
 VITE_INVENTORY_SERVICE_URL=http://inventory-service.gluon-local.svc.cluster.local:8080
 VITE_PAYMENT_SERVICE_URL=http://payment-service.gluon-local.svc.cluster.local:8080
+VITE_USER_SERVICE_URL=http://user-service.gluon-local.svc.cluster.local:8080
+VITE_FULFILMENT_SERVICE_URL=http://fulfilment-service.gluon-local.svc.cluster.local:8080
 ```
 No `kubectl port-forward`, no Vite proxy. OrbStack bridges the cluster's
 own DNS/network straight to the host — that hostname resolves and the
@@ -261,14 +263,17 @@ never logged. Saved addresses remain localStorage keyed by `userId` until
 user-service owns them. The approved UI (banner, modal, a11y behaviour) is
 unchanged.
 
-## Fulfilment prototype (added 2026-10-28; history wired 2026-10-28)
+## Fulfilment queue (real service; added 2026-10-28)
 
-`src/services/fulfilmentStore.ts` is a seeded mock pick/pack/dispatch queue in
-localStorage (`gshop:fulfilmentQueue`), with a real state machine
-(PENDING→PICKING→PACKED→DISPATCHED, or DISPATCH_FAILED) that rejects invalid
-or terminal transitions. `FULFILMENT_MOCK_ENABLED` (default true;
-`VITE_FULFILMENT_MOCK=false` hides it) gates the Fulfilment screen and its
-Admin entry only — fulfilment-service's operator REST is internal and not yet
-wired. Order History reads the real order-service statuses (`dispatched` /
-`dispatch_failed` / `confirmed` / `payment_failed`) with no mock preview
-(US-17.6/18.5, US-19.5).
+`src/services/fulfilmentClient.ts` calls fulfilment-service's operator REST
+(`GET /fulfilment-tasks`; `POST .../{id}/start-picking|pack|dispatch|fail`)
+with the `FulfilmentClientError` (status + server `error` message) convention
+used by the other clients. Tasks themselves are created by the service from
+`payment-events: PaymentAuthorized` — gshop never seeds or persists queue
+state (the old `fulfilmentStore.ts` localStorage prototype and its
+`VITE_FULFILMENT_MOCK` flag were removed). The screen fetches on mount and
+after each action, with a manual Refresh; the response carries no customer
+identity, so cards show the shipping-address snapshot instead. Order History
+reads the real order-service statuses (`dispatched` / `dispatch_failed` /
+`confirmed` / `payment_failed`) with no mock preview (US-17.6/18.5, US-19.5,
+US-17.7).
