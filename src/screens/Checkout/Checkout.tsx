@@ -54,11 +54,13 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
   const [authSession, setAuthSession] = useState<AuthSession | null>(() =>
     AUTH_MOCK_ENABLED ? getSession() : null,
   );
-  const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | null>(null);
 
   const headingRef = useRef<HTMLHeadingElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const alertRef = useRef<HTMLDivElement>(null);
+  const authDialogRef = useRef<HTMLDivElement>(null);
+  const authTriggerRef = useRef<HTMLElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -82,6 +84,48 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
       alertRef.current?.focus();
     }
   }, [failure]);
+
+  // Modal semantics for the auth dialog: Esc closes it, Tab cycles inside it,
+  // and closing returns focus to whatever opened it. The Auth screen moves
+  // focus to its own heading on mount.
+  useEffect(() => {
+    if (!authMode) {
+      return;
+    }
+    const previous = document.activeElement as HTMLElement | null;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setAuthMode(null);
+        return;
+      }
+      if (event.key !== 'Tab') {
+        return;
+      }
+      const items = Array.from(
+        authDialogRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input:not([disabled])',
+        ) ?? [],
+      );
+      if (items.length === 0) {
+        return;
+      }
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      (authTriggerRef.current ?? previous)?.focus();
+    };
+  }, [authMode]);
 
   const updateAddress = (prefix: 'shipping' | 'billing', field: keyof AddressValues, value: string) => {
     setForm((prev) => ({
@@ -184,18 +228,6 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
     setAuthSession(null);
   };
 
-  if (authOpen) {
-    return (
-      <Auth
-        onAuthenticated={(session) => {
-          setAuthSession(session);
-          setAuthOpen(false);
-        }}
-        onBack={() => setAuthOpen(false)}
-      />
-    );
-  }
-
   const total = items.reduce(
     (sum, item) => sum + item.unitPriceCents * item.quantity,
     0,
@@ -223,12 +255,20 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
           aria-busy={submitting}
         >
           {AUTH_MOCK_ENABLED && (
-            <div className="checkout-auth">
+            <section className="checkout-auth-banner" aria-label="Account">
               {authSession ? (
                 <>
-                  <p>Signed in as {authSession.user.email}</p>
+                  <div>
+                    <p className="checkout-auth-banner__title">
+                      Signed in as {authSession.user.email}
+                    </p>
+                    <p className="checkout-auth-banner__subtitle">
+                      Your orders are saved to this account.
+                    </p>
+                  </div>
                   <button
                     type="button"
+                    className="checkout-auth-banner__secondary"
                     onClick={handleSignOut}
                     disabled={submitting}
                   >
@@ -236,15 +276,42 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
                   </button>
                 </>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => setAuthOpen(true)}
-                  disabled={submitting}
-                >
-                  Sign in / Create account
-                </button>
+                <>
+                  <div>
+                    <p className="checkout-auth-banner__title">
+                      Have an account?
+                    </p>
+                    <p className="checkout-auth-banner__subtitle">
+                      Sign in for faster checkout and order history.
+                    </p>
+                  </div>
+                  <div className="checkout-auth-banner__actions">
+                    <button
+                      type="button"
+                      className="checkout-auth-banner__primary"
+                      onClick={(event) => {
+                        authTriggerRef.current = event.currentTarget;
+                        setAuthMode('signin');
+                      }}
+                      disabled={submitting}
+                    >
+                      Sign in
+                    </button>
+                    <button
+                      type="button"
+                      className="checkout-auth-banner__secondary"
+                      onClick={(event) => {
+                        authTriggerRef.current = event.currentTarget;
+                        setAuthMode('signup');
+                      }}
+                      disabled={submitting}
+                    >
+                      Create account
+                    </button>
+                  </div>
+                </>
               )}
-            </div>
+            </section>
           )}
 
           {failure && (
@@ -440,6 +507,34 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
             </aside>
           </div>
         </form>
+      )}
+
+      {authMode && (
+        <div
+          className="auth-overlay"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setAuthMode(null);
+            }
+          }}
+        >
+          <div
+            ref={authDialogRef}
+            className="auth-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="auth-title"
+          >
+            <Auth
+              initialMode={authMode}
+              onAuthenticated={(session) => {
+                setAuthSession(session);
+                setAuthMode(null);
+              }}
+              onBack={() => setAuthMode(null)}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

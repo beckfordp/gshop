@@ -132,13 +132,13 @@ export default function Admin() {
       <h1>Admin</h1>
 
       <section className="admin-section">
-        <h2>Order history</h2>
+        <h2>Order history (this browser)</h2>
         {clearStep === 'idle' && (
           <button onClick={() => setClearStep('confirming')}>Clear order history</button>
         )}
         {clearStep === 'confirming' && (
           <div className="admin-confirm">
-            <p>This permanently deletes every order for this customer. Are you sure?</p>
+            <p>This permanently deletes every order made by this browser's profile. Admin-wide order listing is pending the backend change. Are you sure?</p>
             <button onClick={handleClearHistory}>Yes, clear it</button>
             <button onClick={() => setClearStep('idle')}>Cancel</button>
           </div>

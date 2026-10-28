@@ -41,3 +41,37 @@
   margin: var(--space-md) 0;
   color: var(--color-danger);
 }
+
+
+.order-history__identity {
+  margin: 0 0 var(--space-md);
+  font-size: 1.05rem;
+  color: var(--color-text-muted);
+}
+
+.order-history-card__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-sm);
+  font-size: 1.05rem;
+}
+
+.identity-badge {
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.identity-badge--user {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.identity-badge--anonymous {
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}

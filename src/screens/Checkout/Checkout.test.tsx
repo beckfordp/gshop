@@ -342,12 +342,14 @@ describe('Checkout', () => {
     expect(JSON.stringify(localStorage)).not.toContain('4242');
   });
 
-  it('offers sign-in when signed out and shows the email when signed in', () => {
+  it('prominently offers sign-in and account creation when signed out', () => {
     renderCheckout();
 
+    expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Sign in / Create account' }),
+      screen.getByRole('button', { name: 'Create account' }),
     ).toBeInTheDocument();
+    expect(screen.getByText('Have an account?')).toBeInTheDocument();
   });
 
   it('shows the signed-in email and a sign-out action', () => {
@@ -372,9 +374,7 @@ describe('Checkout', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
 
     expect(signOutMock).toHaveBeenCalledOnce();
-    expect(
-      screen.getByRole('button', { name: 'Sign in / Create account' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();
   });
 
   it('opening auth and returning preserves the checkout form', () => {
@@ -383,14 +383,13 @@ describe('Checkout', () => {
       target: { value: '1 Watchmaker Lane' },
     });
 
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Sign in / Create account' }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: 'Sign in' }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Back to checkout' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(screen.getByLabelText('Address line 1')).toHaveValue(
       '1 Watchmaker Lane',
@@ -415,5 +414,29 @@ describe('Checkout', () => {
       expect.anything(),
     );
     expect(getOrCreateCustomerIdMock).not.toHaveBeenCalled();
+  });
+
+  it('opens the create-account variant of the dialog', () => {
+    renderCheckout();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+
+    expect(
+      screen.getByRole('heading', { name: 'Create account' }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText('Confirm password')).toBeInTheDocument();
+  });
+
+  it('closes the auth dialog with Escape and returns focus to the trigger', () => {
+    renderCheckout();
+    const trigger = screen.getByRole('button', { name: 'Sign in' });
+
+    fireEvent.click(trigger);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
   });
 });

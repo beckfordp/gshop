@@ -258,4 +258,11 @@ the fake token live in localStorage; passwords are stored only as a SHA-256
 hash (`src/lib/sha256.ts`, a local implementation because jsdom's test
 environment has no `crypto.subtle`). No request leaves the browser. Replace
 it with a real `userClient` when `POST /auth/signup`/`POST /auth/login` land;
-the `AuthScreen` props (`onAuthenticated`, `onBack`) are designed to stay.
+the `Auth` props (`onAuthenticated`, `onBack`, `initialMode`) are designed to
+stay.
+
+The entry point is a prominent Checkout banner; the form renders in a modal
+overlay (`role="dialog"`, `aria-modal`, Esc/backdrop close, Tab trap, focus
+returned to the trigger; full-screen under 640px). Order History resolves
+`order.customerId` through `resolveIdentity` to a User/Anonymous badge.
+Admin-wide order listing needs a new order-service endpoint and is deferred.

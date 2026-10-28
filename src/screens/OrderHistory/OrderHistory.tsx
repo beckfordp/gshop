@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { orderClient, type Order } from '../../services/orderClient';
 import { getStoredCustomerId } from '../../services/customerId';
-import { getSession } from '../../services/mockAuth';
+import { getSession, resolveIdentity } from '../../services/mockAuth';
 import { errorMessage, formatPrice, formatStatus } from '../../lib/format';
 import WatchArt from '../../components/WatchArt/WatchArt';
 import './OrderHistory.css';
@@ -39,6 +39,22 @@ export default function OrderHistory() {
     load();
   }, [load]);
 
+  const session = getSession();
+  const identityHeader = (
+    <p className="order-history__identity">
+      {session ? (
+        <>
+          Signed in as <strong>{session.user.email}</strong> — showing your
+          orders
+        </>
+      ) : (
+        <>
+          <strong>Anonymous orders</strong> — sign in at checkout to keep these
+        </>
+      )}
+    </p>
+  );
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -53,14 +69,34 @@ export default function OrderHistory() {
   }
 
   if (orders.length === 0) {
-    return <p>You have no past orders.</p>;
+    return (
+      <div className="order-history">
+        {identityHeader}
+        <p>You have no past orders.</p>
+      </div>
+    );
   }
 
   return (
     <div className="order-history">
+      {identityHeader}
       <ul className="order-history-list">
-        {orders.map((order) => (
+        {orders.map((order) => {
+          const identity = resolveIdentity(order.customerId);
+          return (
           <li key={order.id} className="order-history-card">
+            <p className="order-history-card__identity">
+              <span
+                className={`identity-badge identity-badge--${identity.type}`}
+              >
+                {identity.type === 'user' ? 'User' : 'Anonymous'}
+              </span>
+              <span>
+                {identity.type === 'user'
+                  ? identity.email
+                  : `id ${identity.customerId.slice(0, 8)}…`}
+              </span>
+            </p>
             <p>Order ID: {order.id}</p>
             <p>Status: {formatStatus(order.status)}</p>
             <p>Date: {formatDate(order.createdAt)}</p>
@@ -77,7 +113,8 @@ export default function OrderHistory() {
             </ul>
             <p className="order-history-total">Total: {formatPrice(order.totalCents)}</p>
           </li>
-        ))}
+          );
+        })}
       </ul>
     </div>
   );

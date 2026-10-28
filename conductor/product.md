@@ -81,9 +81,11 @@ All four in-scope user stories are live: US-1 (browse catalog), US-2
   order. A dev-only prototype scenario control is shown when
   `VITE_CHECKOUT_MOCK=true`.
 - `src/screens/Auth/Auth.tsx` (prototype, Checkout Journey 2): signup/login
-  reached from Checkout; backed by `mockAuth` in the browser until
-  user-service lands. Signed-in checkout sends the mock `userId` as
-  `customerId`; Order History reads that user's orders.
+  in a modal opened from a prominent Checkout banner; backed by `mockAuth` in
+  the browser until user-service lands. Signed-in checkout sends the mock
+  `userId` as `customerId`; Order History reads that user's orders and badges
+  each order User/Anonymous. Admin-wide order listing is deferred until the
+  order-service API exists.
 - `src/screens/OrderConfirmation/OrderConfirmation.tsx` is the post-order
   display (order id, status, "Payment authorised", shipping address, line
   items, total). "Continue Shopping" returns to Catalog.

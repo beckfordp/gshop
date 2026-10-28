@@ -119,8 +119,23 @@ describe('Auth', () => {
     const onBack = vi.fn();
     renderAuth({ onBack });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Back to checkout' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(onBack).toHaveBeenCalledOnce();
+  });
+
+  it('respects initialMode', () => {
+    render(
+      <Auth
+        onAuthenticated={vi.fn()}
+        onBack={vi.fn()}
+        initialMode="signup"
+      />,
+    );
+
+    expect(
+      screen.getByRole('heading', { name: 'Create account' }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText('Confirm password')).toBeInTheDocument();
   });
 });

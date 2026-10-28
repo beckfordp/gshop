@@ -91,6 +91,20 @@ export async function signIn(
   return session;
 }
 
+export type OrderIdentity =
+  | { type: 'user'; userId: string; email: string }
+  | { type: 'anonymous'; customerId: string };
+
+/** Resolves an order's customerId to a reviewed identity: a known mock user
+  * (matched by userId) or an anonymous browser id. Prototype-only join — the
+  * real design adds a nullable userId to the order contract instead. */
+export function resolveIdentity(customerId: string): OrderIdentity {
+  const user = readUsers().find((candidate) => candidate.userId === customerId);
+  return user
+    ? { type: 'user', userId: customerId, email: user.email }
+    : { type: 'anonymous', customerId };
+}
+
 export function getSession(): AuthSession | null {
   try {
     const raw = localStorage.getItem(SESSION_KEY);

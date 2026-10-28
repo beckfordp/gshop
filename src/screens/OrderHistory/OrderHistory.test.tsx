@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import OrderHistory from './OrderHistory';
 import { orderClient, type Order } from '../../services/orderClient';
 import { getStoredCustomerId } from '../../services/customerId';
-import { getSession } from '../../services/mockAuth';
+import { getSession, resolveIdentity } from '../../services/mockAuth';
 
 vi.mock('../../services/orderClient', () => ({
   orderClient: { list: vi.fn() },
@@ -15,11 +15,13 @@ vi.mock('../../services/customerId', () => ({
 
 vi.mock('../../services/mockAuth', () => ({
   getSession: vi.fn(),
+  resolveIdentity: vi.fn(),
 }));
 
 const list = vi.mocked(orderClient.list);
 const getStoredCustomerIdMock = vi.mocked(getStoredCustomerId);
 const getSessionMock = vi.mocked(getSession);
+const resolveIdentityMock = vi.mocked(resolveIdentity);
 
 function makeOrder(overrides: Partial<Order> = {}): Order {
   return {
@@ -49,6 +51,11 @@ describe('OrderHistory', () => {
     getStoredCustomerIdMock.mockReset();
     getSessionMock.mockReset();
     getSessionMock.mockReturnValue(null);
+    resolveIdentityMock.mockReset();
+    resolveIdentityMock.mockImplementation((customerId) => ({
+      type: 'anonymous',
+      customerId,
+    }));
   });
 
   it('shows an empty-history message when no customer id is stored, with no API call', async () => {
@@ -152,5 +159,44 @@ describe('OrderHistory', () => {
 
     await screen.findByText('You have no past orders.');
     expect(list).toHaveBeenCalledWith('user-1');
+  });
+
+  it('marks anonymous orders with a clear badge and short id', async () => {
+    getStoredCustomerIdMock.mockReturnValue('anonymous-1');
+    list.mockResolvedValue([makeOrder({ customerId: 'anonymous-1' })]);
+
+    render(<OrderHistory />);
+
+    expect(await screen.findByText('Anonymous')).toBeInTheDocument();
+    expect(screen.getByText('id anonymou…')).toBeInTheDocument();
+    expect(screen.getByText(/Anonymous orders/)).toBeInTheDocument();
+  });
+
+  it('marks a known user order with their email', async () => {
+    getStoredCustomerIdMock.mockReturnValue('user-1');
+    list.mockResolvedValue([makeOrder({ customerId: 'user-1' })]);
+    resolveIdentityMock.mockReturnValue({
+      type: 'user',
+      userId: 'user-1',
+      email: 'ada@example.com',
+    });
+
+    render(<OrderHistory />);
+
+    expect(await screen.findByText('User')).toBeInTheDocument();
+    expect(screen.getByText('ada@example.com')).toBeInTheDocument();
+  });
+
+  it('shows the signed-in identity header', async () => {
+    getSessionMock.mockReturnValue({
+      user: { userId: 'user-1', email: 'ada@example.com' },
+      token: 'token-1',
+    });
+    getStoredCustomerIdMock.mockReturnValue('user-1');
+    list.mockResolvedValue([]);
+
+    render(<OrderHistory />);
+
+    expect(await screen.findByText(/Signed in as/)).toBeInTheDocument();
   });
 });

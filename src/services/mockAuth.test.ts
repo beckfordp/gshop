@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   AuthError,
   getSession,
+  resolveIdentity,
   signIn,
   signOut,
   signUp,
@@ -90,5 +91,22 @@ describe('mockAuth', () => {
     localStorage.setItem('gshop:authSession', '{not json');
 
     expect(getSession()).toBeNull();
+  });
+
+  it('resolveIdentity maps a stored user id to their email', async () => {
+    const session = await signUp(EMAIL, PASSWORD);
+
+    expect(resolveIdentity(session.user.userId)).toEqual({
+      type: 'user',
+      userId: session.user.userId,
+      email: EMAIL,
+    });
+  });
+
+  it('resolveIdentity treats an unknown id as anonymous', () => {
+    expect(resolveIdentity('anonymous-1')).toEqual({
+      type: 'anonymous',
+      customerId: 'anonymous-1',
+    });
   });
 });

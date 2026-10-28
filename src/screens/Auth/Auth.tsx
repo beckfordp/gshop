@@ -12,6 +12,7 @@ import './Auth.css';
 interface AuthProps {
   onAuthenticated: (session: AuthSession) => void;
   onBack: () => void;
+  initialMode?: 'signin' | 'signup';
 }
 
 type Mode = 'signin' | 'signup';
@@ -22,8 +23,12 @@ const EMPTY_FORM: AuthFormValues = {
   confirmPassword: '',
 };
 
-export default function Auth({ onAuthenticated, onBack }: AuthProps) {
-  const [mode, setMode] = useState<Mode>('signin');
+export default function Auth({
+  onAuthenticated,
+  onBack,
+  initialMode = 'signin',
+}: AuthProps) {
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [values, setValues] = useState<AuthFormValues>(EMPTY_FORM);
   const [errors, setErrors] = useState<AuthFormErrors>({});
   const [submitted, setSubmitted] = useState(false);
@@ -104,7 +109,7 @@ export default function Auth({ onAuthenticated, onBack }: AuthProps) {
 
   return (
     <div className="auth">
-      <h1 ref={headingRef} tabIndex={-1}>
+      <h1 ref={headingRef} id="auth-title" tabIndex={-1}>
         {mode === 'signin' ? 'Sign in' : 'Create account'}
       </h1>
       <p className="auth__intro">
@@ -224,7 +229,7 @@ export default function Auth({ onAuthenticated, onBack }: AuthProps) {
           onClick={onBack}
           disabled={submitting}
         >
-          Back to checkout
+          Cancel
         </button>
       </form>
     </div>

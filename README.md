@@ -58,8 +58,11 @@ provider-side tokenization.
 Checkout Journey 2's signup/login UI runs against an in-browser mock until
 user-service lands. It is on by default; set `VITE_AUTH_MOCK=false` to hide it.
 
-- Checkout offers "Sign in / Create account", opening a dedicated Auth screen
-  (Back returns to the checkout form with its values preserved).
+- A prominent banner at the top of Checkout offers **Sign in** and **Create
+  account**; auth opens as a modal dialog over the form (full-screen sheet on
+  mobile; Esc/backdrop close, focus trapped and returned to the trigger).
+- Order History shows a large identity header and a User/Anonymous badge on
+  every card (mock-user join); anonymous orders show a short id.
 - Accounts and the fake session live in `localStorage` (`gshop:mockUsers`,
   `gshop:authSession`); the password is stored only as a SHA-256 hash and
   nothing leaves the browser.
