@@ -270,4 +270,5 @@ or terminal transitions. `FULFILMENT_MOCK_ENABLED` (default true;
 `VITE_FULFILMENT_MOCK=false` hides it) gates the Fulfilment screen and its
 Admin entry only — fulfilment-service's operator REST is internal and not yet
 wired. Order History reads the real order-service statuses (`dispatched` /
-`dispatch_failed`) with no mock preview (US-17.6/18.5).
+`dispatch_failed` / `confirmed` / `payment_failed`) with no mock preview
+(US-17.6/18.5, US-19.5).

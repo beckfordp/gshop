@@ -90,8 +90,9 @@ yet (`VITE_FULFILMENT_MOCK=false` hides the screen).
   total and state: Pending → Picking → Packed → Dispatched, or Dispatch
   failed with a reason. Dispatch requires a tracking number + carrier;
   failure requires a reason. **Reset demo queue** restores the seed.
-- Order History shows the real `Dispatched` / `Dispatch failed` statuses from
-  order-service (US-17.6/18.5) — the old mock preview is gone.
+- Order History shows the real `Dispatched` / `Dispatch failed` / `Confirmed` /
+  `Payment failed` statuses from order-service (US-17.6/18.5, US-19.5) — the
+  old mock preview is gone.
 - Queue state lives under `gshop:fulfilmentQueue`; nothing leaves the browser.
 
 ## Scripts

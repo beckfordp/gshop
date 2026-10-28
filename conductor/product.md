@@ -91,8 +91,8 @@ All four in-scope user stories are live: US-1 (browse catalog), US-2
 - `src/screens/Fulfilment/Fulfilment.tsx` (prototype, Journey 3): operator
   pick/pack/dispatch queue fed by a seeded mock store; reached from Admin.
   Wiring it to fulfilment-service's operator REST is still pending; Order
-  History itself shows the real Dispatched / Dispatch failed statuses from
-  order-service (US-17.6/18.5).
+  History itself shows the real Dispatched / Dispatch failed / Confirmed /
+  Payment failed statuses from order-service (US-17.6/18.5, US-19.5).
 - `src/screens/OrderConfirmation/OrderConfirmation.tsx` is the post-order
   display (order id, status, "Payment authorised", shipping address, line
   items, total). "Continue Shopping" returns to Catalog.
