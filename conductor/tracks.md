@@ -6,9 +6,6 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [x] **Track: US-19.5 — Order History payment capture statuses**
-  *Link: [./tracks/capture-history_20261028/](./tracks/capture-history_20261028/)*
-
 ---
 
 ## Backlog
