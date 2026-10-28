@@ -276,4 +276,7 @@ after each action, with a manual Refresh; the response carries no customer
 identity, so cards show the shipping-address snapshot instead. Order History
 reads the real order-service statuses (`dispatched` / `dispatch_failed` /
 `confirmed` / `payment_failed`) with no mock preview (US-17.6/18.5, US-19.5,
-US-17.7).
+US-17.7). Auto-drive is a client-only demo toggle (`src/lib/autoDrive.ts`,
+3 s interval, 25% simulated failure calling `fail`): it drives the same public
+endpoints, so nothing extra is enabled server-side and the config-gated
+`simulate-next` stays unused by gshop.

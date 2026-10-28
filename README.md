@@ -96,6 +96,11 @@ API:
   old prototype's customer line.
 - Order History shows the real `Dispatched` / `Dispatch failed` / `Confirmed` /
   `Payment failed` statuses from order-service (US-17.6/18.5, US-19.5).
+- **Auto-drive** (demo): the toolbar toggle advances the oldest non-terminal
+  task one step every ~3 s via the real endpoints — Pending → Picking →
+  Packed → Dispatched — with a ~25% simulated warehouse failure so the
+  Dispatch failed path also appears. Manual forms pause it; any error turns it
+  off.
 
 ## Scripts
 

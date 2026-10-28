@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { errorMessage, formatPrice } from '../../lib/format';
 import {
+  AUTO_DRIVE_FAILURE_REASON,
+  AUTO_DRIVE_INTERVAL_MS,
+  shouldAutoFail,
+} from '../../lib/autoDrive';
+import {
   CARRIERS,
   generateTrackingNo,
   type Carrier,
@@ -51,6 +56,7 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
   const [carrier, setCarrier] = useState<Carrier>('DHL');
   const [reason, setReason] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [autoDrive, setAutoDrive] = useState(false);
 
   const alertRef = useRef<HTMLDivElement>(null);
 
@@ -84,24 +90,86 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
     setReason('');
   };
 
-  const apply = async (
-    orderId: string,
-    action: () => Promise<FulfilmentTask>,
-  ) => {
-    setError(null);
-    setBusy(orderId);
-    try {
-      const updated = await action();
-      setQueue((current) =>
-        current.map((task) => (task.orderId === updated.orderId ? updated : task)),
-      );
-      closeForms();
-    } catch (caught) {
-      setError(errorMessage(caught));
-    } finally {
-      setBusy(null);
+  const apply = useCallback(
+    async (
+      orderId: string,
+      action: () => Promise<FulfilmentTask>,
+    ): Promise<boolean> => {
+      setError(null);
+      setBusy(orderId);
+      try {
+        const updated = await action();
+        setQueue((current) =>
+          current.map((task) =>
+            task.orderId === updated.orderId ? updated : task,
+          ),
+        );
+        setDispatchFor(null);
+        setProblemFor(null);
+        setTrackingNo('');
+        setCarrier('DHL');
+        setReason('');
+        return true;
+      } catch (caught) {
+        setError(errorMessage(caught));
+        return false;
+      } finally {
+        setBusy(null);
+      }
+    },
+    [],
+  );
+
+  // Auto-drive (demo): call the real operator endpoints on a timer, with an
+  // occasional simulated warehouse failure so DispatchFailed shows up too.
+  const advance = useCallback(
+    async (task: FulfilmentTask): Promise<boolean> => {
+      const id = task.orderId;
+      switch (task.state) {
+        case 'PENDING':
+          return apply(id, () => fulfilmentClient.startPicking(id));
+        case 'PICKING':
+          return shouldAutoFail()
+            ? apply(id, () =>
+                fulfilmentClient.fail(id, AUTO_DRIVE_FAILURE_REASON),
+              )
+            : apply(id, () => fulfilmentClient.pack(id));
+        case 'PACKED':
+          return shouldAutoFail()
+            ? apply(id, () =>
+                fulfilmentClient.fail(id, AUTO_DRIVE_FAILURE_REASON),
+              )
+            : apply(id, () =>
+                fulfilmentClient.dispatch(
+                  id,
+                  generateTrackingNo('DHL'),
+                  'DHL',
+                ),
+              );
+        default:
+          return true;
+      }
+    },
+    [apply],
+  );
+
+  useEffect(() => {
+    if (!autoDrive || loading || busy || dispatchFor || problemFor) {
+      return;
     }
-  };
+    const target = queue.find((task) => !isTerminalState(task.state));
+    if (!target) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      void advance(target).then((succeeded) => {
+        if (!succeeded) {
+          setAutoDrive(false);
+        }
+      });
+    }, AUTO_DRIVE_INTERVAL_MS);
+    return () => clearTimeout(timer);
+  }, [autoDrive, loading, busy, dispatchFor, problemFor, queue, advance]);
 
   return (
     <div className="fulfilment">
@@ -126,6 +194,13 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
       <div className="fulfilment__toolbar">
         <button type="button" onClick={() => void load()} disabled={loading}>
           Refresh
+        </button>
+        <button
+          type="button"
+          aria-pressed={autoDrive}
+          onClick={() => setAutoDrive((on) => !on)}
+        >
+          {autoDrive ? 'Auto-drive: on' : 'Auto-drive: off'}
         </button>
       </div>
 

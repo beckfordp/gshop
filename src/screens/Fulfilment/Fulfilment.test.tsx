@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import Fulfilment from './Fulfilment';
 import type { FulfilmentState, FulfilmentTask } from '../../services/fulfilmentClient';
 
@@ -229,6 +229,102 @@ describe('Fulfilment', () => {
         'Failed to reach fulfilment service: fetch failed',
       ),
     );
+  });
+
+  describe('auto-drive', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    });
+
+    async function tick(): Promise<void> {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(3000);
+      });
+    }
+
+    it('advances a PENDING task to DISPATCHED every 3 seconds', async () => {
+      vi.useFakeTimers();
+      vi.spyOn(Math, 'random').mockReturnValue(0.9);
+      clientMock.listTasks.mockResolvedValue([task('order-1', 'PENDING')]);
+      clientMock.startPicking.mockResolvedValue(task('order-1', 'PICKING'));
+      clientMock.pack.mockResolvedValue(task('order-1', 'PACKED'));
+      clientMock.dispatch.mockResolvedValue({
+        ...task('order-1', 'DISPATCHED'),
+        trackingNo: '9999999999',
+        carrier: 'DHL',
+      });
+
+      render(<Fulfilment onBackToAdmin={vi.fn()} />);
+      await act(async () => {});
+      fireEvent.click(screen.getByText('Auto-drive: off'));
+
+      await tick();
+      expect(clientMock.startPicking).toHaveBeenCalledWith('order-1');
+      await tick();
+      expect(clientMock.pack).toHaveBeenCalledWith('order-1');
+      await tick();
+      expect(clientMock.dispatch).toHaveBeenCalledWith(
+        'order-1',
+        expect.stringMatching(/^\d{10}$/),
+        'DHL',
+      );
+      expect(within(card('order-1')).getByText('Dispatched')).toBeInTheDocument();
+      expect(screen.getByText('Auto-drive: on')).toBeInTheDocument();
+    });
+
+    it('simulates a warehouse failure instead of finishing a step', async () => {
+      vi.useFakeTimers();
+      vi.spyOn(Math, 'random').mockReturnValue(0.1);
+      clientMock.listTasks.mockResolvedValue([task('order-2', 'PICKING')]);
+      clientMock.fail.mockResolvedValue(task('order-2', 'DISPATCH_FAILED'));
+
+      render(<Fulfilment onBackToAdmin={vi.fn()} />);
+      await act(async () => {});
+      fireEvent.click(screen.getByText('Auto-drive: off'));
+      await tick();
+
+      expect(clientMock.fail).toHaveBeenCalledWith(
+        'order-2',
+        'Auto-drive simulated warehouse failure',
+      );
+      expect(clientMock.pack).not.toHaveBeenCalled();
+      expect(within(card('order-2')).getByText('Dispatch failed')).toBeInTheDocument();
+    });
+
+    it('stops advancing when toggled off', async () => {
+      vi.useFakeTimers();
+      vi.spyOn(Math, 'random').mockReturnValue(0.9);
+      clientMock.listTasks.mockResolvedValue([task('order-1', 'PENDING')]);
+
+      render(<Fulfilment onBackToAdmin={vi.fn()} />);
+      await act(async () => {});
+      fireEvent.click(screen.getByText('Auto-drive: off'));
+      fireEvent.click(screen.getByText('Auto-drive: on'));
+      await tick();
+
+      expect(clientMock.startPicking).not.toHaveBeenCalled();
+      expect(screen.getByText('Auto-drive: off')).toBeInTheDocument();
+    });
+
+    it('turns itself off when a step fails', async () => {
+      vi.useFakeTimers();
+      vi.spyOn(Math, 'random').mockReturnValue(0.9);
+      clientMock.listTasks.mockResolvedValue([task('order-1', 'PENDING')]);
+      clientMock.startPicking.mockRejectedValue(
+        new Error('Cannot start picking a PACKED task'),
+      );
+
+      render(<Fulfilment onBackToAdmin={vi.fn()} />);
+      await act(async () => {});
+      fireEvent.click(screen.getByText('Auto-drive: off'));
+      await tick();
+
+      expect(screen.getByText('Auto-drive: off')).toBeInTheDocument();
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'Cannot start picking a PACKED task',
+      );
+    });
   });
 
   it('goes back to Admin', async () => {
