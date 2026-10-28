@@ -80,6 +80,20 @@ the in-browser mock instead.
 
 The mock remains available only via `VITE_AUTH_MOCK=true`.
 
+## Fulfilment prototype (mock mode)
+
+Journey 3's order-processing UI runs on a seeded, localStorage-persisted queue
+until fulfilment-service lands (`VITE_FULFILMENT_MOCK=false` hides it).
+
+- Admin → **Open order processing** lists the queue with customer, items,
+  total and state: Pending → Picking → Packed → Dispatched, or Dispatch
+  failed with a reason. Dispatch requires a tracking number + carrier;
+  failure requires a reason. **Reset demo queue** restores the seed.
+- Order History shows a clearly-labelled prototype preview of the two
+  customer-facing terminal states (Dispatched with tracking, Dispatch failed
+  with reason).
+- Queue state lives under `gshop:fulfilmentQueue`; nothing leaves the browser.
+
 ## Scripts
 
 - `npm run dev` — local dev server

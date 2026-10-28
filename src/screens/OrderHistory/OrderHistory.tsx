@@ -3,6 +3,8 @@ import { orderClient, type Order } from '../../services/orderClient';
 import { getStoredCustomerId } from '../../services/customerId';
 import { getSession } from '../../services/mockAuth';
 import { resolveIdentity } from '../../services/identityStore';
+import { FULFILMENT_MOCK_ENABLED } from '../../services/env';
+import { getFulfilmentQueue } from '../../services/fulfilmentStore';
 import { errorMessage, formatPrice, formatStatus } from '../../lib/format';
 import WatchArt from '../../components/WatchArt/WatchArt';
 import './OrderHistory.css';
@@ -41,6 +43,61 @@ export default function OrderHistory() {
   }, [load]);
 
   const session = getSession();
+  const prototypeOrders = FULFILMENT_MOCK_ENABLED
+    ? getFulfilmentQueue().filter(
+        (order) =>
+          order.state === 'DISPATCHED' || order.state === 'DISPATCH_FAILED',
+      )
+    : [];
+  const prototypePreview = FULFILMENT_MOCK_ENABLED ? (
+    <section
+      className="order-history-prototype"
+      aria-label="Fulfilment prototype preview"
+    >
+      <h2>Prototype: fulfilment statuses</h2>
+      <p className="order-history__identity">
+        Sample orders from the mock order-processing queue.
+      </p>
+      <ul className="order-history-list">
+        {prototypeOrders.map((order) => (
+          <li key={order.orderId} className="order-history-card">
+            <p className="order-history-card__identity">
+              <span
+                className={`identity-badge identity-badge--${
+                  order.state === 'DISPATCHED' ? 'user' : 'anonymous'
+                }`}
+              >
+                {order.state === 'DISPATCHED' ? 'Shipped' : 'Problem'}
+              </span>
+              <span>{formatStatus(order.state)}</span>
+            </p>
+            <p>Order ID: {order.orderId}</p>
+            <ul className="order-history-items">
+              {order.items.map((item) => (
+                <li key={item.sku} className="order-history-item">
+                  <WatchArt sku={item.sku} name={item.productName} size={48} />
+                  <span>
+                    {item.productName} — qty {item.quantity} —{' '}
+                    {formatPrice(item.unitPriceCents * item.quantity)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="order-history-total">
+              Total: {formatPrice(order.totalCents)}
+            </p>
+            {order.state === 'DISPATCHED' ? (
+              <p>
+                Shipped via {order.carrier} — tracking {order.trackingNo}
+              </p>
+            ) : (
+              <p>Not dispatched: {order.failureReason}</p>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  ) : null;
   const identityHeader = (
     <p className="order-history__identity">
       {session ? (
@@ -74,6 +131,7 @@ export default function OrderHistory() {
       <div className="order-history">
         {identityHeader}
         <p>You have no past orders.</p>
+        {prototypePreview}
       </div>
     );
   }
@@ -81,6 +139,7 @@ export default function OrderHistory() {
   return (
     <div className="order-history">
       {identityHeader}
+      {prototypePreview}
       <ul className="order-history-list">
         {orders.map((order) => {
           const identity = resolveIdentity(order.customerId);

@@ -21,3 +21,8 @@ export const CHECKOUT_MOCK_ENABLED = import.meta.env.VITE_CHECKOUT_MOCK === 'tru
 // Auth mode (Checkout Journey 2). Real user-service by default; set
 // VITE_AUTH_MOCK=true to use the in-browser mock for offline UX work.
 export const AUTH_MOCK_ENABLED = import.meta.env.VITE_AUTH_MOCK === 'true';
+
+// Journey 3 prototype: the operator fulfilment queue is mock/local until
+// fulfilment-service lands. Set VITE_FULFILMENT_MOCK=false to hide it.
+export const FULFILMENT_MOCK_ENABLED =
+  import.meta.env.VITE_FULFILMENT_MOCK !== 'false';

@@ -6,6 +6,14 @@ import { getStoredCustomerId } from '../../services/customerId';
 import { getSession } from '../../services/mockAuth';
 import { resolveIdentity } from '../../services/identityStore';
 
+const envMock = vi.hoisted(() => ({ fulfilmentEnabled: true }));
+
+vi.mock('../../services/env', () => ({
+  get FULFILMENT_MOCK_ENABLED() {
+    return envMock.fulfilmentEnabled;
+  },
+}));
+
 vi.mock('../../services/orderClient', () => ({
   orderClient: { list: vi.fn() },
 }));
@@ -55,6 +63,8 @@ describe('OrderHistory', () => {
     getStoredCustomerIdMock.mockReset();
     getSessionMock.mockReset();
     getSessionMock.mockReturnValue(null);
+    envMock.fulfilmentEnabled = false;
+    localStorage.clear();
     resolveIdentityMock.mockReset();
     resolveIdentityMock.mockImplementation((customerId) => ({
       type: 'anonymous',
@@ -202,5 +212,35 @@ describe('OrderHistory', () => {
     render(<OrderHistory />);
 
     expect(await screen.findByText(/Signed in as/)).toBeInTheDocument();
+  });
+
+  it('shows the prototype fulfilment preview with shipped and failed samples', async () => {
+    envMock.fulfilmentEnabled = true;
+    getStoredCustomerIdMock.mockReturnValue(null);
+    list.mockResolvedValue([]);
+
+    render(<OrderHistory />);
+
+    expect(
+      await screen.findByText('Prototype: fulfilment statuses'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Shipped via DHL Express — tracking GLN-8842-7710'))
+      .toBeInTheDocument();
+    expect(
+      screen.getByText('Not dispatched: Item damaged during packing'),
+    ).toBeInTheDocument();
+  });
+
+  it('hides the prototype preview when the fulfilment mock is disabled', async () => {
+    envMock.fulfilmentEnabled = false;
+    getStoredCustomerIdMock.mockReturnValue(null);
+    list.mockResolvedValue([]);
+
+    render(<OrderHistory />);
+
+    await screen.findByText('You have no past orders.');
+    expect(
+      screen.queryByText('Prototype: fulfilment statuses'),
+    ).not.toBeInTheDocument();
   });
 });

@@ -21,7 +21,11 @@ interface InventoryRow {
   quantityReserved: number;
 }
 
-export default function Admin() {
+interface AdminProps {
+  onOpenFulfilment?: () => void;
+}
+
+export default function Admin({ onOpenFulfilment }: AdminProps = {}) {
   const [inventoryLoading, setInventoryLoading] = useState(true);
   const [inventoryError, setInventoryError] = useState<string | null>(null);
   const [rows, setRows] = useState<InventoryRow[]>([]);
@@ -130,6 +134,14 @@ export default function Admin() {
   return (
     <div className="admin">
       <h1>Admin</h1>
+
+      {onOpenFulfilment && (
+        <section className="admin-section">
+          <h2>Fulfilment</h2>
+          <p>Pick, pack and dispatch orders — prototype queue.</p>
+          <button onClick={onOpenFulfilment}>Open order processing</button>
+        </section>
+      )}
 
       <section className="admin-section">
         <h2>Order history (this browser)</h2>

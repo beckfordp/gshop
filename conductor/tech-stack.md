@@ -260,3 +260,13 @@ badges. Sessions persist in localStorage under `gshop:authSession`; tokens are
 never logged. Saved addresses remain localStorage keyed by `userId` until
 user-service owns them. The approved UI (banner, modal, a11y behaviour) is
 unchanged.
+
+## Fulfilment prototype (added 2026-10-28)
+
+`src/services/fulfilmentStore.ts` is a seeded mock pick/pack/dispatch queue in
+localStorage (`gshop:fulfilmentQueue`), with a real state machine
+(PENDING→PICKING→PACKED→DISPATCHED, or DISPATCH_FAILED) that rejects invalid
+or terminal transitions. `FULFILMENT_MOCK_ENABLED` (default true;
+`VITE_FULFILMENT_MOCK=false` hides it) gates the Fulfilment screen, its Admin
+entry and the Order History prototype preview. Replaced by fulfilment-service's
+API when Journey 3's backend lands.

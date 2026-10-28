@@ -5,6 +5,7 @@ import Checkout from './screens/Checkout/Checkout'
 import OrderConfirmation from './screens/OrderConfirmation/OrderConfirmation'
 import OrderHistory from './screens/OrderHistory/OrderHistory'
 import Admin from './screens/Admin/Admin'
+import Fulfilment from './screens/Fulfilment/Fulfilment'
 import type { NewOrderItem, Order } from './services/orderClient'
 import './App.css'
 
@@ -15,6 +16,7 @@ type AppView =
   | { name: 'confirmation'; order: Order }
   | { name: 'history' }
   | { name: 'admin' }
+  | { name: 'fulfilment' }
 
 const NAV_TARGETS: { view: AppView; label: string }[] = [
   { view: { name: 'catalog' }, label: 'Back to Catalog' },
@@ -64,7 +66,12 @@ function App() {
           />
         )}
         {view.name === 'history' && <OrderHistory />}
-        {view.name === 'admin' && <Admin />}
+        {view.name === 'admin' && (
+          <Admin onOpenFulfilment={() => setView({ name: 'fulfilment' })} />
+        )}
+        {view.name === 'fulfilment' && (
+          <Fulfilment onBackToAdmin={() => setView({ name: 'admin' })} />
+        )}
       </main>
       {!inCheckoutFlow && (
         <a

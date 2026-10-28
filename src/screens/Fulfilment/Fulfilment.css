@@ -1,0 +1,154 @@
+.fulfilment {
+  padding: var(--space-md) 0;
+}
+
+.fulfilment h1:focus {
+  outline: none;
+}
+
+.fulfilment__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.fulfilment__intro {
+  color: var(--color-text-muted);
+  margin-top: var(--space-xs);
+}
+
+.fulfilment__toolbar {
+  margin: var(--space-sm) 0 var(--space-md);
+}
+
+.fulfilment__alert {
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm) var(--space-md);
+  margin: var(--space-md) 0;
+  background-color: var(--color-bg-elevated);
+}
+
+.fulfilment__alert:focus {
+  outline: none;
+}
+
+.fulfilment-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.fulfilment-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-elevated);
+  padding: var(--space-md);
+}
+
+.fulfilment-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.fulfilment-card__id {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.fulfilment-card__customer {
+  color: var(--color-text-muted);
+  margin: var(--space-xs) 0;
+}
+
+.fulfilment-card__items {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-xs) 0;
+}
+
+.fulfilment-card__total {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--color-accent);
+  margin: var(--space-xs) 0;
+}
+
+.fulfilment-card__outcome {
+  margin: var(--space-xs) 0;
+  font-size: 1rem;
+}
+
+.fulfilment-card__actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-top: var(--space-sm);
+}
+
+.fulfilment-card__problem {
+  background: none;
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+}
+
+.fulfilment-badge {
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.fulfilment-badge--pending {
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.fulfilment-badge--picking,
+.fulfilment-badge--packed {
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+}
+
+.fulfilment-badge--dispatched {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.fulfilment-badge--dispatch_failed {
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+}
+
+.fulfilment-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+.fulfilment-form input {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font: inherit;
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.fulfilment-form__actions {
+  display: flex;
+  gap: var(--space-sm);
+}
