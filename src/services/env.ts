@@ -12,6 +12,7 @@ export const ORDER_SERVICE_URL = import.meta.env.VITE_ORDER_SERVICE_URL;
 export const INVENTORY_SERVICE_URL = import.meta.env.VITE_INVENTORY_SERVICE_URL;
 export const PAYMENT_SERVICE_URL = import.meta.env.VITE_PAYMENT_SERVICE_URL;
 export const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL;
+export const FULFILMENT_SERVICE_URL = import.meta.env.VITE_FULFILMENT_SERVICE_URL;
 
 // Prototype flag: when true, Checkout talks to an in-browser mock instead of
 // payment-service/order-service. Set VITE_CHECKOUT_MOCK=true for local UX
@@ -21,8 +22,3 @@ export const CHECKOUT_MOCK_ENABLED = import.meta.env.VITE_CHECKOUT_MOCK === 'tru
 // Auth mode (Checkout Journey 2). Real user-service by default; set
 // VITE_AUTH_MOCK=true to use the in-browser mock for offline UX work.
 export const AUTH_MOCK_ENABLED = import.meta.env.VITE_AUTH_MOCK === 'true';
-
-// Journey 3 prototype: the operator fulfilment queue is mock/local until
-// fulfilment-service lands. Set VITE_FULFILMENT_MOCK=false to hide it.
-export const FULFILMENT_MOCK_ENABLED =
-  import.meta.env.VITE_FULFILMENT_MOCK !== 'false';
