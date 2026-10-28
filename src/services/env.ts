@@ -16,3 +16,8 @@ export const PAYMENT_SERVICE_URL = import.meta.env.VITE_PAYMENT_SERVICE_URL;
 // payment-service/order-service. Set VITE_CHECKOUT_MOCK=true for local UX
 // tryouts; unset/false uses the real clients. See README.md.
 export const CHECKOUT_MOCK_ENABLED = import.meta.env.VITE_CHECKOUT_MOCK === 'true';
+
+// Prototype flag for the signup/login flow (Checkout Journey 2). On by
+// default until user-service lands; set VITE_AUTH_MOCK=false to hide it.
+// The mock lives entirely in the browser — see mockAuth.ts.
+export const AUTH_MOCK_ENABLED = import.meta.env.VITE_AUTH_MOCK !== 'false';

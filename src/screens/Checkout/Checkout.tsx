@@ -4,7 +4,10 @@ import { clearCartId, getStoredCartId } from '../../services/cartId';
 import { getOrCreateCustomerId } from '../../services/customerId';
 import { checkoutGateway } from '../../services/checkoutGateway';
 import { setMockScenario, type MockScenario } from '../../services/checkoutMock';
-import { CHECKOUT_MOCK_ENABLED } from '../../services/env';
+import { AUTH_MOCK_ENABLED, CHECKOUT_MOCK_ENABLED } from '../../services/env';
+import { getSession, signOut } from '../../services/mockAuth';
+import type { AuthSession } from '../../services/authTypes';
+import Auth from '../Auth/Auth';
 import type { NewOrderItem, Order } from '../../services/orderClient';
 import type { ReservationFailure } from '../../services/checkoutTypes';
 import { errorMessage, formatPrice } from '../../lib/format';
@@ -48,6 +51,10 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
   const [submitting, setSubmitting] = useState(false);
   const [failure, setFailure] = useState<Failure | null>(null);
   const [scenario, setScenario] = useState<MockScenario>('normal');
+  const [authSession, setAuthSession] = useState<AuthSession | null>(() =>
+    AUTH_MOCK_ENABLED ? getSession() : null,
+  );
+  const [authOpen, setAuthOpen] = useState(false);
 
   const headingRef = useRef<HTMLHeadingElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -117,7 +124,7 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
     try {
       const result = await checkoutGateway.submit(
         {
-          customerId: getOrCreateCustomerId(),
+          customerId: authSession?.user.userId ?? getOrCreateCustomerId(),
           items,
           shippingAddress: toAddress(form.shipping),
           billingAddress: toAddress(form.sameAsShipping ? form.shipping : form.billing),
@@ -172,6 +179,23 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
     }
   };
 
+  const handleSignOut = () => {
+    signOut();
+    setAuthSession(null);
+  };
+
+  if (authOpen) {
+    return (
+      <Auth
+        onAuthenticated={(session) => {
+          setAuthSession(session);
+          setAuthOpen(false);
+        }}
+        onBack={() => setAuthOpen(false)}
+      />
+    );
+  }
+
   const total = items.reduce(
     (sum, item) => sum + item.unitPriceCents * item.quantity,
     0,
@@ -198,6 +222,31 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
           onSubmit={handleSubmit}
           aria-busy={submitting}
         >
+          {AUTH_MOCK_ENABLED && (
+            <div className="checkout-auth">
+              {authSession ? (
+                <>
+                  <p>Signed in as {authSession.user.email}</p>
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    disabled={submitting}
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAuthOpen(true)}
+                  disabled={submitting}
+                >
+                  Sign in / Create account
+                </button>
+              )}
+            </div>
+          )}
+
           {failure && (
             <div
               ref={alertRef}

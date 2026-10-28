@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import OrderHistory from './OrderHistory';
 import { orderClient, type Order } from '../../services/orderClient';
 import { getStoredCustomerId } from '../../services/customerId';
+import { getSession } from '../../services/mockAuth';
 
 vi.mock('../../services/orderClient', () => ({
   orderClient: { list: vi.fn() },
@@ -12,8 +13,13 @@ vi.mock('../../services/customerId', () => ({
   getStoredCustomerId: vi.fn(),
 }));
 
+vi.mock('../../services/mockAuth', () => ({
+  getSession: vi.fn(),
+}));
+
 const list = vi.mocked(orderClient.list);
 const getStoredCustomerIdMock = vi.mocked(getStoredCustomerId);
+const getSessionMock = vi.mocked(getSession);
 
 function makeOrder(overrides: Partial<Order> = {}): Order {
   return {
@@ -41,6 +47,8 @@ describe('OrderHistory', () => {
   beforeEach(() => {
     list.mockReset();
     getStoredCustomerIdMock.mockReset();
+    getSessionMock.mockReset();
+    getSessionMock.mockReturnValue(null);
   });
 
   it('shows an empty-history message when no customer id is stored, with no API call', async () => {
@@ -130,5 +138,19 @@ describe('OrderHistory', () => {
 
     await screen.findByText(/order-1/);
     expect(screen.queryByText('order service down')).not.toBeInTheDocument();
+  });
+
+  it("lists the signed-in user's orders instead of the anonymous id", async () => {
+    getSessionMock.mockReturnValue({
+      user: { userId: 'user-1', email: 'ada@example.com' },
+      token: 'token-1',
+    });
+    getStoredCustomerIdMock.mockReturnValue('anonymous-1');
+    list.mockResolvedValue([]);
+
+    render(<OrderHistory />);
+
+    await screen.findByText('You have no past orders.');
+    expect(list).toHaveBeenCalledWith('user-1');
   });
 });

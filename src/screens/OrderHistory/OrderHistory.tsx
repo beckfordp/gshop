@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { orderClient, type Order } from '../../services/orderClient';
 import { getStoredCustomerId } from '../../services/customerId';
+import { getSession } from '../../services/mockAuth';
 import { errorMessage, formatPrice, formatStatus } from '../../lib/format';
 import WatchArt from '../../components/WatchArt/WatchArt';
 import './OrderHistory.css';
@@ -15,7 +16,7 @@ export default function OrderHistory() {
   const [orders, setOrders] = useState<Order[]>([]);
 
   const load = useCallback(async () => {
-    const customerId = getStoredCustomerId();
+    const customerId = getSession()?.user.userId ?? getStoredCustomerId();
     if (!customerId) {
       setOrders([]);
       setLoading(false);

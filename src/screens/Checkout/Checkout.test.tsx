@@ -6,6 +6,7 @@ import { checkoutGateway } from '../../services/checkoutGateway';
 import { cartClient, type Cart } from '../../services/cartClient';
 import { clearCartId, getStoredCartId } from '../../services/cartId';
 import { getOrCreateCustomerId } from '../../services/customerId';
+import { getSession, signOut } from '../../services/mockAuth';
 import type { NewOrderItem, Order } from '../../services/orderClient';
 
 vi.mock('../../services/checkoutGateway', () => ({
@@ -25,11 +26,18 @@ vi.mock('../../services/customerId', () => ({
   getOrCreateCustomerId: vi.fn(),
 }));
 
+vi.mock('../../services/mockAuth', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../services/mockAuth')>();
+  return { ...actual, getSession: vi.fn(), signOut: vi.fn() };
+});
+
 const submit = vi.mocked(checkoutGateway.submit);
 const removeItem = vi.mocked(cartClient.removeItem);
 const getStoredCartIdMock = vi.mocked(getStoredCartId);
 const clearCartIdMock = vi.mocked(clearCartId);
 const getOrCreateCustomerIdMock = vi.mocked(getOrCreateCustomerId);
+const getSessionMock = vi.mocked(getSession);
+const signOutMock = vi.mocked(signOut);
 
 const items: NewOrderItem[] = [
   { sku: 'WID-1', productName: 'Widget', unitPriceCents: 1000, quantity: 2 },
@@ -92,6 +100,9 @@ describe('Checkout', () => {
     clearCartIdMock.mockReset();
     getOrCreateCustomerIdMock.mockReset();
     getOrCreateCustomerIdMock.mockReturnValue('customer-1');
+    getSessionMock.mockReset();
+    getSessionMock.mockReturnValue(null);
+    signOutMock.mockReset();
     localStorage.clear();
   });
 
@@ -329,5 +340,80 @@ describe('Checkout', () => {
     await screen.findByText(/Payment declined/);
 
     expect(JSON.stringify(localStorage)).not.toContain('4242');
+  });
+
+  it('offers sign-in when signed out and shows the email when signed in', () => {
+    renderCheckout();
+
+    expect(
+      screen.getByRole('button', { name: 'Sign in / Create account' }),
+    ).toBeInTheDocument();
+  });
+
+  it('shows the signed-in email and a sign-out action', () => {
+    getSessionMock.mockReturnValue({
+      user: { userId: 'user-1', email: 'ada@example.com' },
+      token: 'token-1',
+    });
+
+    renderCheckout();
+
+    expect(screen.getByText('Signed in as ada@example.com')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
+  });
+
+  it('signing out clears the session', () => {
+    getSessionMock.mockReturnValue({
+      user: { userId: 'user-1', email: 'ada@example.com' },
+      token: 'token-1',
+    });
+
+    renderCheckout();
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+
+    expect(signOutMock).toHaveBeenCalledOnce();
+    expect(
+      screen.getByRole('button', { name: 'Sign in / Create account' }),
+    ).toBeInTheDocument();
+  });
+
+  it('opening auth and returning preserves the checkout form', () => {
+    renderCheckout();
+    fireEvent.change(screen.getByLabelText('Address line 1'), {
+      target: { value: '1 Watchmaker Lane' },
+    });
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Sign in / Create account' }),
+    );
+    expect(
+      screen.getByRole('heading', { name: 'Sign in' }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Back to checkout' }));
+
+    expect(screen.getByLabelText('Address line 1')).toHaveValue(
+      '1 Watchmaker Lane',
+    );
+  });
+
+  it('submits the signed-in user id as the customerId', async () => {
+    getSessionMock.mockReturnValue({
+      user: { userId: 'user-1', email: 'ada@example.com' },
+      token: 'token-1',
+    });
+    const onOrderPlaced = vi.fn();
+    submit.mockResolvedValue({ kind: 'authorized', order: makeOrder() });
+
+    renderCheckout({ onOrderPlaced });
+    fillForm();
+    fireEvent.click(screen.getByRole('button', { name: 'Place order' }));
+
+    await waitFor(() => expect(onOrderPlaced).toHaveBeenCalled());
+    expect(submit).toHaveBeenCalledWith(
+      expect.objectContaining({ customerId: 'user-1' }),
+      expect.anything(),
+    );
+    expect(getOrCreateCustomerIdMock).not.toHaveBeenCalled();
   });
 });

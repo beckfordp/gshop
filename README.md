@@ -53,6 +53,23 @@ Prototype caveat: collecting a raw PAN in browser state is acceptable only
 for the simulator. A real provider integration needs hosted fields or
 provider-side tokenization.
 
+## Auth prototype (mock mode)
+
+Checkout Journey 2's signup/login UI runs against an in-browser mock until
+user-service lands. It is on by default; set `VITE_AUTH_MOCK=false` to hide it.
+
+- Checkout offers "Sign in / Create account", opening a dedicated Auth screen
+  (Back returns to the checkout form with its values preserved).
+- Accounts and the fake session live in `localStorage` (`gshop:mockUsers`,
+  `gshop:authSession`); the password is stored only as a SHA-256 hash and
+  nothing leaves the browser.
+- When signed in, the mock `userId` becomes the order's `customerId` and
+  Order History reads that user's orders; signed out keeps the anonymous id.
+- Sign up, wrong password, duplicate email, field validation and sign out are
+  all reachable by hand for review.
+
+This mock is replaced by a real `userClient` when the service lands.
+
 ## Scripts
 
 - `npm run dev` — local dev server
@@ -62,7 +79,8 @@ provider-side tokenization.
 ## Status
 
 Catalog, Cart, Checkout (form + confirmation), Order History, and Admin
-screens are live. Checkout collects shipping/billing addresses and card
+screens are live. Signup/login is a mock-backed prototype pending
+user-service (see "Auth prototype" above). Checkout collects shipping/billing addresses and card
 details, creates a payment method, then submits the order against the real
 `POST /orders` contract: `201` → confirmation, `402` → inline decline with
 the card editable, `409` → every failed line with its own Remove action,

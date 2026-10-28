@@ -248,3 +248,14 @@ order-service's own deliberate design" reasoning as above — the Admin
 screen's "Order history cleared." message is accurate (the deletes did
 happen), the Order History *screen* just won't reflect it for up to a
 minute, same as a just-placed order's delayed appearance.
+
+## Auth prototype (added 2026-10-28)
+
+`src/services/mockAuth.ts` is an in-browser stand-in for user-service
+(Checkout Journey 2). `AUTH_MOCK_ENABLED` (default true; `VITE_AUTH_MOCK=false`
+hides it) gates the Checkout entry point and `src/screens/Auth/`. Accounts and
+the fake token live in localStorage; passwords are stored only as a SHA-256
+hash (`src/lib/sha256.ts`, a local implementation because jsdom's test
+environment has no `crypto.subtle`). No request leaves the browser. Replace
+it with a real `userClient` when `POST /auth/signup`/`POST /auth/login` land;
+the `AuthScreen` props (`onAuthenticated`, `onBack`) are designed to stay.

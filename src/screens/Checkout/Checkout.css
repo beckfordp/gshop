@@ -230,3 +230,15 @@
     position: static;
   }
 }
+
+.checkout-auth {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  color: var(--color-text-muted);
+}
+
+.checkout-auth p {
+  margin: 0;
+}
