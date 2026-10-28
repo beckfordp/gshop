@@ -133,6 +133,8 @@ describe('OrderHistory', () => {
   it.each<[OrderStatus, string]>([
     ['dispatched', 'Dispatched'],
     ['dispatch_failed', 'Dispatch failed'],
+    ['confirmed', 'Confirmed'],
+    ['payment_failed', 'Payment failed'],
   ])('renders the real %s status as "%s"', async (status, label) => {
     getStoredCustomerIdMock.mockReturnValue('customer-1');
     list.mockResolvedValue([makeOrder({ status })]);
@@ -140,6 +142,18 @@ describe('OrderHistory', () => {
     render(<OrderHistory />);
 
     expect(await screen.findByText(`Status: ${label}`)).toBeInTheDocument();
+  });
+
+  it('still renders the full card for a capture-failed order', async () => {
+    getStoredCustomerIdMock.mockReturnValue('customer-1');
+    list.mockResolvedValue([makeOrder({ status: 'payment_failed' })]);
+
+    render(<OrderHistory />);
+
+    expect(await screen.findByText('Status: Payment failed')).toBeInTheDocument();
+    expect(screen.getByText(/Order ID: order-1/)).toBeInTheDocument();
+    expect(screen.getByText(/Widget/)).toBeInTheDocument();
+    expect(screen.getByText('Total: $19.99')).toBeInTheDocument();
   });
 
   it('does not show the prototype fulfilment preview', async () => {
