@@ -2,9 +2,9 @@
 
 ## Phase 1: Capture statuses in Order History
 
-- [ ] Task: Extend the `OrderHistory` status test with `confirmed` → "Confirmed" and `payment_failed` → "Payment failed", and assert a capture-failed order still shows its items and total. The rendering is already generic (`formatStatus`), so this is a characterisation test — expect green; only change production code if it exposes a real gap
-- [ ] Task: Refactor if needed, full suite green
-- [ ] Task: Conductor - User Manual Verification 'Capture statuses in Order History' (Protocol in workflow.md)
+- [x] Task: Extend the `OrderHistory` status test with `confirmed` → "Confirmed" and `payment_failed` → "Payment failed", and assert a capture-failed order still shows its items and total. The rendering is already generic (`formatStatus`), so this is a characterisation test — expect green; only change production code if it exposes a real gap `da5857f`
+- [x] Task: Refactor if needed, full suite green `da5857f`
+- [x] Task: Conductor - User Manual Verification 'Capture statuses in Order History' (Protocol in workflow.md) — 240 tests green `da5857f`
 
 ## Phase 2: Docs + live proof
 
