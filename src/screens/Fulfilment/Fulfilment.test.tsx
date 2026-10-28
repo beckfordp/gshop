@@ -99,18 +99,30 @@ describe('Fulfilment', () => {
     expect(await within(card('order-1')).findByText('Packed')).toBeInTheDocument();
 
     fireEvent.click(within(card('order-1')).getByText('Dispatch'));
-    fireEvent.change(within(card('order-1')).getByLabelText('Tracking number'), {
-      target: { value: 'GLN-42' },
+    const tracking = within(card('order-1')).getByLabelText(
+      'Tracking number',
+    ) as HTMLInputElement;
+    const carrier = within(card('order-1')).getByLabelText(
+      'Carrier',
+    ) as HTMLSelectElement;
+    expect(carrier.value).toBe('DHL');
+    expect(tracking.value).toMatch(/^\d{10}$/);
+
+    fireEvent.change(carrier, { target: { value: 'UPS' } });
+    expect(tracking.value).toMatch(/^1Z[0-9A-Z]{16}$/);
+    const upsTracking = tracking.value;
+    clientMock.dispatch.mockResolvedValue({
+      ...task('order-1', 'DISPATCHED'),
+      trackingNo: upsTracking,
+      carrier: 'UPS',
     });
-    fireEvent.change(within(card('order-1')).getByLabelText('Carrier'), {
-      target: { value: 'DHL Express' },
-    });
+
     fireEvent.click(within(card('order-1')).getByText('Confirm dispatch'));
 
     expect(await within(card('order-1')).findByText('Dispatched')).toBeInTheDocument();
-    expect(clientMock.dispatch).toHaveBeenCalledWith('order-1', 'GLN-42', 'DHL Express');
+    expect(clientMock.dispatch).toHaveBeenCalledWith('order-1', upsTracking, 'UPS');
     expect(
-      within(card('order-1')).getByText('Shipped via DHL Express — tracking GLN-42'),
+      within(card('order-1')).getByText(`Shipped via UPS — tracking ${upsTracking}`),
     ).toBeInTheDocument();
   });
 
@@ -119,6 +131,10 @@ describe('Fulfilment', () => {
     await screen.findByText('order-3');
 
     fireEvent.click(within(card('order-3')).getByText('Dispatch'));
+    fireEvent.change(
+      within(card('order-3')).getByLabelText('Tracking number'),
+      { target: { value: '' } },
+    );
     fireEvent.click(within(card('order-3')).getByText('Confirm dispatch'));
 
     expect(screen.getByRole('alert')).toHaveTextContent(

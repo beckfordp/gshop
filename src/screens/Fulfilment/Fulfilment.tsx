@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { errorMessage, formatPrice } from '../../lib/format';
 import {
+  CARRIERS,
+  generateTrackingNo,
+  type Carrier,
+} from '../../lib/tracking';
+import {
   fulfilmentClient,
   type FulfilmentState,
   type FulfilmentTask,
@@ -43,7 +48,7 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
   const [dispatchFor, setDispatchFor] = useState<string | null>(null);
   const [problemFor, setProblemFor] = useState<string | null>(null);
   const [trackingNo, setTrackingNo] = useState('');
-  const [carrier, setCarrier] = useState('');
+  const [carrier, setCarrier] = useState<Carrier>('DHL');
   const [reason, setReason] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -75,7 +80,7 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
     setDispatchFor(null);
     setProblemFor(null);
     setTrackingNo('');
-    setCarrier('');
+    setCarrier('DHL');
     setReason('');
   };
 
@@ -208,6 +213,8 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
                       onClick={() => {
                         closeForms();
                         setError(null);
+                        setCarrier('DHL');
+                        setTrackingNo(generateTrackingNo('DHL'));
                         setDispatchFor(order.orderId);
                       }}
                     >
@@ -240,11 +247,21 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
                     onChange={(event) => setTrackingNo(event.target.value)}
                   />
                   <label htmlFor={`carrier-${order.orderId}`}>Carrier</label>
-                  <input
+                  <select
                     id={`carrier-${order.orderId}`}
                     value={carrier}
-                    onChange={(event) => setCarrier(event.target.value)}
-                  />
+                    onChange={(event) => {
+                      const next = event.target.value as Carrier;
+                      setCarrier(next);
+                      setTrackingNo(generateTrackingNo(next));
+                    }}
+                  >
+                    {CARRIERS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
                   <div className="fulfilment-form__actions">
                     <button
                       type="button"
