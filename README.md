@@ -27,6 +27,7 @@ system-design.md`.
 | order-service | `src/services/orderClient.ts` | live — Checkout (`POST /orders`, extended with address/payment method), Order History |
 | inventory-service | `src/services/inventoryClient.ts` | live — Admin screen stock table |
 | payment-service | `src/services/paymentClient.ts` | live — `POST /payments/methods` (US-13) |
+| user-service | `src/services/userClient.ts` | live — `POST /auth/signup`, `POST /auth/login` (US-16) |
 
 Base URLs are read from Vite env vars (`VITE_<NAME>_SERVICE_URL`, see
 `src/services/env.ts`) — there's no documented local port map yet for
@@ -53,10 +54,12 @@ Prototype caveat: collecting a raw PAN in browser state is acceptable only
 for the simulator. A real provider integration needs hosted fields or
 provider-side tokenization.
 
-## Auth prototype (mock mode)
+## Auth
 
-Checkout Journey 2's signup/login UI runs against an in-browser mock until
-user-service lands. It is on by default; set `VITE_AUTH_MOCK=false` to hide it.
+Signup/login runs against the real user-service by default
+(`POST /auth/signup`, `POST /auth/login`; set `VITE_USER_SERVICE_URL` like the
+other service URLs). For offline UX work, `VITE_AUTH_MOCK=true` switches to
+the in-browser mock instead.
 
 - A prominent banner at the top of Checkout offers **Sign in** and **Create
   account**; auth opens as a modal dialog over the form (full-screen sheet on
@@ -69,12 +72,13 @@ user-service lands. It is on by default; set `VITE_AUTH_MOCK=false` to hide it.
 - Accounts and the fake session live in `localStorage` (`gshop:mockUsers`,
   `gshop:authSession`); the password is stored only as a SHA-256 hash and
   nothing leaves the browser.
-- When signed in, the mock `userId` becomes the order's `customerId` and
-  Order History reads that user's orders; signed out keeps the anonymous id.
+- When signed in, the `userId` becomes the order's `customerId` and Order
+  History reads that user's orders; signed out keeps the anonymous id. A
+  per-browser identity registry powers the User/Anonymous badges.
 - Sign up, wrong password, duplicate email, field validation and sign out are
   all reachable by hand for review.
 
-This mock is replaced by a real `userClient` when the service lands.
+The mock remains available only via `VITE_AUTH_MOCK=true`.
 
 ## Scripts
 

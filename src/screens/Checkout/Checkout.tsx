@@ -4,7 +4,7 @@ import { clearCartId, getStoredCartId } from '../../services/cartId';
 import { getOrCreateCustomerId } from '../../services/customerId';
 import { checkoutGateway } from '../../services/checkoutGateway';
 import { setMockScenario, type MockScenario } from '../../services/checkoutMock';
-import { AUTH_MOCK_ENABLED, CHECKOUT_MOCK_ENABLED } from '../../services/env';
+import { CHECKOUT_MOCK_ENABLED } from '../../services/env';
 import { getSession, signOut } from '../../services/mockAuth';
 import {
   getCheckoutAddress,
@@ -62,7 +62,7 @@ function formFromSaved(saved: SavedCheckoutAddress): CheckoutFormValues {
 export default function Checkout({ items: initialItems, onOrderPlaced, onBackToCart }: CheckoutProps) {
   const [items, setItems] = useState<NewOrderItem[]>(initialItems);
   const [form, setForm] = useState<CheckoutFormValues>(() => {
-    const session = AUTH_MOCK_ENABLED ? getSession() : null;
+    const session = getSession();
     const saved = session
       ? getCheckoutAddress(session.user.userId)
       : null;
@@ -74,7 +74,7 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
   const [failure, setFailure] = useState<Failure | null>(null);
   const [scenario, setScenario] = useState<MockScenario>('normal');
   const [authSession, setAuthSession] = useState<AuthSession | null>(() =>
-    AUTH_MOCK_ENABLED ? getSession() : null,
+    getSession(),
   );
   const [authMode, setAuthMode] = useState<'signin' | 'signup' | null>(null);
 
@@ -300,8 +300,7 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
           onSubmit={handleSubmit}
           aria-busy={submitting}
         >
-          {AUTH_MOCK_ENABLED && (
-            <section className="checkout-auth-banner" aria-label="Account">
+          <section className="checkout-auth-banner" aria-label="Account">
               {authSession ? (
                 <>
                   <div>
@@ -357,8 +356,7 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
                   </div>
                 </>
               )}
-            </section>
-          )}
+          </section>
 
           {failure && (
             <div

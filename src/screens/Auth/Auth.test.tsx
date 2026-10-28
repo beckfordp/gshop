@@ -1,16 +1,28 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Auth from './Auth';
-import { getSession, signUp } from '../../services/mockAuth';
+import { authGateway } from '../../services/authGateway';
+
+vi.mock('../../services/authGateway', () => ({
+  authGateway: { signup: vi.fn(), login: vi.fn() },
+}));
+
+const signup = vi.mocked(authGateway.signup);
+const login = vi.mocked(authGateway.login);
 
 const EMAIL = 'ada@example.com';
 const PASSWORD = 'correct horse';
+const SESSION = {
+  user: { userId: 'user-1', email: EMAIL },
+  token: 'token-1',
+};
 
 function renderAuth(props: Partial<Parameters<typeof Auth>[0]> = {}) {
   return render(
     <Auth
       onAuthenticated={props.onAuthenticated ?? vi.fn()}
       onBack={props.onBack ?? vi.fn()}
+      initialMode={props.initialMode}
     />,
   );
 }
@@ -39,6 +51,8 @@ function fill(values: {
 
 describe('Auth', () => {
   beforeEach(() => {
+    signup.mockReset();
+    login.mockReset();
     localStorage.clear();
   });
 
@@ -63,9 +77,11 @@ describe('Auth', () => {
 
     expect(await screen.findByText('Enter your email address')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByLabelText('Email')).toHaveFocus());
+    expect(login).not.toHaveBeenCalled();
   });
 
-  it('signs up, stores the session, and reports the user', async () => {
+  it('signs up through the gateway and reports the session', async () => {
+    signup.mockResolvedValue(SESSION);
     const onAuthenticated = vi.fn();
     renderAuth({ onAuthenticated });
     fireEvent.click(screen.getByRole('tab', { name: 'Create account' }));
@@ -73,26 +89,27 @@ describe('Auth', () => {
     fill({ email: EMAIL, password: PASSWORD, confirmPassword: PASSWORD });
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
 
-    await waitFor(() => expect(onAuthenticated).toHaveBeenCalledOnce());
-    expect(onAuthenticated.mock.calls[0][0].user.email).toBe(EMAIL);
-    expect(getSession()?.user.email).toBe(EMAIL);
+    await waitFor(() => expect(onAuthenticated).toHaveBeenCalledWith(SESSION));
+    expect(signup).toHaveBeenCalledWith(EMAIL, PASSWORD);
   });
 
-  it('rejects a duplicate account with a form-level error', async () => {
-    await signUp(EMAIL, PASSWORD);
+  it('shows the gateway error for a duplicate account', async () => {
+    signup.mockRejectedValue(
+      new Error('An account with this email already exists'),
+    );
     renderAuth();
     fireEvent.click(screen.getByRole('tab', { name: 'Create account' }));
 
     fill({ email: EMAIL, password: PASSWORD, confirmPassword: PASSWORD });
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
 
-    expect(
-      await screen.findByRole('alert'),
-    ).toHaveTextContent('An account with this email already exists');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'An account with this email already exists',
+    );
   });
 
-  it('rejects a wrong password with the generic message', async () => {
-    await signUp(EMAIL, PASSWORD);
+  it('shows the generic message for a wrong password', async () => {
+    login.mockRejectedValue(new Error('Email or password is incorrect'));
     renderAuth();
 
     fill({ email: EMAIL, password: 'wrong password' });
@@ -103,8 +120,11 @@ describe('Auth', () => {
     );
   });
 
-  it('signs in an existing user and reports them', async () => {
-    const created = await signUp(EMAIL, PASSWORD);
+  it('logs in through the gateway and reports the session', async () => {
+    login.mockResolvedValue({
+      ...SESSION,
+      refreshToken: 'refresh-1',
+    });
     const onAuthenticated = vi.fn();
     renderAuth({ onAuthenticated });
 
@@ -112,7 +132,7 @@ describe('Auth', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
     await waitFor(() => expect(onAuthenticated).toHaveBeenCalledOnce());
-    expect(onAuthenticated.mock.calls[0][0].user).toEqual(created.user);
+    expect(login).toHaveBeenCalledWith(EMAIL, PASSWORD);
   });
 
   it('calls onBack without authenticating', () => {
@@ -122,16 +142,12 @@ describe('Auth', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(onBack).toHaveBeenCalledOnce();
+    expect(signup).not.toHaveBeenCalled();
+    expect(login).not.toHaveBeenCalled();
   });
 
   it('respects initialMode', () => {
-    render(
-      <Auth
-        onAuthenticated={vi.fn()}
-        onBack={vi.fn()}
-        initialMode="signup"
-      />,
-    );
+    renderAuth({ initialMode: 'signup' });
 
     expect(
       screen.getByRole('heading', { name: 'Create account' }),

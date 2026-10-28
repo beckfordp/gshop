@@ -80,13 +80,14 @@ All four in-scope user stories are live: US-1 (browse catalog), US-2
   `400`/`503`/`500` show the server error. A failed attempt persists no
   order. A dev-only prototype scenario control is shown when
   `VITE_CHECKOUT_MOCK=true`.
-- `src/screens/Auth/Auth.tsx` (prototype, Checkout Journey 2): signup/login
-  in a modal opened from a prominent Checkout banner; backed by `mockAuth` in
-  the browser until user-service lands. Signed-in checkout sends the mock
-  `userId` as `customerId`; Order History reads that user's orders and badges
-  each order User/Anonymous. A signed-in user's addresses are saved after a
-  successful checkout and prefilled next time. Admin-wide order listing is
-  deferred until the order-service API exists.
+- `src/screens/Auth/Auth.tsx` (Checkout Journey 2): signup/login in a modal
+  opened from a prominent Checkout banner, backed by the real user-service
+  (`userClient`/`authGateway`; the in-browser mock is opt-in via
+  `VITE_AUTH_MOCK=true`). Signed-in checkout sends the real `userId` as
+  `customerId`; Order History reads that user's orders and badges each order
+  User/Anonymous via a local identity registry. A signed-in user's addresses
+  are saved after a successful checkout and prefilled next time. Admin-wide
+  order listing is deferred until the order-service API exists.
 - `src/screens/OrderConfirmation/OrderConfirmation.tsx` is the post-order
   display (order id, status, "Payment authorised", shipping address, line
   items, total). "Continue Shopping" returns to Catalog.

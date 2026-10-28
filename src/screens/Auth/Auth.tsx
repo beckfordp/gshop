@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AuthError, signIn, signUp } from '../../services/mockAuth';
+import { authGateway } from '../../services/authGateway';
 import {
   validateSignIn,
   validateSignUp,
@@ -93,12 +93,12 @@ export default function Auth({
     try {
       const session =
         mode === 'signup'
-          ? await signUp(values.email, values.password)
-          : await signIn(values.email, values.password);
+          ? await authGateway.signup(values.email, values.password)
+          : await authGateway.login(values.email, values.password);
       onAuthenticated(session);
     } catch (error) {
       setFormError(
-        error instanceof AuthError
+        error instanceof Error && error.message
           ? error.message
           : 'Something went wrong. Please try again.',
       );

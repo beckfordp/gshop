@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { orderClient, type Order } from '../../services/orderClient';
 import { getStoredCustomerId } from '../../services/customerId';
-import { getSession, resolveIdentity } from '../../services/mockAuth';
+import { getSession } from '../../services/mockAuth';
+import { resolveIdentity } from '../../services/identityStore';
 import { errorMessage, formatPrice, formatStatus } from '../../lib/format';
 import WatchArt from '../../components/WatchArt/WatchArt';
 import './OrderHistory.css';

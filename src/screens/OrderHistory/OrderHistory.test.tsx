@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import OrderHistory from './OrderHistory';
 import { orderClient, type Order } from '../../services/orderClient';
 import { getStoredCustomerId } from '../../services/customerId';
-import { getSession, resolveIdentity } from '../../services/mockAuth';
+import { getSession } from '../../services/mockAuth';
+import { resolveIdentity } from '../../services/identityStore';
 
 vi.mock('../../services/orderClient', () => ({
   orderClient: { list: vi.fn() },
@@ -15,6 +16,9 @@ vi.mock('../../services/customerId', () => ({
 
 vi.mock('../../services/mockAuth', () => ({
   getSession: vi.fn(),
+}));
+
+vi.mock('../../services/identityStore', () => ({
   resolveIdentity: vi.fn(),
 }));
 

@@ -6,7 +6,8 @@ import { checkoutGateway } from '../../services/checkoutGateway';
 import { cartClient, type Cart } from '../../services/cartClient';
 import { clearCartId, getStoredCartId } from '../../services/cartId';
 import { getOrCreateCustomerId } from '../../services/customerId';
-import { getSession, signOut, signUp } from '../../services/mockAuth';
+import { getSession, signOut } from '../../services/mockAuth';
+import { authGateway } from '../../services/authGateway';
 import {
   getCheckoutAddress,
   saveCheckoutAddress,
@@ -35,6 +36,10 @@ vi.mock('../../services/mockAuth', async (importOriginal) => {
   return { ...actual, getSession: vi.fn(), signOut: vi.fn() };
 });
 
+vi.mock('../../services/authGateway', () => ({
+  authGateway: { signup: vi.fn(), login: vi.fn() },
+}));
+
 const submit = vi.mocked(checkoutGateway.submit);
 const removeItem = vi.mocked(cartClient.removeItem);
 const getStoredCartIdMock = vi.mocked(getStoredCartId);
@@ -42,6 +47,8 @@ const clearCartIdMock = vi.mocked(clearCartId);
 const getOrCreateCustomerIdMock = vi.mocked(getOrCreateCustomerId);
 const getSessionMock = vi.mocked(getSession);
 const signOutMock = vi.mocked(signOut);
+const signupMock = vi.mocked(authGateway.signup);
+const loginMock = vi.mocked(authGateway.login);
 
 const items: NewOrderItem[] = [
   { sku: 'WID-1', productName: 'Widget', unitPriceCents: 1000, quantity: 2 },
@@ -107,6 +114,8 @@ describe('Checkout', () => {
     getSessionMock.mockReset();
     getSessionMock.mockReturnValue(null);
     signOutMock.mockReset();
+    signupMock.mockReset();
+    loginMock.mockReset();
     localStorage.clear();
   });
 
@@ -523,8 +532,12 @@ describe('Checkout', () => {
   });
 
   it('prefills after signing in mid-checkout', async () => {
-    const created = await signUp('ada@example.com', 'correct horse');
-    saveCheckoutAddress(created.user.userId, savedAddress);
+    const session = {
+      user: { userId: 'user-1', email: 'ada@example.com' },
+      token: 'token-1',
+    };
+    loginMock.mockResolvedValue(session);
+    saveCheckoutAddress(session.user.userId, savedAddress);
 
     renderCheckout();
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));

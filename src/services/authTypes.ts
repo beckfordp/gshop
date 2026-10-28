@@ -9,4 +9,6 @@ export interface AuthUser {
 export interface AuthSession {
   user: AuthUser;
   token: string;
+  // Present after a real login; no refresh endpoint exists yet.
+  refreshToken?: string;
 }
