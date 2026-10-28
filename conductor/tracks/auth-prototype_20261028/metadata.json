@@ -1,0 +1,8 @@
+{
+  "track_id": "auth-prototype_20261028",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-10-28T10:42:10Z",
+  "updated_at": "2026-10-28T10:42:10Z",
+  "description": "US-16.5 prototype — signup/login forms in the checkout UI with mock auth, for manual review before the Journey 2 backend lands"
+}
