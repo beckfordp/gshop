@@ -6,8 +6,6 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [ ] **Track: US-16.5 prototype — signup/login UI for manual review**
-  *Link: [./tracks/auth-prototype_20261028/](./tracks/auth-prototype_20261028/)*
 ---
 
 ## Backlog
