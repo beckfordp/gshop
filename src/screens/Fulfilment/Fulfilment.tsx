@@ -1,16 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
-import { formatPrice } from '../../lib/format';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { errorMessage, formatPrice } from '../../lib/format';
 import {
-  dispatchOrder,
-  getFulfilmentQueue,
-  isTerminalState,
-  markPacked,
-  reportProblem,
-  resetFulfilmentQueue,
-  startPicking,
-  type FulfilmentOrder,
+  fulfilmentClient,
   type FulfilmentState,
-} from '../../services/fulfilmentStore';
+  type FulfilmentTask,
+} from '../../services/fulfilmentClient';
 import './Fulfilment.css';
 
 interface FulfilmentProps {
@@ -25,10 +19,27 @@ const STATE_LABELS: Record<FulfilmentState, string> = {
   DISPATCH_FAILED: 'Dispatch failed',
 };
 
-export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
-  const [queue, setQueue] = useState<FulfilmentOrder[]>(() =>
-    getFulfilmentQueue(),
+function isTerminalState(state: FulfilmentState): boolean {
+  return state === 'DISPATCHED' || state === 'DISPATCH_FAILED';
+}
+
+function totalCents(items: FulfilmentTask['items']): number {
+  return items.reduce(
+    (sum, item) => sum + item.unitPriceCents * item.quantity,
+    0,
   );
+}
+
+function shipTo(task: FulfilmentTask): string {
+  const { line1, line2, city, postalCode, country } = task.shippingAddress;
+  const street = line2 ? `${line1}, ${line2}` : line1;
+  return `Ship to: ${street}, ${city} ${postalCode}, ${country}`;
+}
+
+export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
+  const [queue, setQueue] = useState<FulfilmentTask[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState<string | null>(null);
   const [dispatchFor, setDispatchFor] = useState<string | null>(null);
   const [problemFor, setProblemFor] = useState<string | null>(null);
   const [trackingNo, setTrackingNo] = useState('');
@@ -38,20 +49,27 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
 
   const alertRef = useRef<HTMLDivElement>(null);
 
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setQueue(await fulfilmentClient.listTasks());
+    } catch (caught) {
+      setError(errorMessage(caught));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
   useEffect(() => {
     if (error) {
       alertRef.current?.focus();
     }
   }, [error]);
-
-  const run = (action: () => FulfilmentOrder[]) => {
-    setError(null);
-    try {
-      setQueue(action());
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
-    }
-  };
 
   const closeForms = () => {
     setDispatchFor(null);
@@ -59,7 +77,25 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
     setTrackingNo('');
     setCarrier('');
     setReason('');
+  };
+
+  const apply = async (
+    orderId: string,
+    action: () => Promise<FulfilmentTask>,
+  ) => {
     setError(null);
+    setBusy(orderId);
+    try {
+      const updated = await action();
+      setQueue((current) =>
+        current.map((task) => (task.orderId === updated.orderId ? updated : task)),
+      );
+      closeForms();
+    } catch (caught) {
+      setError(errorMessage(caught));
+    } finally {
+      setBusy(null);
+    }
   };
 
   return (
@@ -68,7 +104,7 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
         <div>
           <h1>Order processing</h1>
           <p className="fulfilment__intro">
-            Prototype queue — pick, pack and dispatch orders. Mock data only.
+            Pick, pack and dispatch authorized orders.
           </p>
         </div>
         <button type="button" onClick={onBackToAdmin}>
@@ -83,20 +119,26 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
       )}
 
       <div className="fulfilment__toolbar">
-        <button
-          type="button"
-          onClick={() => {
-            closeForms();
-            setQueue(resetFulfilmentQueue());
-          }}
-        >
-          Reset demo queue
+        <button type="button" onClick={() => void load()} disabled={loading}>
+          Refresh
         </button>
       </div>
+
+      {loading && queue.length === 0 && (
+        <p className="fulfilment__empty">Loading fulfilment queue…</p>
+      )}
+
+      {!loading && !error && queue.length === 0 && (
+        <p className="fulfilment__empty">
+          No fulfilment tasks yet — they appear when an order&apos;s payment is
+          authorized.
+        </p>
+      )}
 
       <ul className="fulfilment-list">
         {queue.map((order) => {
           const terminal = isTerminalState(order.state);
+          const working = busy === order.orderId;
           return (
             <li key={order.orderId} className="fulfilment-card">
               <div className="fulfilment-card__top">
@@ -107,10 +149,7 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
                   {STATE_LABELS[order.state]}
                 </span>
               </div>
-              <p className="fulfilment-card__customer">
-                {order.customer.type === 'user' ? 'User' : 'Anonymous'} ·{' '}
-                {order.customer.label}
-              </p>
+              <p className="fulfilment-card__customer">{shipTo(order)}</p>
               <ul className="fulfilment-card__items">
                 {order.items.map((item) => (
                   <li key={item.sku}>
@@ -120,7 +159,7 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
                 ))}
               </ul>
               <p className="fulfilment-card__total">
-                Total: {formatPrice(order.totalCents)}
+                Total: {formatPrice(totalCents(order.items))}
               </p>
 
               {order.state === 'DISPATCHED' && (
@@ -139,7 +178,12 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
                   {order.state === 'PENDING' && (
                     <button
                       type="button"
-                      onClick={() => run(() => startPicking(order.orderId))}
+                      disabled={working}
+                      onClick={() =>
+                        void apply(order.orderId, () =>
+                          fulfilmentClient.startPicking(order.orderId),
+                        )
+                      }
                     >
                       Start picking
                     </button>
@@ -147,7 +191,12 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
                   {order.state === 'PICKING' && (
                     <button
                       type="button"
-                      onClick={() => run(() => markPacked(order.orderId))}
+                      disabled={working}
+                      onClick={() =>
+                        void apply(order.orderId, () =>
+                          fulfilmentClient.pack(order.orderId),
+                        )
+                      }
                     >
                       Mark packed
                     </button>
@@ -155,8 +204,10 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
                   {order.state === 'PACKED' && (
                     <button
                       type="button"
+                      disabled={working}
                       onClick={() => {
                         closeForms();
+                        setError(null);
                         setDispatchFor(order.orderId);
                       }}
                     >
@@ -166,8 +217,10 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
                   <button
                     type="button"
                     className="fulfilment-card__problem"
+                    disabled={working}
                     onClick={() => {
                       closeForms();
+                      setError(null);
                       setProblemFor(order.orderId);
                     }}
                   >
@@ -195,9 +248,22 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
                   <div className="fulfilment-form__actions">
                     <button
                       type="button"
-                      onClick={() =>
-                        run(() => dispatchOrder(order.orderId, trackingNo, carrier))
-                      }
+                      disabled={working}
+                      onClick={() => {
+                        if (!trackingNo.trim() || !carrier.trim()) {
+                          setError(
+                            'Tracking number and carrier are required to dispatch',
+                          );
+                          return;
+                        }
+                        void apply(order.orderId, () =>
+                          fulfilmentClient.dispatch(
+                            order.orderId,
+                            trackingNo.trim(),
+                            carrier.trim(),
+                          ),
+                        );
+                      }}
                     >
                       Confirm dispatch
                     </button>
@@ -221,9 +287,16 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
                   <div className="fulfilment-form__actions">
                     <button
                       type="button"
-                      onClick={() =>
-                        run(() => reportProblem(order.orderId, reason))
-                      }
+                      disabled={working}
+                      onClick={() => {
+                        if (!reason.trim()) {
+                          setError('A reason is required');
+                          return;
+                        }
+                        void apply(order.orderId, () =>
+                          fulfilmentClient.fail(order.orderId, reason.trim()),
+                        );
+                      }}
                     >
                       Confirm failure
                     </button>
