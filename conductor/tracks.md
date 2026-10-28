@@ -6,6 +6,8 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
+- [~] **Track: Journey 3 prototype — order processing UI**
+  *Link: [./tracks/fulfilment-prototype_20261028/](./tracks/fulfilment-prototype_20261028/)*
 ---
 
 ## Backlog

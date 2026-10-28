@@ -1,0 +1,8 @@
+{
+  "track_id": "fulfilment-prototype_20261028",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-10-28T15:00:00Z",
+  "updated_at": "2026-10-28T15:00:00Z",
+  "description": "Journey 3 prototype — order processing (fulfilment) UI in gshop with mock pick/pack/dispatch state"
+}
