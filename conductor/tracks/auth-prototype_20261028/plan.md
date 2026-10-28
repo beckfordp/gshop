@@ -35,3 +35,12 @@
 - `crypto.subtle` is async; the mock auth API is promise-based to match the real client shape, and tests await it.
 - Mock users/session live in localStorage under `gshop:mockUsers`/`gshop:authSession`; sign out removes the session, and no password is ever sent or logged.
 - The two new PLAN checklist items map to this track's Phase 4 review handoff.
+
+## Phase 5: Review changes (2026-10-28)
+
+- [ ] Task: Prominence — accent-bordered auth banner at the top of Checkout: primary "Sign in" + secondary "Create account"; signed-in identity bar with email + Sign out (Red → Green)
+- [ ] Task: Presentation — auth becomes a modal dialog over Checkout (full-screen sheet on mobile): Esc/backdrop close, focus trap, return focus, `role="dialog"`/`aria-modal`; Auth gains `initialMode` and a Cancel close (Red → Green)
+- [ ] Task: Ownership — Order History gains a large identity header (signed-in email vs anonymous) and a prominent User/Anonymous badge per card, resolving ids through the mock users (`resolveIdentity`) (Red → Green)
+- [ ] Task: Admin copy clarifies that Clear history affects this browser's anonymous history; Admin all-orders listing deferred to a follow-up order-service track (no backend change here)
+- [ ] Task: Docs updated; full suite green
+- [ ] Task: Conductor - User Manual Verification 'Review changes' — hand back to the user for a second manual review
