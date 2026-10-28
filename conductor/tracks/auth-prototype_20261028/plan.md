@@ -44,3 +44,10 @@
 - [x] Task: Admin copy clarifies that Clear history affects this browser's anonymous history; Admin all-orders listing deferred to a follow-up order-service track (no backend change here) `b01912f`
 - [x] Task: Docs updated; full suite green `b01912f`
 - [ ] Task: Conductor - User Manual Verification 'Review changes' — **waiting on the user** for a second manual review (`b01912f`)
+
+## Phase 6: Saved addresses (2026-10-28)
+
+- [x] Task: Save a signed-in user's shipping/billing addresses + "same as shipping" after a successful checkout (`savedAddress.ts`, scoped by mock userId; card never stored) `3af7240`
+- [x] Task: Prefill on checkout mount and after mid-checkout sign-in, without overwriting an address already being typed `3af7240`
+- [x] Task: Tests for round-trip/corrupt storage, per-user scoping, mount prefill, post-checkout save, anonymous no-save, mid-sign-in prefill; docs updated `3af7240` (209 tests, 96.4% coverage)
+- [ ] Task: Conductor - User Manual Verification 'Saved addresses' — **waiting on the user** for manual review
