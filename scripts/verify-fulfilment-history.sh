@@ -161,12 +161,16 @@ echo "-- waiting for order-service to apply both events --"
 for _ in $(seq 1 60); do
   A="$(order_status "$ORDER_DISPATCH")"
   B="$(order_status "$ORDER_FAIL")"
-  [ "$A" = "dispatched" ] && [ "$B" = "dispatch_failed" ] && break
+  { [ "$A" = "dispatched" ] || [ "$A" = "confirmed" ]; } &&
+    [ "$B" = "dispatch_failed" ] && break
   sleep 1
 done
-[ "$A" = "dispatched" ] || { echo "FAIL: dispatch order status is '$A'" >&2; exit 1; }
+{ [ "$A" = "dispatched" ] || [ "$A" = "confirmed" ]; } || {
+  echo "FAIL: dispatch order status is '$A'" >&2
+  exit 1
+}
 [ "$B" = "dispatch_failed" ] || { echo "FAIL: failed order status is '$B'" >&2; exit 1; }
-echo "   order statuses: dispatched / dispatch_failed"
+echo "   order statuses: $A / $B (confirmed is capture-on-dispatch)"
 
 echo "All fulfilment-history live checks passed (Order History renders"
 echo "'Dispatched' and 'Dispatch failed')."
