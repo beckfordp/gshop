@@ -185,7 +185,7 @@ export default function OrderHistory() {
                   <p role="alert">
                     {cancelError.message}
                     {cancelError.status === 409
-                      ? ' The order may already be cancelled or dispatched.'
+                      ? ' The order may already be cancelled or dispatched. If it has already shipped, see returns (US-23).'
                       : ''}
                   </p>
                 )}

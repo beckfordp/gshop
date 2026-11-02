@@ -85,7 +85,8 @@ describe('workflowDemo store', () => {
     expect(snapshot.orders.find((entry) => entry.id === 'demo-order-1001')?.status).toBe(
       'authorized',
     );
-    expect(snapshot.reservations.filter((line) => line.status === 'active')).toHaveLength(5);
+    expect(snapshot.reservations.filter((line) => line.status === 'active')).toHaveLength(4);
+    expect(snapshot.reservations.filter((line) => line.status === 'shipped')).toHaveLength(1);
     expect(snapshot.emails).toHaveLength(6);
   });
 

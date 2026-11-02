@@ -97,6 +97,7 @@
 }
 
 .workflow-demo__badge--released,
+.workflow-demo__badge--shipped,
 .workflow-demo__badge--cancelled,
 .workflow-demo__badge--voided {
   border-color: var(--color-text-muted);

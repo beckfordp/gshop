@@ -295,6 +295,7 @@ describe('OrderHistory', () => {
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent("Illegal status transition to 'cancelled'");
     expect(alert).toHaveTextContent('may already be cancelled or dispatched');
+    expect(alert).toHaveTextContent('returns (US-23)');
     expect(screen.getByText('Status: Authorized')).toBeInTheDocument();
   });
 
@@ -320,6 +321,18 @@ describe('OrderHistory', () => {
     render(<OrderHistory />);
 
     await screen.findByText('Status: Dispatched');
+    expect(
+      screen.queryByRole('button', { name: 'Cancel order order-1' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows a cancelled order without a cancel action', async () => {
+    getStoredCustomerIdMock.mockReturnValue('customer-1');
+    list.mockResolvedValue([makeOrder({ id: 'order-1', status: 'cancelled' })]);
+
+    render(<OrderHistory />);
+
+    await screen.findByText('Status: Cancelled');
     expect(
       screen.queryByRole('button', { name: 'Cancel order order-1' }),
     ).not.toBeInTheDocument();

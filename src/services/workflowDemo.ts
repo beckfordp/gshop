@@ -20,7 +20,7 @@ export type DemoFulfilmentState =
   | 'DISPATCH_FAILED'
   | 'CANCELLED';
 
-export type DemoReservationStatus = 'active' | 'released';
+export type DemoReservationStatus = 'active' | 'released' | 'shipped';
 
 export type CancellationReason = 'operator' | 'auth_expired' | 'customer';
 
@@ -213,7 +213,7 @@ const seed: DemoSnapshot = {
     reservation('demo-order-1001', 1, item('watch-rolex-submariner', 'Rolex Submariner', 1, 950000), 'active', '2026-11-01T09:15:00Z'),
     reservation('demo-order-1001', 2, item('watch-omega-speedmaster', 'Omega Speedmaster', 1, 620000), 'active', '2026-11-01T09:15:00Z'),
     reservation('demo-order-1002', 1, item('watch-tudor-black-bay', 'Tudor Black Bay', 1, 380000), 'active', '2026-11-02T11:40:00Z'),
-    reservation('demo-order-1003', 1, item('watch-grand-seiko-snowflake', 'Grand Seiko Snowflake', 1, 560000), 'active', '2026-10-29T08:05:00Z'),
+    reservation('demo-order-1003', 1, item('watch-grand-seiko-snowflake', 'Grand Seiko Snowflake', 1, 560000), 'shipped', '2026-10-29T08:05:00Z'),
     reservation('demo-order-1004', 1, item('watch-longines-master-collection', 'Longines Master Collection', 1, 240000), 'released', '2026-10-27T16:20:00Z', '2026-10-28T09:00:00Z'),
     reservation('demo-order-1005', 1, item('watch-cartier-tank', 'Cartier Tank', 1, 340000), 'active', '2026-10-26T13:10:00Z'),
   ],
