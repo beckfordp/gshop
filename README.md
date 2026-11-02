@@ -29,6 +29,17 @@ system-design.md`.
 | payment-service | `src/services/paymentClient.ts` | live — `POST /payments/methods` (US-13) |
 | user-service | `src/services/userClient.ts` | live — `POST /auth/signup`, `POST /auth/login` (US-16) |
 | fulfilment-service | `src/services/fulfilmentClient.ts` | live — Admin order-processing queue (US-17.7) |
+| notification-service | `src/services/adminClient.ts` | live — Admin console email history (ADM-8) |
+
+The Admin screen's **Operations** console (`src/services/adminClient.ts`,
+ADM-7/8) reads order-, inventory-, payment-, fulfilment-, notification- and
+user-service: the admin order list, reservation ledger, the four
+reconciliation queues (resolve with a note), per-order/per-customer email
+history, operator cancel (Journey 8) and the ADM-5 expiry trigger. Writes
+send the dev-only operator token (ADR 0024) — `VITE_OPERATOR_TOKEN`,
+defaulting to the services' fixed local `dev-operator-token`. Customers are
+the distinct `customerId`s on orders, resolved via `GET /users/{id}`; a 404
+is shown as a guest checkout.
 
 Base URLs are read from Vite env vars (`VITE_<NAME>_SERVICE_URL`, see
 `src/services/env.ts`) — there's no documented local port map yet for
@@ -102,28 +113,26 @@ API:
   Dispatch failed path also appears. Manual forms pause it; any error turns it
   off.
 
-## Admin workflow demo (prototype)
+## Admin operations console (ADM-7/8)
 
-Admin's top section is a **mock-data prototype** of the operator views the
-backend does not expose yet. It is always on and clearly labelled; it never
-calls the cluster.
+Admin's top section is the real-wired **Operations** console (it replaced
+the ADM-0 mock prototype). Everything it shows comes from the cluster;
+cancellations and expiry fan out asynchronously over Kafka, so **Refresh**
+re-reads each service as it catches up.
 
-- **Orders**: open an authorized order to see payment, fulfilment and its
-  reservation ledger. **Operator cancel** and **Simulate authorization
-  timeout** simulate the full fan-out: order cancelled, payment voided,
-  reservation lines released, non-dispatched fulfilment cancelled, and a
-  cancellation email queued. Dispatched/confirmed orders show why they are
-  past cancelling (returns are out of scope).
-- **Customers**: open a customer to see their orders and email history. Email
-  rows show the recipient key the real system has today (`customerId`,
-  email address for `UserRegistered`, or `orderId` for payment/fulfilment
-  events), with an expandable body. Cancellation emails appear after the
-  actions above.
-- **Reset demo** restores the seed data.
-
-This is UX-only: real ledger/email/admin-order APIs, an expiry trigger and
-operator identity are follow-up tasks. The ledger/email shapes mirror the
-existing `order_reservations` table and notification-service's email copy.
+- **Orders**: the admin order list (`GET /admin/orders`) and the
+  reconciliation queue — open flags from order, payment, fulfilment and
+  inventory, each resolvable with an optional note (first resolver wins).
+  An order's detail shows its fulfilment task state, reservation ledger,
+  reconciliation flags and emails. An `authorized` order offers **Operator
+  cancel** (Journey 8, `reason: operator`) and **Expire authorization now**
+  (ADM-5's payment-service trigger, which cancels via
+  `PaymentAuthorizationExpired`); later statuses say why they are past
+  cancelling. No bulk cancel.
+- **Customers**: the distinct customers on orders, labelled by their
+  user-service email (or **Guest** for an anonymous checkout's id), with
+  their orders and email history (status, resolved recipient, expandable
+  body).
 
 ## Scripts
 
@@ -136,7 +145,7 @@ existing `order_reservations` table and notification-service's email copy.
 Catalog, Cart, Checkout (form + confirmation), Order History, and Admin
 screens are live. Order History now includes a real **Cancel order** action
 for `authorized` orders (US-9.8), calling `PATCH /orders/{id}`; the Admin
-workflow tabs above are mock-backed. Signup/login is a mock-backed prototype pending
+operations console above is real-wired (ADM-7/8). Signup/login is a mock-backed prototype pending
 user-service (see "Auth prototype" above). Checkout collects shipping/billing addresses and card
 details, creates a payment method, then submits the order against the real
 `POST /orders` contract: `201` → confirmation, `402` → inline decline with

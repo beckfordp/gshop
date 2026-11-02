@@ -12,9 +12,9 @@ vi.mock('../../services/inventoryClient', () => ({
   inventoryClient: { list: vi.fn(), adjust: vi.fn() },
 }));
 
-// The prototype has its own suite; keep its demo tables/buttons out of the
-// existing Admin selectors.
-vi.mock('./WorkflowDemo', () => ({ default: () => null }));
+// The console has its own suite; keep its tables/buttons out of the existing
+// Admin selectors.
+vi.mock('./AdminConsole', () => ({ default: () => null }));
 
 const catalogList = vi.mocked(catalogClient.list);
 const inventoryList = vi.mocked(inventoryClient.list);

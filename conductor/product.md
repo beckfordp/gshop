@@ -140,13 +140,13 @@ All four in-scope user stories are live: US-1 (browse catalog), US-2
   via a small, low-contrast text link fixed to the page's bottom-right
   corner — no auth/login, consistent with the rest of this demo app's
   no-auth architecture, discretion only. Current sections: the
-  mock-backed "Workflow demo" prototype (Orders/Customers — see README),
+  real-wired "Operations" console (Orders/Customers, ADM-7/8 — see README),
   the fulfilment queue link, and an inventory table (real rows from
   `inventory-service`, joined against the catalog for display names),
   hidden behind a "Show complete inventory" button, with "+1"/"−1" buttons
   adjusting `quantityAvailable` (`quantityReserved` shown read-only,
   system-managed by the order/checkout flow). The old "Clear order
-  history" section was removed once the Workflow demo's customer order
+  history" section was removed once the console's customer order
   views made it redundant. Required adding a previously-missing
   `GET /inventorys` list/filter-by-sku endpoint to `inventory-service`
   itself (tracked there as `list-inventory-endpoint_20261010`) — it only

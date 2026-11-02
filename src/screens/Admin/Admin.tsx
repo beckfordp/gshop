@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { catalogClient } from '../../services/catalogClient';
 import { inventoryClient } from '../../services/inventoryClient';
 import { errorMessage } from '../../lib/format';
-import WorkflowDemo from './WorkflowDemo';
+import AdminConsole from './AdminConsole';
 import './Admin.css';
 
 // catalog-service has no lookup-by-sku endpoint, so the join below fetches
@@ -97,7 +97,7 @@ export default function Admin({ onOpenFulfilment }: AdminProps = {}) {
     <div className="admin">
       <h1>Admin</h1>
 
-      <WorkflowDemo />
+      <AdminConsole />
 
       {onOpenFulfilment && (
         <section className="admin-section">
