@@ -56,7 +56,7 @@ function refusalReason(order: Order): string {
 }
 
 export default function AdminConsole() {
-  const [tab, setTab] = useState<Tab>('orders');
+  const [tab, setTab] = useState<Tab>('customers');
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState<string | null>(null);
@@ -146,22 +146,22 @@ export default function AdminConsole() {
         <button
           type="button"
           role="tab"
-          id="admin-orders-tab"
-          aria-selected={tab === 'orders'}
-          aria-controls="admin-orders-panel"
-          onClick={() => setTab('orders')}
-        >
-          Orders
-        </button>
-        <button
-          type="button"
-          role="tab"
           id="admin-customers-tab"
           aria-selected={tab === 'customers'}
           aria-controls="admin-customers-panel"
           onClick={() => setTab('customers')}
         >
           Customers
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id="admin-orders-tab"
+          aria-selected={tab === 'orders'}
+          aria-controls="admin-orders-panel"
+          onClick={() => setTab('orders')}
+        >
+          Orders
         </button>
       </div>
 

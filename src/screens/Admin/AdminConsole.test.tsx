@@ -105,17 +105,28 @@ beforeEach(() => {
   listTasks.mockResolvedValue([]);
 });
 
-async function openOrder(orderId: string) {
+async function renderOrdersTab() {
   render(<AdminConsole />);
-  const table = await screen.findByRole('table', { name: 'Orders' });
+  await screen.findByRole('table', { name: 'Customers' });
+  fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+  return screen.findByRole('table', { name: 'Orders' });
+}
+
+async function openOrder(orderId: string) {
+  const table = await renderOrdersTab();
   fireEvent.click(within(table).getByRole('button', { name: orderId }));
 }
 
 describe('AdminConsole', () => {
-  it('lists real orders with customer emails, guests and the open reconciliation queue', async () => {
+  it('opens on the Customers tab', async () => {
     render(<AdminConsole />);
 
-    const table = await screen.findByRole('table', { name: 'Orders' });
+    expect(await screen.findByRole('table', { name: 'Customers' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Customers' })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('lists real orders with customer emails, guests and the open reconciliation queue', async () => {
+    const table = await renderOrdersTab();
     expect(within(table).getByText('order-1')).toBeInTheDocument();
     expect(await within(table).findByText('ada@example.com')).toBeInTheDocument();
     expect(await within(table).findByText('Guest guest-12')).toBeInTheDocument();
@@ -127,7 +138,7 @@ describe('AdminConsole', () => {
 
   it('resolves a queued flag with the operator note', async () => {
     client.resolveReconciliation.mockResolvedValue({ ...openFlag, status: 'resolved' });
-    render(<AdminConsole />);
+    await renderOrdersTab();
 
     fireEvent.change(await screen.findByLabelText('Note for payment order-2'), {
       target: { value: 'Refunded manually' },
@@ -224,8 +235,6 @@ describe('AdminConsole', () => {
 
   it('shows a customer’s orders and email history', async () => {
     render(<AdminConsole />);
-    await screen.findByRole('table', { name: 'Orders' });
-    fireEvent.click(screen.getByRole('tab', { name: 'Customers' }));
 
     const customers = await screen.findByRole('table', { name: 'Customers' });
     fireEvent.click(await within(customers).findByRole('button', { name: 'ada@example.com' }));
@@ -241,8 +250,6 @@ describe('AdminConsole', () => {
 
   it('labels a guest customer', async () => {
     render(<AdminConsole />);
-    await screen.findByRole('table', { name: 'Orders' });
-    fireEvent.click(screen.getByRole('tab', { name: 'Customers' }));
 
     const customers = await screen.findByRole('table', { name: 'Customers' });
     fireEvent.click(await within(customers).findByRole('button', { name: 'Guest guest-12' }));
@@ -254,9 +261,7 @@ describe('AdminConsole', () => {
     client.listOrders.mockResolvedValue([
       order({ customerId: 'guest-123456789', guestEmail: 'guest@example.com' }),
     ]);
-    render(<AdminConsole />);
-
-    const table = await screen.findByRole('table', { name: 'Orders' });
+    const table = await renderOrdersTab();
     expect(await within(table).findByText('Guest guest@example.com')).toBeInTheDocument();
   });
 
@@ -266,6 +271,6 @@ describe('AdminConsole', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('not configured');
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
-    expect(await screen.findByRole('table', { name: 'Orders' })).toBeInTheDocument();
+    expect(await screen.findByRole('table', { name: 'Customers' })).toBeInTheDocument();
   });
 });
