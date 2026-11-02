@@ -25,9 +25,6 @@ export interface OrderItem extends NewOrderItem {
 }
 
 export type OrderStatus =
-  | 'pending'
-  | 'reserved'
-  | 'reservation_failed'
   | 'authorized'
   | 'payment_failed'
   | 'dispatched'

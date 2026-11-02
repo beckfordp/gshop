@@ -91,15 +91,15 @@ describe('OrderConfirmation', () => {
     expect(container.querySelectorAll('.watch-art')).toHaveLength(2);
   });
 
-  it('formats a reservation_failed status for display', () => {
+  it('formats a payment_failed status for display', () => {
     render(
       <OrderConfirmation
-        order={makeOrder({ status: 'reservation_failed' })}
+        order={makeOrder({ status: 'payment_failed' })}
         onContinueShopping={vi.fn()}
       />,
     );
 
-    expect(screen.getByText(/Reservation failed/)).toBeInTheDocument();
+    expect(screen.getByText(/Payment failed/)).toBeInTheDocument();
     expect(screen.queryByText('Payment authorised')).not.toBeInTheDocument();
   });
 

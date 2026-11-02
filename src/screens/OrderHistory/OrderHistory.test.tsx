@@ -44,7 +44,7 @@ function makeOrder(overrides: Partial<Order> = {}): Order {
     id: 'order-1',
     customerId: 'customer-1',
     totalCents: 1999,
-    status: 'pending',
+    status: 'authorized',
     items: [
       {
         id: 'item-1',
@@ -106,10 +106,10 @@ describe('OrderHistory', () => {
 
   it('renders past orders with id, status, items, total, and date, in server order', async () => {
     const orders = [
-      makeOrder({ id: 'order-2', status: 'pending', totalCents: 1999 }),
+      makeOrder({ id: 'order-2', status: 'confirmed', totalCents: 1999 }),
       makeOrder({
         id: 'order-1',
-        status: 'reservation_failed',
+        status: 'cancelled',
         totalCents: 500,
         items: [
           {
@@ -131,8 +131,8 @@ describe('OrderHistory', () => {
     const order1 = screen.getByText(/order-1/);
     expect(order2.compareDocumentPosition(order1) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 
-    expect(screen.getByText(/Pending/)).toBeInTheDocument();
-    expect(screen.getByText(/Reservation failed/)).toBeInTheDocument();
+    expect(screen.getByText(/Confirmed/)).toBeInTheDocument();
+    expect(screen.getByText(/Cancelled/)).toBeInTheDocument();
 
     const gadgetLine = screen.getByText(/Gadget/);
     expect(gadgetLine.textContent).toContain('qty 2');

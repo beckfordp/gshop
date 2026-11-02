@@ -21,7 +21,7 @@ describe('errorMessage', () => {
 
 describe('formatStatus', () => {
   it('replaces underscores with spaces and capitalizes the first letter', () => {
-    expect(formatStatus('reservation_failed')).toBe('Reservation failed');
-    expect(formatStatus('pending')).toBe('Pending');
+    expect(formatStatus('payment_failed')).toBe('Payment failed');
+    expect(formatStatus('dispatch_failed')).toBe('Dispatch failed');
   });
 });

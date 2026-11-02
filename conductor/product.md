@@ -154,10 +154,9 @@ All four in-scope user stories are live: US-1 (browse catalog), US-2
 - All screens connect directly to their backend services locally via
   cluster DNS (no proxy, no port-forward — see `tech-stack.md`'s "Local
   dev against a running backend", resolved 2026-10-10). Also found during
-  US-3: `inventory-service` has no
-  stock seeded for any sku, so real checkouts currently all come back
-  `reservation_failed` unless test stock is seeded by hand (see
-  `gluon`'s `backlogs/inventory-service.md`). And found during US-8:
+  US-3: `inventory-service` starts with no stock, so run catalog-service's
+  `scripts/seed-watches.sh` (which also backfills stock) before a real
+  checkout. And found during US-8:
   order-service's history endpoint has a 60s cache TTL with no
   write-invalidation (its own documented, deliberate design) — a
   just-placed order can take up to a minute to show up in Order History.
