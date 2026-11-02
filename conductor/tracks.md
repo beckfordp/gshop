@@ -6,9 +6,6 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
-- [~] **Track: Checkout Journey 7 — cancel polish + shipped mock (US-21.5)**
-  *Link: [./tracks/j7-cancel-polish_20261102/](./tracks/j7-cancel-polish_20261102/)*
-
 ---
 
 ## Backlog
