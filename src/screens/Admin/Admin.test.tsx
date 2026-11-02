@@ -78,9 +78,7 @@ describe('Admin', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Hide inventory' }));
 
     expect(screen.queryByText('Rolex Submariner')).not.toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Show complete inventory' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Show complete inventory' })).toBeInTheDocument();
   });
 
   it('no longer renders the order history section', async () => {
@@ -88,9 +86,7 @@ describe('Admin', () => {
 
     await screen.findByRole('button', { name: 'Show complete inventory' });
     expect(screen.queryByText(/Order history \(this browser\)/)).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: 'Clear order history' }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Clear order history' })).not.toBeInTheDocument();
   });
 
   it('shows a loading state while fetching inventory', async () => {
@@ -109,9 +105,9 @@ describe('Admin', () => {
   });
 
   it('shows an error and working Retry when the inventory fetch fails', async () => {
-    inventoryList.mockRejectedValueOnce(new Error('inventory down')).mockResolvedValueOnce([
-      makeInventoryItem(),
-    ]);
+    inventoryList
+      .mockRejectedValueOnce(new Error('inventory down'))
+      .mockResolvedValueOnce([makeInventoryItem()]);
 
     render(<Admin />);
 
@@ -123,7 +119,9 @@ describe('Admin', () => {
   });
 
   it('+1 adjusts quantityAvailable up, sending the unchanged quantityReserved', async () => {
-    inventoryAdjust.mockResolvedValue(makeInventoryItem({ quantityAvailable: 6, quantityReserved: 1 }));
+    inventoryAdjust.mockResolvedValue(
+      makeInventoryItem({ quantityAvailable: 6, quantityReserved: 1 }),
+    );
 
     render(<Admin />);
     await showInventory();
@@ -135,8 +133,12 @@ describe('Admin', () => {
   });
 
   it('-1 adjusts quantityAvailable down and disables itself at 0', async () => {
-    inventoryList.mockResolvedValue([makeInventoryItem({ quantityAvailable: 1, quantityReserved: 0 })]);
-    inventoryAdjust.mockResolvedValue(makeInventoryItem({ quantityAvailable: 0, quantityReserved: 0 }));
+    inventoryList.mockResolvedValue([
+      makeInventoryItem({ quantityAvailable: 1, quantityReserved: 0 }),
+    ]);
+    inventoryAdjust.mockResolvedValue(
+      makeInventoryItem({ quantityAvailable: 0, quantityReserved: 0 }),
+    );
 
     render(<Admin />);
     await showInventory();

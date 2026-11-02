@@ -39,9 +39,7 @@ describe('mockAuth', () => {
   it('rejects a second signup for the same email, case-insensitively', async () => {
     await signUp(EMAIL, PASSWORD);
 
-    await expect(signUp('ADA@example.com', 'another password')).rejects.toThrow(
-      AuthError,
-    );
+    await expect(signUp('ADA@example.com', 'another password')).rejects.toThrow(AuthError);
     await expect(signUp(EMAIL, PASSWORD)).rejects.toThrow(
       'An account with this email already exists',
     );
@@ -56,17 +54,13 @@ describe('mockAuth', () => {
   });
 
   it('signIn rejects an unknown email with the generic message', async () => {
-    await expect(signIn(EMAIL, PASSWORD)).rejects.toThrow(
-      'Email or password is incorrect',
-    );
+    await expect(signIn(EMAIL, PASSWORD)).rejects.toThrow('Email or password is incorrect');
   });
 
   it('signIn rejects a wrong password with the same generic message', async () => {
     await signUp(EMAIL, PASSWORD);
 
-    await expect(signIn(EMAIL, 'wrong password')).rejects.toThrow(
-      'Email or password is incorrect',
-    );
+    await expect(signIn(EMAIL, 'wrong password')).rejects.toThrow('Email or password is incorrect');
   });
 
   it('signOut clears the stored session but keeps the account', async () => {

@@ -53,10 +53,7 @@ async function createMethod(
 
   if (!response.ok) {
     const fallback = `Payment method request failed with status ${response.status}`;
-    throw new PaymentClientError(
-      await serverErrorMessage(response, fallback),
-      response.status,
-    );
+    throw new PaymentClientError(await serverErrorMessage(response, fallback), response.status);
   }
 
   return (await response.json()) as PaymentMethod;

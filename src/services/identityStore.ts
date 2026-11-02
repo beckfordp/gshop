@@ -6,8 +6,7 @@
 const KNOWN_IDENTITIES_KEY = 'gshop:knownIdentities';
 
 export type OrderIdentity =
-  | { type: 'user'; userId: string; email: string }
-  | { type: 'anonymous'; customerId: string };
+  { type: 'user'; userId: string; email: string } | { type: 'anonymous'; customerId: string };
 
 function read(): Record<string, string> {
   try {
@@ -29,7 +28,5 @@ export function rememberIdentity(userId: string, email: string): void {
 
 export function resolveIdentity(customerId: string): OrderIdentity {
   const email = read()[customerId];
-  return email
-    ? { type: 'user', userId: customerId, email }
-    : { type: 'anonymous', customerId };
+  return email ? { type: 'user', userId: customerId, email } : { type: 'anonymous', customerId };
 }

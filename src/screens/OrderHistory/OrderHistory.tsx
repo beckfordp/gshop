@@ -55,7 +55,9 @@ export default function OrderHistory() {
       const updated = await orderClient.cancel(id);
       setOrders((current) => current.map((order) => (order.id === id ? updated : order)));
       setCancelFor(null);
-      setNotice(`Order ${id} cancelled. The payment hold and reserved stock will be released shortly.`);
+      setNotice(
+        `Order ${id} cancelled. The payment hold and reserved stock will be released shortly.`,
+      );
     } catch (err) {
       setCancelError({
         orderId: id,
@@ -72,8 +74,7 @@ export default function OrderHistory() {
     <p className="order-history__identity">
       {session ? (
         <>
-          Signed in as <strong>{session.user.email}</strong> — showing your
-          orders
+          Signed in as <strong>{session.user.email}</strong> — showing your orders
         </>
       ) : (
         <>
@@ -117,81 +118,79 @@ export default function OrderHistory() {
         {orders.map((order) => {
           const identity = resolveIdentity(order.customerId);
           return (
-          <li key={order.id} className="order-history-card">
-            <p className="order-history-card__identity">
-              <span
-                className={`identity-badge identity-badge--${identity.type}`}
-              >
-                {identity.type === 'user' ? 'User' : 'Anonymous'}
-              </span>
-              <span>
-                {identity.type === 'user'
-                  ? identity.email
-                  : `id ${identity.customerId.slice(0, 8)}…`}
-              </span>
-            </p>
-            <p>Order ID: {order.id}</p>
-            <p>Status: {formatStatus(order.status)}</p>
-            <p>Date: {formatDate(order.createdAt)}</p>
-            <ul className="order-history-items">
-              {order.items.map((item) => (
-                <li key={item.id} className="order-history-item">
-                  <WatchArt sku={item.sku} name={item.productName} size={48} />
-                  <span>
-                    {item.productName} — qty {item.quantity} —{' '}
-                    {formatPrice(item.unitPriceCents * item.quantity)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <p className="order-history-total">Total: {formatPrice(order.totalCents)}</p>
-            {order.status === 'authorized' && (
-              <div className="order-history-card__actions">
-                {cancelFor === order.id ? (
-                  <div className="order-history-confirm">
-                    <p>
-                      Cancel this order? The payment hold and reserved stock will be released
-                      shortly.
+            <li key={order.id} className="order-history-card">
+              <p className="order-history-card__identity">
+                <span className={`identity-badge identity-badge--${identity.type}`}>
+                  {identity.type === 'user' ? 'User' : 'Anonymous'}
+                </span>
+                <span>
+                  {identity.type === 'user'
+                    ? identity.email
+                    : `id ${identity.customerId.slice(0, 8)}…`}
+                </span>
+              </p>
+              <p>Order ID: {order.id}</p>
+              <p>Status: {formatStatus(order.status)}</p>
+              <p>Date: {formatDate(order.createdAt)}</p>
+              <ul className="order-history-items">
+                {order.items.map((item) => (
+                  <li key={item.id} className="order-history-item">
+                    <WatchArt sku={item.sku} name={item.productName} size={48} />
+                    <span>
+                      {item.productName} — qty {item.quantity} —{' '}
+                      {formatPrice(item.unitPriceCents * item.quantity)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="order-history-total">Total: {formatPrice(order.totalCents)}</p>
+              {order.status === 'authorized' && (
+                <div className="order-history-card__actions">
+                  {cancelFor === order.id ? (
+                    <div className="order-history-confirm">
+                      <p>
+                        Cancel this order? The payment hold and reserved stock will be released
+                        shortly.
+                      </p>
+                      <button
+                        type="button"
+                        aria-label={`Confirm cancel ${order.id}`}
+                        disabled={cancelling === order.id}
+                        onClick={() => void handleCancel(order.id)}
+                      >
+                        Yes, cancel order
+                      </button>
+                      <button
+                        type="button"
+                        disabled={cancelling === order.id}
+                        onClick={() => setCancelFor(null)}
+                      >
+                        Keep order
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      aria-label={`Cancel order ${order.id}`}
+                      onClick={() => {
+                        setCancelFor(order.id);
+                        setCancelError(null);
+                      }}
+                    >
+                      Cancel order
+                    </button>
+                  )}
+                  {cancelError?.orderId === order.id && (
+                    <p role="alert">
+                      {cancelError.message}
+                      {cancelError.status === 409
+                        ? ' The order may already be cancelled or dispatched. If it has already shipped, see returns (US-23).'
+                        : ''}
                     </p>
-                    <button
-                      type="button"
-                      aria-label={`Confirm cancel ${order.id}`}
-                      disabled={cancelling === order.id}
-                      onClick={() => void handleCancel(order.id)}
-                    >
-                      Yes, cancel order
-                    </button>
-                    <button
-                      type="button"
-                      disabled={cancelling === order.id}
-                      onClick={() => setCancelFor(null)}
-                    >
-                      Keep order
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    aria-label={`Cancel order ${order.id}`}
-                    onClick={() => {
-                      setCancelFor(order.id);
-                      setCancelError(null);
-                    }}
-                  >
-                    Cancel order
-                  </button>
-                )}
-                {cancelError?.orderId === order.id && (
-                  <p role="alert">
-                    {cancelError.message}
-                    {cancelError.status === 409
-                      ? ' The order may already be cancelled or dispatched. If it has already shipped, see returns (US-23).'
-                      : ''}
-                  </p>
-                )}
-              </div>
-            )}
-          </li>
+                  )}
+                </div>
+              )}
+            </li>
           );
         })}
       </ul>

@@ -67,15 +67,13 @@ describe('validateAddress', () => {
 
 describe('validateCheckout', () => {
   it('ignores the billing draft when same-as-shipping is on', () => {
-    expect(
-      validateCheckout(makeValues({ sameAsShipping: true, billing: EMPTY_ADDRESS })),
-    ).toEqual({});
+    expect(validateCheckout(makeValues({ sameAsShipping: true, billing: EMPTY_ADDRESS }))).toEqual(
+      {},
+    );
   });
 
   it('validates billing when same-as-shipping is off', () => {
-    const errors = validateCheckout(
-      makeValues({ sameAsShipping: false, billing: EMPTY_ADDRESS }),
-    );
+    const errors = validateCheckout(makeValues({ sameAsShipping: false, billing: EMPTY_ADDRESS }));
 
     expect(errors.billing).toBeDefined();
     expect(errors.shipping).toBeUndefined();
@@ -83,12 +81,8 @@ describe('validateCheckout', () => {
 
   it('requires 12 to 19 card digits', () => {
     expect(validateCheckout(makeValues({ cardNumber: '' })).cardNumber).toBeDefined();
-    expect(
-      validateCheckout(makeValues({ cardNumber: '12345678901' })).cardNumber,
-    ).toBeDefined();
-    expect(
-      validateCheckout(makeValues({ cardNumber: '1'.repeat(20) })).cardNumber,
-    ).toBeDefined();
+    expect(validateCheckout(makeValues({ cardNumber: '12345678901' })).cardNumber).toBeDefined();
+    expect(validateCheckout(makeValues({ cardNumber: '1'.repeat(20) })).cardNumber).toBeDefined();
     expect(
       validateCheckout(makeValues({ cardNumber: '4242 4242 4242 4242' })).cardNumber,
     ).toBeUndefined();

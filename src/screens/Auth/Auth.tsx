@@ -23,11 +23,7 @@ const EMPTY_FORM: AuthFormValues = {
   confirmPassword: '',
 };
 
-export default function Auth({
-  onAuthenticated,
-  onBack,
-  initialMode = 'signin',
-}: AuthProps) {
+export default function Auth({ onAuthenticated, onBack, initialMode = 'signin' }: AuthProps) {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [values, setValues] = useState<AuthFormValues>(EMPTY_FORM);
   const [errors, setErrors] = useState<AuthFormErrors>({});
@@ -112,9 +108,7 @@ export default function Auth({
       <h1 ref={headingRef} id="auth-title" tabIndex={-1}>
         {mode === 'signin' ? 'Sign in' : 'Create account'}
       </h1>
-      <p className="auth__intro">
-        Sign in before checkout so your orders are tied to you.
-      </p>
+      <p className="auth__intro">Sign in before checkout so your orders are tied to you.</p>
 
       <div className="auth__tabs" role="tablist" aria-label="Authentication mode">
         <button
@@ -201,9 +195,7 @@ export default function Auth({
               value={values.confirmPassword}
               disabled={submitting}
               aria-invalid={errors.confirmPassword ? true : undefined}
-              aria-describedby={
-                errors.confirmPassword ? 'auth-confirm-error' : undefined
-              }
+              aria-describedby={errors.confirmPassword ? 'auth-confirm-error' : undefined}
               onChange={(event) => update('confirmPassword', event.target.value)}
             />
             {errors.confirmPassword && (
@@ -223,12 +215,7 @@ export default function Auth({
               ? 'Create account'
               : 'Sign in'}
         </button>
-        <button
-          className="auth__back"
-          type="button"
-          onClick={onBack}
-          disabled={submitting}
-        >
+        <button className="auth__back" type="button" onClick={onBack} disabled={submitting}>
           Cancel
         </button>
       </form>

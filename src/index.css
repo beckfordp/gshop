@@ -69,7 +69,9 @@ button {
   color: var(--color-text);
   background-color: var(--color-bg-elevated);
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
 }
 button:hover {
   border-color: var(--color-accent);

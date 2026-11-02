@@ -25,9 +25,7 @@ describe('generateTrackingNo', () => {
   });
 
   it('does not repeat the same number back to back', () => {
-    const numbers = new Set(
-      Array.from({ length: 10 }, () => generateTrackingNo('DHL')),
-    );
+    const numbers = new Set(Array.from({ length: 10 }, () => generateTrackingNo('DHL')));
     expect(numbers.size).toBeGreaterThan(1);
   });
 });

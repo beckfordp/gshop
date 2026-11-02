@@ -1,9 +1,5 @@
 import { AUTH_MOCK_ENABLED } from './env';
-import {
-  saveSession,
-  signIn as mockSignIn,
-  signUp as mockSignUp,
-} from './mockAuth';
+import { saveSession, signIn as mockSignIn, signUp as mockSignUp } from './mockAuth';
 import { rememberIdentity } from './identityStore';
 import { userClient } from './userClient';
 import type { AuthSession } from './authTypes';

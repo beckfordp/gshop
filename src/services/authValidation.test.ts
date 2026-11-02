@@ -19,15 +19,15 @@ describe('validateSignUp', () => {
   });
 
   it('requires a password of at least 8 characters', () => {
-    expect(
-      validateSignUp({ ...valid, password: 'short', confirmPassword: 'short' }),
-    ).toMatchObject({ password: expect.stringContaining('8 characters') });
+    expect(validateSignUp({ ...valid, password: 'short', confirmPassword: 'short' })).toMatchObject(
+      { password: expect.stringContaining('8 characters') },
+    );
   });
 
   it('requires the confirmation to match', () => {
-    expect(
-      validateSignUp({ ...valid, confirmPassword: 'different' }),
-    ).toMatchObject({ confirmPassword: expect.stringContaining('match') });
+    expect(validateSignUp({ ...valid, confirmPassword: 'different' })).toMatchObject({
+      confirmPassword: expect.stringContaining('match'),
+    });
   });
 });
 

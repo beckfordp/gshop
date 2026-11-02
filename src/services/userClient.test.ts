@@ -54,10 +54,9 @@ describe('userClient', () => {
   it('surfaces the server error message and status on 409', async () => {
     userClient.baseUrl = baseUrl;
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(
-        JSON.stringify({ error: 'An account with this email already exists' }),
-        { status: 409 },
-      ),
+      new Response(JSON.stringify({ error: 'An account with this email already exists' }), {
+        status: 409,
+      }),
     );
 
     try {
@@ -66,9 +65,7 @@ describe('userClient', () => {
     } catch (error) {
       expect(error).toBeInstanceOf(UserClientError);
       expect((error as UserClientError).status).toBe(409);
-      expect((error as UserClientError).message).toBe(
-        'An account with this email already exists',
-      );
+      expect((error as UserClientError).message).toBe('An account with this email already exists');
     }
   });
 
@@ -80,25 +77,25 @@ describe('userClient', () => {
       }),
     );
 
-    await expect(
-      userClient.login(input.email, 'wrong'),
-    ).rejects.toThrow('Email or password is incorrect');
+    await expect(userClient.login(input.email, 'wrong')).rejects.toThrow(
+      'Email or password is incorrect',
+    );
   });
 
   it('throws UserClientError when the network fails', async () => {
     userClient.baseUrl = baseUrl;
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
 
-    await expect(
-      userClient.signup(input.email, input.password),
-    ).rejects.toBeInstanceOf(UserClientError);
+    await expect(userClient.signup(input.email, input.password)).rejects.toBeInstanceOf(
+      UserClientError,
+    );
   });
 
   it('throws when the base URL is not configured', async () => {
     userClient.baseUrl = undefined;
 
-    await expect(
-      userClient.signup(input.email, input.password),
-    ).rejects.toThrow('User service URL is not configured');
+    await expect(userClient.signup(input.email, input.password)).rejects.toThrow(
+      'User service URL is not configured',
+    );
   });
 });

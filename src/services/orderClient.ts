@@ -25,12 +25,7 @@ export interface OrderItem extends NewOrderItem {
 }
 
 export type OrderStatus =
-  | 'authorized'
-  | 'payment_failed'
-  | 'dispatched'
-  | 'dispatch_failed'
-  | 'confirmed'
-  | 'cancelled';
+  'authorized' | 'payment_failed' | 'dispatched' | 'dispatch_failed' | 'confirmed' | 'cancelled';
 
 export interface Order {
   id: string;
@@ -142,7 +137,10 @@ async function remove(id: string): Promise<void> {
   }
 
   if (!response.ok) {
-    throw new OrderClientError(`Order request failed with status ${response.status}`, response.status);
+    throw new OrderClientError(
+      `Order request failed with status ${response.status}`,
+      response.status,
+    );
   }
 }
 

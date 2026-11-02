@@ -164,14 +164,12 @@ describe('Catalog', () => {
   it('shows an inline error and working Retry when adding to cart fails', async () => {
     list.mockResolvedValue({ items: [makeItem({ sku: 'WID-1' })], total: 1 });
     getOrCreateCartIdMock.mockResolvedValue('cart-1');
-    addItem
-      .mockRejectedValueOnce(new Error('cart service down'))
-      .mockResolvedValueOnce({
-        id: 'cart-1',
-        items: { 'WID-1': 1 },
-        createdAt: '2026-01-01T00:00:00Z',
-        updatedAt: '2026-01-01T00:00:00Z',
-      });
+    addItem.mockRejectedValueOnce(new Error('cart service down')).mockResolvedValueOnce({
+      id: 'cart-1',
+      items: { 'WID-1': 1 },
+      createdAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-01T00:00:00Z',
+    });
 
     render(<Catalog />);
 

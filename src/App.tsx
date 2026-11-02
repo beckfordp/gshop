@@ -1,13 +1,13 @@
-import { useState } from 'react'
-import Catalog from './screens/Catalog/Catalog'
-import Cart from './screens/Cart/Cart'
-import Checkout from './screens/Checkout/Checkout'
-import OrderConfirmation from './screens/OrderConfirmation/OrderConfirmation'
-import OrderHistory from './screens/OrderHistory/OrderHistory'
-import Admin from './screens/Admin/Admin'
-import Fulfilment from './screens/Fulfilment/Fulfilment'
-import type { NewOrderItem, Order } from './services/orderClient'
-import './App.css'
+import { useState } from 'react';
+import Catalog from './screens/Catalog/Catalog';
+import Cart from './screens/Cart/Cart';
+import Checkout from './screens/Checkout/Checkout';
+import OrderConfirmation from './screens/OrderConfirmation/OrderConfirmation';
+import OrderHistory from './screens/OrderHistory/OrderHistory';
+import Admin from './screens/Admin/Admin';
+import Fulfilment from './screens/Fulfilment/Fulfilment';
+import type { NewOrderItem, Order } from './services/orderClient';
+import './App.css';
 
 type AppView =
   | { name: 'catalog' }
@@ -16,17 +16,17 @@ type AppView =
   | { name: 'confirmation'; order: Order }
   | { name: 'history' }
   | { name: 'admin' }
-  | { name: 'fulfilment' }
+  | { name: 'fulfilment' };
 
 const NAV_TARGETS: { view: AppView; label: string }[] = [
   { view: { name: 'catalog' }, label: 'Back to Catalog' },
   { view: { name: 'cart' }, label: 'View Cart' },
   { view: { name: 'history' }, label: 'Order History' },
-]
+];
 
 function App() {
-  const [view, setView] = useState<AppView>({ name: 'catalog' })
-  const inCheckoutFlow = view.name === 'checkout' || view.name === 'confirmation'
+  const [view, setView] = useState<AppView>({ name: 'catalog' });
+  const inCheckoutFlow = view.name === 'checkout' || view.name === 'confirmation';
 
   return (
     <>
@@ -48,9 +48,7 @@ function App() {
       <main className="app-main">
         {view.name === 'catalog' && <Catalog />}
         {view.name === 'cart' && (
-          <Cart
-            onProceedToCheckout={(items) => setView({ name: 'checkout', items })}
-          />
+          <Cart onProceedToCheckout={(items) => setView({ name: 'checkout', items })} />
         )}
         {view.name === 'checkout' && (
           <Checkout
@@ -78,15 +76,15 @@ function App() {
           href="#"
           className="admin-entry"
           onClick={(event) => {
-            event.preventDefault()
-            setView({ name: 'admin' })
+            event.preventDefault();
+            setView({ name: 'admin' });
           }}
         >
           Admin
         </a>
       )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;

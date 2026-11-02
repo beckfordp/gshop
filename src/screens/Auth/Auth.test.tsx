@@ -27,11 +27,7 @@ function renderAuth(props: Partial<Parameters<typeof Auth>[0]> = {}) {
   );
 }
 
-function fill(values: {
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-}) {
+function fill(values: { email?: string; password?: string; confirmPassword?: string }) {
   if (values.email !== undefined) {
     fireEvent.change(screen.getByLabelText('Email'), {
       target: { value: values.email },
@@ -64,9 +60,7 @@ describe('Auth', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Create account' }));
 
-    expect(
-      screen.getByRole('heading', { name: 'Create account' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Create account' })).toBeInTheDocument();
     expect(screen.getByLabelText('Confirm password')).toBeInTheDocument();
   });
 
@@ -94,9 +88,7 @@ describe('Auth', () => {
   });
 
   it('shows the gateway error for a duplicate account', async () => {
-    signup.mockRejectedValue(
-      new Error('An account with this email already exists'),
-    );
+    signup.mockRejectedValue(new Error('An account with this email already exists'));
     renderAuth();
     fireEvent.click(screen.getByRole('tab', { name: 'Create account' }));
 
@@ -115,9 +107,7 @@ describe('Auth', () => {
     fill({ email: EMAIL, password: 'wrong password' });
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Email or password is incorrect',
-    );
+    expect(await screen.findByRole('alert')).toHaveTextContent('Email or password is incorrect');
   });
 
   it('logs in through the gateway and reports the session', async () => {
@@ -149,9 +139,7 @@ describe('Auth', () => {
   it('respects initialMode', () => {
     renderAuth({ initialMode: 'signup' });
 
-    expect(
-      screen.getByRole('heading', { name: 'Create account' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Create account' })).toBeInTheDocument();
     expect(screen.getByLabelText('Confirm password')).toBeInTheDocument();
   });
 });

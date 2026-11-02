@@ -172,9 +172,7 @@ describe('OrderHistory', () => {
     render(<OrderHistory />);
 
     await screen.findByText(/Widget/);
-    expect(
-      screen.queryByText('Prototype: fulfilment statuses'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Prototype: fulfilment statuses')).not.toBeInTheDocument();
   });
 
   it('renders each order as a styled card with a WatchArt thumbnail per item', async () => {
@@ -263,33 +261,23 @@ describe('OrderHistory', () => {
 
     render(<OrderHistory />);
 
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Cancel order order-1' }),
-    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel order order-1' }));
     fireEvent.click(screen.getByRole('button', { name: 'Confirm cancel order-1' }));
 
-    expect(await screen.findByRole('status')).toHaveTextContent(
-      'Order order-1 cancelled',
-    );
+    expect(await screen.findByRole('status')).toHaveTextContent('Order order-1 cancelled');
     expect(cancel).toHaveBeenCalledWith('order-1');
     expect(screen.getByText('Status: Cancelled')).toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: 'Cancel order order-1' }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Cancel order order-1' })).not.toBeInTheDocument();
   });
 
   it('shows the server message when a cancel is rejected with 409', async () => {
     getStoredCustomerIdMock.mockReturnValue('customer-1');
     list.mockResolvedValue([makeOrder({ id: 'order-1', status: 'authorized' })]);
-    cancel.mockRejectedValue(
-      new OrderClientError("Illegal status transition to 'cancelled'", 409),
-    );
+    cancel.mockRejectedValue(new OrderClientError("Illegal status transition to 'cancelled'", 409));
 
     render(<OrderHistory />);
 
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Cancel order order-1' }),
-    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel order order-1' }));
     fireEvent.click(screen.getByRole('button', { name: 'Confirm cancel order-1' }));
 
     const alert = await screen.findByRole('alert');
@@ -305,9 +293,7 @@ describe('OrderHistory', () => {
 
     render(<OrderHistory />);
 
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Cancel order order-1' }),
-    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel order order-1' }));
     fireEvent.click(screen.getByRole('button', { name: 'Keep order' }));
 
     expect(cancel).not.toHaveBeenCalled();
@@ -321,9 +307,7 @@ describe('OrderHistory', () => {
     render(<OrderHistory />);
 
     await screen.findByText('Status: Dispatched');
-    expect(
-      screen.queryByRole('button', { name: 'Cancel order order-1' }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Cancel order order-1' })).not.toBeInTheDocument();
   });
 
   it('shows a cancelled order without a cancel action', async () => {
@@ -333,8 +317,6 @@ describe('OrderHistory', () => {
     render(<OrderHistory />);
 
     await screen.findByText('Status: Cancelled');
-    expect(
-      screen.queryByRole('button', { name: 'Cancel order order-1' }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Cancel order order-1' })).not.toBeInTheDocument();
   });
 });

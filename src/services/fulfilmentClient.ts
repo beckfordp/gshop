@@ -11,12 +11,7 @@ import { errorMessage } from '../lib/format';
 // customer identity (the event itself has none).
 
 export type FulfilmentState =
-  | 'PENDING'
-  | 'PICKING'
-  | 'PACKED'
-  | 'DISPATCHED'
-  | 'DISPATCH_FAILED'
-  | 'CANCELLED';
+  'PENDING' | 'PICKING' | 'PACKED' | 'DISPATCHED' | 'DISPATCH_FAILED' | 'CANCELLED';
 
 export interface FulfilmentItem {
   sku: string;
@@ -59,10 +54,7 @@ function messageFor(status: number): string {
   return `Fulfilment request failed with status ${status}`;
 }
 
-async function send(
-  path: string,
-  init?: RequestInit,
-): Promise<Response> {
+async function send(path: string, init?: RequestInit): Promise<Response> {
   const baseUrl = fulfilmentClient.baseUrl;
   if (!baseUrl) {
     throw new FulfilmentClientError('Fulfilment service URL is not configured');
@@ -73,9 +65,7 @@ async function send(
     const url = `${baseUrl}${path}`;
     response = init ? await fetch(url, init) : await fetch(url);
   } catch (error) {
-    throw new FulfilmentClientError(
-      `Failed to reach fulfilment service: ${errorMessage(error)}`,
-    );
+    throw new FulfilmentClientError(`Failed to reach fulfilment service: ${errorMessage(error)}`);
   }
 
   if (!response.ok) {

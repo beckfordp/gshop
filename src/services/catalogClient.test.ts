@@ -56,25 +56,19 @@ describe('catalogClient.list', () => {
       }),
     );
 
-    await expect(catalogClient.list({ limit: -1, offset: 0 })).rejects.toThrow(
-      CatalogClientError,
-    );
+    await expect(catalogClient.list({ limit: -1, offset: 0 })).rejects.toThrow(CatalogClientError);
   });
 
   it('throws CatalogClientError when the network request fails', async () => {
     catalogClient.baseUrl = baseUrl;
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
 
-    await expect(catalogClient.list({ limit: 20, offset: 0 })).rejects.toThrow(
-      CatalogClientError,
-    );
+    await expect(catalogClient.list({ limit: 20, offset: 0 })).rejects.toThrow(CatalogClientError);
   });
 
   it('throws CatalogClientError when the base URL is not configured', async () => {
     catalogClient.baseUrl = undefined;
 
-    await expect(catalogClient.list({ limit: 20, offset: 0 })).rejects.toThrow(
-      CatalogClientError,
-    );
+    await expect(catalogClient.list({ limit: 20, offset: 0 })).rejects.toThrow(CatalogClientError);
   });
 });

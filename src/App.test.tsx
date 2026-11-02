@@ -23,11 +23,7 @@ vi.mock('./screens/Catalog/Catalog', () => ({
 }));
 
 vi.mock('./screens/Cart/Cart', () => ({
-  default: ({
-    onProceedToCheckout,
-  }: {
-    onProceedToCheckout: (items: NewOrderItem[]) => void;
-  }) => (
+  default: ({ onProceedToCheckout }: { onProceedToCheckout: (items: NewOrderItem[]) => void }) => (
     <div>
       Cart screen
       <button onClick={() => onProceedToCheckout(testItems)}>Proceed to checkout</button>
@@ -54,13 +50,7 @@ vi.mock('./screens/Checkout/Checkout', () => ({
 }));
 
 vi.mock('./screens/OrderConfirmation/OrderConfirmation', () => ({
-  default: ({
-    order,
-    onContinueShopping,
-  }: {
-    order: Order;
-    onContinueShopping: () => void;
-  }) => (
+  default: ({ order, onContinueShopping }: { order: Order; onContinueShopping: () => void }) => (
     <div>
       Confirmation screen for {order.id}
       <button onClick={onContinueShopping}>Continue Shopping</button>

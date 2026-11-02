@@ -97,9 +97,7 @@ export default function Cart({ onProceedToCheckout }: CartProps) {
       return;
     }
 
-    const pricedLines = lines.filter(
-      (line): line is PricedCartLine => line.priceCents !== null,
-    );
+    const pricedLines = lines.filter((line): line is PricedCartLine => line.priceCents !== null);
     if (pricedLines.length !== lines.length) {
       setCheckoutError('Remove unavailable items before checking out.');
       return;
@@ -146,13 +144,17 @@ export default function Cart({ onProceedToCheckout }: CartProps) {
               {line.priceCents !== null && ` — ${formatPrice(line.priceCents * line.quantity)}`}
             </span>
             <button
-              onClick={() => runAction(line.sku, (cartId) => cartClient.addItem(cartId, line.sku, 1))}
+              onClick={() =>
+                runAction(line.sku, (cartId) => cartClient.addItem(cartId, line.sku, 1))
+              }
               disabled={actionLoading[line.sku]}
             >
               +1
             </button>
             <button
-              onClick={() => runAction(line.sku, (cartId) => cartClient.removeItem(cartId, line.sku))}
+              onClick={() =>
+                runAction(line.sku, (cartId) => cartClient.removeItem(cartId, line.sku))
+              }
               disabled={actionLoading[line.sku]}
             >
               Remove

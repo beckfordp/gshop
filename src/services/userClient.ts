@@ -50,10 +50,7 @@ async function post<T>(
 
   if (!response.ok) {
     const fallback = `User request failed with status ${response.status}`;
-    throw new UserClientError(
-      await serverErrorMessage(response, fallback),
-      response.status,
-    );
+    throw new UserClientError(await serverErrorMessage(response, fallback), response.status);
   }
 
   return (await response.json()) as T;

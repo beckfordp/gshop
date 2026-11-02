@@ -125,7 +125,8 @@ describe('createMockCheckoutGateway', () => {
     expect(getMockScenario()).toBe('normal');
   });
 
-  it('never returns or stores the card number', async () => {    const gateway = createMockCheckoutGateway({ delayMs: 0, createId, now });
+  it('never returns or stores the card number', async () => {
+    const gateway = createMockCheckoutGateway({ delayMs: 0, createId, now });
 
     const authorized = await gateway.submit(request);
     const declined = await gateway.submit({
@@ -168,8 +169,8 @@ describe('createMockCheckoutGateway', () => {
     const controller = new AbortController();
     controller.abort();
 
-    await expect(
-      gateway.submit(request, { signal: controller.signal }),
-    ).rejects.toMatchObject({ name: 'AbortError' });
+    await expect(gateway.submit(request, { signal: controller.signal })).rejects.toMatchObject({
+      name: 'AbortError',
+    });
   });
 });

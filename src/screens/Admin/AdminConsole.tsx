@@ -36,9 +36,7 @@ function statusLabel(status: string): string {
 }
 
 function badge(status: string): string {
-  return `admin-console__badge admin-console__badge--${status
-    .toLowerCase()
-    .replace(/_/g, '-')}`;
+  return `admin-console__badge admin-console__badge--${status.toLowerCase().replace(/_/g, '-')}`;
 }
 
 function refusalReason(order: Order): string {
@@ -383,9 +381,7 @@ function ReconciliationQueue({ onOpenOrder, onResult }: ReconciliationQueueProps
 
   const load = useCallback(async () => {
     setLoading(true);
-    const loaded = await adminClient.allReconciliations(
-      showResolved ? {} : { status: 'open' },
-    );
+    const loaded = await adminClient.allReconciliations(showResolved ? {} : { status: 'open' });
     setRows(loaded.rows);
     setFailures(loaded.failures);
     setLoading(false);
@@ -480,7 +476,9 @@ function OrderDetail({
     ]);
     setFacts({
       reservations:
-        reservations.status === 'fulfilled' ? reservations.value : errorMessage(reservations.reason),
+        reservations.status === 'fulfilled'
+          ? reservations.value
+          : errorMessage(reservations.reason),
       task:
         tasks.status === 'fulfilled'
           ? (tasks.value.find((task) => task.orderId === order.id) ?? null)

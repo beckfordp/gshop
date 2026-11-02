@@ -164,11 +164,7 @@ async function reconciliations(
   service: ReconciliationService,
   filters: { status?: 'open' | 'resolved'; orderId?: string } = {},
 ): Promise<ServiceReconciliation[]> {
-  const response = await send(
-    service,
-    serviceUrls[service](),
-    `/reconciliations${query(filters)}`,
-  );
+  const response = await send(service, serviceUrls[service](), `/reconciliations${query(filters)}`);
   const rows = (await response.json()) as Reconciliation[];
   return rows.map((row) => ({ ...row, service }));
 }

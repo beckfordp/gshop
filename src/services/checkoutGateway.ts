@@ -1,11 +1,7 @@
 import { CHECKOUT_MOCK_ENABLED } from './env';
 import { paymentClient } from './paymentClient';
 import { orderClient, type NewOrderItem, type Order } from './orderClient';
-import {
-  type Address,
-  type CardDetails,
-  type ReservationFailure,
-} from './checkoutTypes';
+import { type Address, type CardDetails, type ReservationFailure } from './checkoutTypes';
 import { createMockCheckoutGateway, type MockCheckoutOptions } from './checkoutMock';
 
 export { CheckoutGatewayError } from './checkoutTypes';
@@ -34,10 +30,7 @@ export type CheckoutResult =
   | { kind: 'stock_unavailable'; failures: ReservationFailure[] };
 
 export interface CheckoutGateway {
-  submit(
-    request: CheckoutRequest,
-    options?: { signal?: AbortSignal },
-  ): Promise<CheckoutResult>;
+  submit(request: CheckoutRequest, options?: { signal?: AbortSignal }): Promise<CheckoutResult>;
 }
 
 export interface CheckoutGatewayDeps {
@@ -88,9 +81,7 @@ export function createConfiguredCheckoutGateway(
   deps?: CheckoutGatewayDeps,
   mockOptions?: MockCheckoutOptions,
 ): CheckoutGateway {
-  return mockEnabled
-    ? createMockCheckoutGateway(mockOptions)
-    : createHttpCheckoutGateway(deps);
+  return mockEnabled ? createMockCheckoutGateway(mockOptions) : createHttpCheckoutGateway(deps);
 }
 
 export const checkoutGateway = createConfiguredCheckoutGateway(CHECKOUT_MOCK_ENABLED);

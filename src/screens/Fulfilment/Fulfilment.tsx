@@ -5,11 +5,7 @@ import {
   AUTO_DRIVE_INTERVAL_MS,
   shouldAutoFail,
 } from '../../lib/autoDrive';
-import {
-  CARRIERS,
-  generateTrackingNo,
-  type Carrier,
-} from '../../lib/tracking';
+import { CARRIERS, generateTrackingNo, type Carrier } from '../../lib/tracking';
 import {
   fulfilmentClient,
   type FulfilmentState,
@@ -43,18 +39,11 @@ const QUEUE_FILTERS: { value: QueueFilter; label: string }[] = [
 ];
 
 function isTerminalState(state: FulfilmentState): boolean {
-  return (
-    state === 'DISPATCHED' ||
-    state === 'DISPATCH_FAILED' ||
-    state === 'CANCELLED'
-  );
+  return state === 'DISPATCHED' || state === 'DISPATCH_FAILED' || state === 'CANCELLED';
 }
 
 function totalCents(items: FulfilmentTask['items']): number {
-  return items.reduce(
-    (sum, item) => sum + item.unitPriceCents * item.quantity,
-    0,
-  );
+  return items.reduce((sum, item) => sum + item.unitPriceCents * item.quantity, 0);
 }
 
 function shipTo(task: FulfilmentTask): string {
@@ -109,18 +98,13 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
   };
 
   const apply = useCallback(
-    async (
-      orderId: string,
-      action: () => Promise<FulfilmentTask>,
-    ): Promise<boolean> => {
+    async (orderId: string, action: () => Promise<FulfilmentTask>): Promise<boolean> => {
       setError(null);
       setBusy(orderId);
       try {
         const updated = await action();
         setQueue((current) =>
-          current.map((task) =>
-            task.orderId === updated.orderId ? updated : task,
-          ),
+          current.map((task) => (task.orderId === updated.orderId ? updated : task)),
         );
         setDispatchFor(null);
         setProblemFor(null);
@@ -144,9 +128,7 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
   );
 
   const countFor = (value: QueueFilter): number =>
-    value === 'ALL'
-      ? queue.length
-      : queue.filter((task) => task.state === value).length;
+    value === 'ALL' ? queue.length : queue.filter((task) => task.state === value).length;
 
   // Auto-drive (demo): call the real operator endpoints on a timer, with an
   // occasional simulated warehouse failure so DispatchFailed shows up too.
@@ -159,22 +141,12 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
           return apply(id, () => fulfilmentClient.startPicking(id));
         case 'PICKING':
           return shouldAutoFail()
-            ? apply(id, () =>
-                fulfilmentClient.fail(id, AUTO_DRIVE_FAILURE_REASON),
-              )
+            ? apply(id, () => fulfilmentClient.fail(id, AUTO_DRIVE_FAILURE_REASON))
             : apply(id, () => fulfilmentClient.pack(id));
         case 'PACKED':
           return shouldAutoFail()
-            ? apply(id, () =>
-                fulfilmentClient.fail(id, AUTO_DRIVE_FAILURE_REASON),
-              )
-            : apply(id, () =>
-                fulfilmentClient.dispatch(
-                  id,
-                  generateTrackingNo('DHL'),
-                  'DHL',
-                ),
-              );
+            ? apply(id, () => fulfilmentClient.fail(id, AUTO_DRIVE_FAILURE_REASON))
+            : apply(id, () => fulfilmentClient.dispatch(id, generateTrackingNo('DHL'), 'DHL'));
         default:
           return true;
       }
@@ -205,9 +177,7 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
       <div className="fulfilment__header">
         <div>
           <h1>Order processing</h1>
-          <p className="fulfilment__intro">
-            Pick, pack and dispatch authorized orders.
-          </p>
+          <p className="fulfilment__intro">Pick, pack and dispatch authorized orders.</p>
         </div>
         <button type="button" onClick={onBackToAdmin}>
           Back to Admin
@@ -224,20 +194,12 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
         <button type="button" onClick={() => void load()} disabled={loading}>
           Refresh
         </button>
-        <button
-          type="button"
-          aria-pressed={autoDrive}
-          onClick={() => setAutoDrive((on) => !on)}
-        >
+        <button type="button" aria-pressed={autoDrive} onClick={() => setAutoDrive((on) => !on)}>
           {autoDrive ? 'Auto-drive: on' : 'Auto-drive: off'}
         </button>
       </div>
 
-      <div
-        className="fulfilment__tabs"
-        role="tablist"
-        aria-label="Orders by state"
-      >
+      <div className="fulfilment__tabs" role="tablist" aria-label="Orders by state">
         {QUEUE_FILTERS.map((option) => (
           <button
             key={option.value}
@@ -249,26 +211,19 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
             onClick={() => setFilter(option.value)}
           >
             {option.label}
-            <span className="fulfilment__tab-count">
-              {countFor(option.value)}
-            </span>
+            <span className="fulfilment__tab-count">{countFor(option.value)}</span>
           </button>
         ))}
       </div>
 
-      <div
-        id="fulfilment-queue-panel"
-        role="tabpanel"
-        aria-labelledby={`fulfilment-tab-${filter}`}
-      >
+      <div id="fulfilment-queue-panel" role="tabpanel" aria-labelledby={`fulfilment-tab-${filter}`}>
         {loading && queue.length === 0 && (
           <p className="fulfilment__empty">Loading fulfilment queue…</p>
         )}
 
         {!loading && !error && queue.length === 0 && (
           <p className="fulfilment__empty">
-            No fulfilment tasks yet — they appear when an order&apos;s payment is
-            authorized.
+            No fulfilment tasks yet — they appear when an order&apos;s payment is authorized.
           </p>
         )}
 
@@ -280,194 +235,182 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
 
         <ul className="fulfilment-list">
           {visibleQueue.map((order) => {
-          const terminal = isTerminalState(order.state);
-          const working = busy === order.orderId;
-          return (
-            <li key={order.orderId} className="fulfilment-card">
-              <div className="fulfilment-card__top">
-                <p className="fulfilment-card__id">{order.orderId}</p>
-                <span
-                  className={`fulfilment-badge fulfilment-badge--${order.state.toLowerCase()}`}
-                >
-                  {STATE_LABELS[order.state]}
-                </span>
-              </div>
-              <p className="fulfilment-card__customer">{shipTo(order)}</p>
-              <ul className="fulfilment-card__items">
-                {order.items.map((item) => (
-                  <li key={item.sku}>
-                    {item.productName} — qty {item.quantity} —{' '}
-                    {formatPrice(item.unitPriceCents * item.quantity)}
-                  </li>
-                ))}
-              </ul>
-              <p className="fulfilment-card__total">
-                Total: {formatPrice(totalCents(order.items))}
-              </p>
+            const terminal = isTerminalState(order.state);
+            const working = busy === order.orderId;
+            return (
+              <li key={order.orderId} className="fulfilment-card">
+                <div className="fulfilment-card__top">
+                  <p className="fulfilment-card__id">{order.orderId}</p>
+                  <span
+                    className={`fulfilment-badge fulfilment-badge--${order.state.toLowerCase()}`}
+                  >
+                    {STATE_LABELS[order.state]}
+                  </span>
+                </div>
+                <p className="fulfilment-card__customer">{shipTo(order)}</p>
+                <ul className="fulfilment-card__items">
+                  {order.items.map((item) => (
+                    <li key={item.sku}>
+                      {item.productName} — qty {item.quantity} —{' '}
+                      {formatPrice(item.unitPriceCents * item.quantity)}
+                    </li>
+                  ))}
+                </ul>
+                <p className="fulfilment-card__total">
+                  Total: {formatPrice(totalCents(order.items))}
+                </p>
 
-              {order.state === 'DISPATCHED' && (
-                <p className="fulfilment-card__outcome">
-                  Shipped via {order.carrier} — tracking {order.trackingNo}
-                </p>
-              )}
-              {order.state === 'DISPATCH_FAILED' && (
-                <p className="fulfilment-card__outcome">
-                  Not dispatched: {order.failureReason}
-                </p>
-              )}
-              {order.state === 'CANCELLED' && (
-                <p className="fulfilment-card__outcome">
-                  Cancelled before dispatch
-                </p>
-              )}
+                {order.state === 'DISPATCHED' && (
+                  <p className="fulfilment-card__outcome">
+                    Shipped via {order.carrier} — tracking {order.trackingNo}
+                  </p>
+                )}
+                {order.state === 'DISPATCH_FAILED' && (
+                  <p className="fulfilment-card__outcome">Not dispatched: {order.failureReason}</p>
+                )}
+                {order.state === 'CANCELLED' && (
+                  <p className="fulfilment-card__outcome">Cancelled before dispatch</p>
+                )}
 
-              {!terminal && (
-                <div className="fulfilment-card__actions">
-                  {order.state === 'PENDING' && (
+                {!terminal && (
+                  <div className="fulfilment-card__actions">
+                    {order.state === 'PENDING' && (
+                      <button
+                        type="button"
+                        disabled={working}
+                        onClick={() =>
+                          void apply(order.orderId, () =>
+                            fulfilmentClient.startPicking(order.orderId),
+                          )
+                        }
+                      >
+                        Start picking
+                      </button>
+                    )}
+                    {order.state === 'PICKING' && (
+                      <button
+                        type="button"
+                        disabled={working}
+                        onClick={() =>
+                          void apply(order.orderId, () => fulfilmentClient.pack(order.orderId))
+                        }
+                      >
+                        Mark packed
+                      </button>
+                    )}
+                    {order.state === 'PACKED' && (
+                      <button
+                        type="button"
+                        disabled={working}
+                        onClick={() => {
+                          closeForms();
+                          setError(null);
+                          setCarrier('DHL');
+                          setTrackingNo(generateTrackingNo('DHL'));
+                          setDispatchFor(order.orderId);
+                        }}
+                      >
+                        Dispatch
+                      </button>
+                    )}
                     <button
                       type="button"
-                      disabled={working}
-                      onClick={() =>
-                        void apply(order.orderId, () =>
-                          fulfilmentClient.startPicking(order.orderId),
-                        )
-                      }
-                    >
-                      Start picking
-                    </button>
-                  )}
-                  {order.state === 'PICKING' && (
-                    <button
-                      type="button"
-                      disabled={working}
-                      onClick={() =>
-                        void apply(order.orderId, () =>
-                          fulfilmentClient.pack(order.orderId),
-                        )
-                      }
-                    >
-                      Mark packed
-                    </button>
-                  )}
-                  {order.state === 'PACKED' && (
-                    <button
-                      type="button"
+                      className="fulfilment-card__problem"
                       disabled={working}
                       onClick={() => {
                         closeForms();
                         setError(null);
-                        setCarrier('DHL');
-                        setTrackingNo(generateTrackingNo('DHL'));
-                        setDispatchFor(order.orderId);
+                        setProblemFor(order.orderId);
                       }}
                     >
-                      Dispatch
+                      Report problem
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    className="fulfilment-card__problem"
-                    disabled={working}
-                    onClick={() => {
-                      closeForms();
-                      setError(null);
-                      setProblemFor(order.orderId);
-                    }}
-                  >
-                    Report problem
-                  </button>
-                </div>
-              )}
+                  </div>
+                )}
 
-              {dispatchFor === order.orderId && (
-                <div className="fulfilment-form">
-                  <label htmlFor={`tracking-${order.orderId}`}>
-                    Tracking number
-                  </label>
-                  <input
-                    id={`tracking-${order.orderId}`}
-                    value={trackingNo}
-                    onChange={(event) => setTrackingNo(event.target.value)}
-                  />
-                  <label htmlFor={`carrier-${order.orderId}`}>Carrier</label>
-                  <select
-                    id={`carrier-${order.orderId}`}
-                    value={carrier}
-                    onChange={(event) => {
-                      const next = event.target.value as Carrier;
-                      setCarrier(next);
-                      setTrackingNo(generateTrackingNo(next));
-                    }}
-                  >
-                    {CARRIERS.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="fulfilment-form__actions">
-                    <button
-                      type="button"
-                      disabled={working}
-                      onClick={() => {
-                        if (!trackingNo.trim() || !carrier.trim()) {
-                          setError(
-                            'Tracking number and carrier are required to dispatch',
+                {dispatchFor === order.orderId && (
+                  <div className="fulfilment-form">
+                    <label htmlFor={`tracking-${order.orderId}`}>Tracking number</label>
+                    <input
+                      id={`tracking-${order.orderId}`}
+                      value={trackingNo}
+                      onChange={(event) => setTrackingNo(event.target.value)}
+                    />
+                    <label htmlFor={`carrier-${order.orderId}`}>Carrier</label>
+                    <select
+                      id={`carrier-${order.orderId}`}
+                      value={carrier}
+                      onChange={(event) => {
+                        const next = event.target.value as Carrier;
+                        setCarrier(next);
+                        setTrackingNo(generateTrackingNo(next));
+                      }}
+                    >
+                      {CARRIERS.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="fulfilment-form__actions">
+                      <button
+                        type="button"
+                        disabled={working}
+                        onClick={() => {
+                          if (!trackingNo.trim() || !carrier.trim()) {
+                            setError('Tracking number and carrier are required to dispatch');
+                            return;
+                          }
+                          void apply(order.orderId, () =>
+                            fulfilmentClient.dispatch(
+                              order.orderId,
+                              trackingNo.trim(),
+                              carrier.trim(),
+                            ),
                           );
-                          return;
-                        }
-                        void apply(order.orderId, () =>
-                          fulfilmentClient.dispatch(
-                            order.orderId,
-                            trackingNo.trim(),
-                            carrier.trim(),
-                          ),
-                        );
-                      }}
-                    >
-                      Confirm dispatch
-                    </button>
-                    <button type="button" onClick={closeForms}>
-                      Cancel
-                    </button>
+                        }}
+                      >
+                        Confirm dispatch
+                      </button>
+                      <button type="button" onClick={closeForms}>
+                        Cancel
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {problemFor === order.orderId && (
-                <div className="fulfilment-form">
-                  <label htmlFor={`reason-${order.orderId}`}>
-                    What went wrong?
-                  </label>
-                  <input
-                    id={`reason-${order.orderId}`}
-                    value={reason}
-                    onChange={(event) => setReason(event.target.value)}
-                  />
-                  <div className="fulfilment-form__actions">
-                    <button
-                      type="button"
-                      disabled={working}
-                      onClick={() => {
-                        if (!reason.trim()) {
-                          setError('A reason is required');
-                          return;
-                        }
-                        void apply(order.orderId, () =>
-                          fulfilmentClient.fail(order.orderId, reason.trim()),
-                        );
-                      }}
-                    >
-                      Confirm failure
-                    </button>
-                    <button type="button" onClick={closeForms}>
-                      Cancel
-                    </button>
+                {problemFor === order.orderId && (
+                  <div className="fulfilment-form">
+                    <label htmlFor={`reason-${order.orderId}`}>What went wrong?</label>
+                    <input
+                      id={`reason-${order.orderId}`}
+                      value={reason}
+                      onChange={(event) => setReason(event.target.value)}
+                    />
+                    <div className="fulfilment-form__actions">
+                      <button
+                        type="button"
+                        disabled={working}
+                        onClick={() => {
+                          if (!reason.trim()) {
+                            setError('A reason is required');
+                            return;
+                          }
+                          void apply(order.orderId, () =>
+                            fulfilmentClient.fail(order.orderId, reason.trim()),
+                          );
+                        }}
+                      >
+                        Confirm failure
+                      </button>
+                      <button type="button" onClick={closeForms}>
+                        Cancel
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
-            </li>
-          );
+                )}
+              </li>
+            );
           })}
         </ul>
       </div>

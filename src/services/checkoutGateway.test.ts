@@ -132,9 +132,7 @@ describe('createHttpCheckoutGateway', () => {
     });
     createMethod.mockRejectedValue(new Error('payment down'));
 
-    await expect(createHttpCheckoutGateway(deps).submit(request)).rejects.toThrow(
-      'payment down',
-    );
+    await expect(createHttpCheckoutGateway(deps).submit(request)).rejects.toThrow('payment down');
     expect(create).not.toHaveBeenCalled();
   });
 

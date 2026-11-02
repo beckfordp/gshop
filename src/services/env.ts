@@ -19,8 +19,7 @@ export const NOTIFICATION_SERVICE_URL = import.meta.env.VITE_NOTIFICATION_SERVIC
 // resolve) carry the dev-only operator token (ADR 0024). The default is the
 // services' fixed local default; it is not a secret and never a real
 // authorization boundary.
-export const OPERATOR_TOKEN: string =
-  import.meta.env.VITE_OPERATOR_TOKEN ?? 'dev-operator-token';
+export const OPERATOR_TOKEN: string = import.meta.env.VITE_OPERATOR_TOKEN ?? 'dev-operator-token';
 
 // Prototype flag: when true, Checkout talks to an in-browser mock instead of
 // payment-service/order-service. Set VITE_CHECKOUT_MOCK=true for local UX

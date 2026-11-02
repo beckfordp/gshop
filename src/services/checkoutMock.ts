@@ -8,11 +8,7 @@ import type { Order, OrderItem } from './orderClient';
 // authorizes. A decline or stock failure persists no order. No PAN is stored
 // or logged; nothing leaves the browser.
 
-export type MockScenario =
-  | 'normal'
-  | 'items_unavailable'
-  | 'card_declined'
-  | 'service_error';
+export type MockScenario = 'normal' | 'items_unavailable' | 'card_declined' | 'service_error';
 
 let scenario: MockScenario = 'normal';
 
@@ -69,10 +65,7 @@ export function createMockCheckoutGateway({
 
 // The scenario control is meant to exercise the multi-line 409 path; the card
 // trick (0003) reports a single unavailable line, like a one-line cart.
-function failedLines(
-  request: CheckoutRequest,
-  multiple: boolean,
-): ReservationFailure[] {
+function failedLines(request: CheckoutRequest, multiple: boolean): ReservationFailure[] {
   const lines = multiple ? request.items.slice(0, 2) : request.items.slice(0, 1);
   return lines.map((item, index) => ({
     sku: item.sku,
@@ -80,11 +73,7 @@ function failedLines(
   }));
 }
 
-function makeOrder(
-  request: CheckoutRequest,
-  createId: () => string,
-  now: () => Date,
-): Order {
+function makeOrder(request: CheckoutRequest, createId: () => string, now: () => Date): Order {
   const timestamp = now().toISOString();
   const items: OrderItem[] = request.items.map((item) => ({
     ...item,
@@ -94,10 +83,7 @@ function makeOrder(
   return {
     id: createId(),
     customerId: request.customerId,
-    totalCents: items.reduce(
-      (sum, item) => sum + item.unitPriceCents * item.quantity,
-      0,
-    ),
+    totalCents: items.reduce((sum, item) => sum + item.unitPriceCents * item.quantity, 0),
     status: 'authorized',
     items,
     createdAt: timestamp,

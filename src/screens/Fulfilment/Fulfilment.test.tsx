@@ -79,12 +79,8 @@ describe('Fulfilment', () => {
     expect(within(card('order-4')).getByText('Dispatched')).toBeInTheDocument();
     expect(within(card('order-5')).getByText('Dispatch failed')).toBeInTheDocument();
     expect(within(card('order-6')).getByText('Cancelled')).toBeInTheDocument();
-    expect(
-      within(card('order-6')).getByText('Cancelled before dispatch'),
-    ).toBeInTheDocument();
-    expect(
-      within(card('order-1')).getByText(/122 Wilmot Street/),
-    ).toBeInTheDocument();
+    expect(within(card('order-6')).getByText('Cancelled before dispatch')).toBeInTheDocument();
+    expect(within(card('order-1')).getByText(/122 Wilmot Street/)).toBeInTheDocument();
     expect(within(card('order-1')).getByText(/Total: \$90/)).toBeInTheDocument();
   });
 
@@ -92,10 +88,7 @@ describe('Fulfilment', () => {
     render(<Fulfilment onBackToAdmin={vi.fn()} />);
     await screen.findByText('order-1');
 
-    expect(screen.getByRole('tab', { name: /^All/ })).toHaveAttribute(
-      'aria-selected',
-      'true',
-    );
+    expect(screen.getByRole('tab', { name: /^All/ })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('tab', { name: 'Pending 1' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Cancelled 1' })).toBeInTheDocument();
     expect(screen.getByText('order-6')).toBeInTheDocument();
@@ -104,10 +97,7 @@ describe('Fulfilment', () => {
 
     expect(screen.getByText('order-1')).toBeInTheDocument();
     expect(screen.queryByText('order-2')).not.toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Pending 1' })).toHaveAttribute(
-      'aria-selected',
-      'true',
-    );
+    expect(screen.getByRole('tab', { name: 'Pending 1' })).toHaveAttribute('aria-selected', 'true');
 
     fireEvent.click(screen.getByRole('tab', { name: 'Dispatched 1' }));
 
@@ -142,12 +132,8 @@ describe('Fulfilment', () => {
     expect(await within(card('order-1')).findByText('Packed')).toBeInTheDocument();
 
     fireEvent.click(within(card('order-1')).getByText('Dispatch'));
-    const tracking = within(card('order-1')).getByLabelText(
-      'Tracking number',
-    ) as HTMLInputElement;
-    const carrier = within(card('order-1')).getByLabelText(
-      'Carrier',
-    ) as HTMLSelectElement;
+    const tracking = within(card('order-1')).getByLabelText('Tracking number') as HTMLInputElement;
+    const carrier = within(card('order-1')).getByLabelText('Carrier') as HTMLSelectElement;
     expect(carrier.value).toBe('DHL');
     expect(tracking.value).toMatch(/^\d{10}$/);
 
@@ -174,10 +160,9 @@ describe('Fulfilment', () => {
     await screen.findByText('order-3');
 
     fireEvent.click(within(card('order-3')).getByText('Dispatch'));
-    fireEvent.change(
-      within(card('order-3')).getByLabelText('Tracking number'),
-      { target: { value: '' } },
-    );
+    fireEvent.change(within(card('order-3')).getByLabelText('Tracking number'), {
+      target: { value: '' },
+    });
     fireEvent.click(within(card('order-3')).getByText('Confirm dispatch'));
 
     expect(screen.getByRole('alert')).toHaveTextContent(
@@ -203,16 +188,12 @@ describe('Fulfilment', () => {
     });
     fireEvent.click(within(card('order-2')).getByText('Confirm failure'));
 
-    expect(
-      await within(card('order-2')).findByText('Dispatch failed'),
-    ).toBeInTheDocument();
+    expect(await within(card('order-2')).findByText('Dispatch failed')).toBeInTheDocument();
     expect(clientMock.fail).toHaveBeenCalledWith('order-2', 'Box crushed');
   });
 
   it('surfaces server errors in the alert banner', async () => {
-    clientMock.startPicking.mockRejectedValue(
-      new Error('Cannot start picking a PACKED task'),
-    );
+    clientMock.startPicking.mockRejectedValue(new Error('Cannot start picking a PACKED task'));
 
     render(<Fulfilment onBackToAdmin={vi.fn()} />);
     await screen.findByText('order-1');
@@ -243,27 +224,17 @@ describe('Fulfilment', () => {
 
     render(<Fulfilment onBackToAdmin={vi.fn()} />);
 
-    expect(
-      await screen.findByText(/No fulfilment tasks yet/),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/No fulfilment tasks yet/)).toBeInTheDocument();
   });
 
   it('shows no actions for terminal orders', async () => {
     render(<Fulfilment onBackToAdmin={vi.fn()} />);
     await screen.findByText('order-4');
 
-    expect(
-      within(card('order-4')).queryByText('Report problem'),
-    ).not.toBeInTheDocument();
-    expect(
-      within(card('order-5')).queryByText('Report problem'),
-    ).not.toBeInTheDocument();
-    expect(
-      within(card('order-6')).queryByText('Report problem'),
-    ).not.toBeInTheDocument();
-    expect(
-      within(card('order-6')).queryByText('Start picking'),
-    ).not.toBeInTheDocument();
+    expect(within(card('order-4')).queryByText('Report problem')).not.toBeInTheDocument();
+    expect(within(card('order-5')).queryByText('Report problem')).not.toBeInTheDocument();
+    expect(within(card('order-6')).queryByText('Report problem')).not.toBeInTheDocument();
+    expect(within(card('order-6')).queryByText('Start picking')).not.toBeInTheDocument();
   });
 
   it('shows the server error when the queue cannot be loaded', async () => {
@@ -360,9 +331,7 @@ describe('Fulfilment', () => {
       vi.useFakeTimers();
       vi.spyOn(Math, 'random').mockReturnValue(0.9);
       clientMock.listTasks.mockResolvedValue([task('order-1', 'PENDING')]);
-      clientMock.startPicking.mockRejectedValue(
-        new Error('Cannot start picking a PACKED task'),
-      );
+      clientMock.startPicking.mockRejectedValue(new Error('Cannot start picking a PACKED task'));
 
       render(<Fulfilment onBackToAdmin={vi.fn()} />);
       await act(async () => {});
@@ -370,9 +339,7 @@ describe('Fulfilment', () => {
       await tick();
 
       expect(screen.getByText('Auto-drive: off')).toBeInTheDocument();
-      expect(screen.getByRole('alert')).toHaveTextContent(
-        'Cannot start picking a PACKED task',
-      );
+      expect(screen.getByRole('alert')).toHaveTextContent('Cannot start picking a PACKED task');
     });
   });
 

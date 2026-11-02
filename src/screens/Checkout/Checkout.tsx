@@ -61,13 +61,15 @@ function formFromSaved(saved: SavedCheckoutAddress): CheckoutFormValues {
   };
 }
 
-export default function Checkout({ items: initialItems, onOrderPlaced, onBackToCart }: CheckoutProps) {
+export default function Checkout({
+  items: initialItems,
+  onOrderPlaced,
+  onBackToCart,
+}: CheckoutProps) {
   const [items, setItems] = useState<NewOrderItem[]>(initialItems);
   const [form, setForm] = useState<CheckoutFormValues>(() => {
     const session = getSession();
-    const saved = session
-      ? getCheckoutAddress(session.user.userId)
-      : null;
+    const saved = session ? getCheckoutAddress(session.user.userId) : null;
     return saved ? formFromSaved(saved) : initialForm;
   });
   const [errors, setErrors] = useState<CheckoutErrors>({});
@@ -75,9 +77,7 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
   const [submitting, setSubmitting] = useState(false);
   const [failure, setFailure] = useState<Failure | null>(null);
   const [scenario, setScenario] = useState<MockScenario>('normal');
-  const [authSession, setAuthSession] = useState<AuthSession | null>(() =>
-    getSession(),
-  );
+  const [authSession, setAuthSession] = useState<AuthSession | null>(() => getSession());
   const [authMode, setAuthMode] = useState<'signin' | 'signup' | null>(null);
 
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -119,9 +119,7 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
     if (!saved) {
       return;
     }
-    setForm((prev) =>
-      prev.shipping.line1.trim() ? prev : formFromSaved(saved),
-    );
+    setForm((prev) => (prev.shipping.line1.trim() ? prev : formFromSaved(saved)));
   }, [authSession]);
 
   // Modal semantics for the auth dialog: Esc closes it, Tab cycles inside it,
@@ -166,7 +164,11 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
     };
   }, [authMode]);
 
-  const updateAddress = (prefix: 'shipping' | 'billing', field: keyof AddressValues, value: string) => {
+  const updateAddress = (
+    prefix: 'shipping' | 'billing',
+    field: keyof AddressValues,
+    value: string,
+  ) => {
     setForm((prev) => ({
       ...prev,
       [prefix]: { ...prev[prefix], [field]: value },
@@ -229,9 +231,7 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
         if (authSession) {
           saveCheckoutAddress(authSession.user.userId, {
             shipping: toAddress(form.shipping),
-            billing: toAddress(
-              form.sameAsShipping ? form.shipping : form.billing,
-            ),
+            billing: toAddress(form.sameAsShipping ? form.shipping : form.billing),
             sameAsShipping: form.sameAsShipping,
           });
         }
@@ -278,10 +278,7 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
     setAuthSession(null);
   };
 
-  const total = items.reduce(
-    (sum, item) => sum + item.unitPriceCents * item.quantity,
-    0,
-  );
+  const total = items.reduce((sum, item) => sum + item.unitPriceCents * item.quantity, 0);
 
   return (
     <div className="checkout">
@@ -305,61 +302,59 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
           aria-busy={submitting}
         >
           <section className="checkout-auth-banner" aria-label="Account">
-              {authSession ? (
-                <>
-                  <div>
-                    <p className="checkout-auth-banner__title">
-                      Signed in as {authSession.user.email}
-                    </p>
-                    <p className="checkout-auth-banner__subtitle">
-                      Your orders are saved to this account.
-                    </p>
-                  </div>
+            {authSession ? (
+              <>
+                <div>
+                  <p className="checkout-auth-banner__title">
+                    Signed in as {authSession.user.email}
+                  </p>
+                  <p className="checkout-auth-banner__subtitle">
+                    Your orders are saved to this account.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="checkout-auth-banner__secondary"
+                  onClick={handleSignOut}
+                  disabled={submitting}
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <div>
+                  <p className="checkout-auth-banner__title">Have an account?</p>
+                  <p className="checkout-auth-banner__subtitle">
+                    Sign in for faster checkout and order history.
+                  </p>
+                </div>
+                <div className="checkout-auth-banner__actions">
+                  <button
+                    type="button"
+                    className="checkout-auth-banner__primary"
+                    onClick={(event) => {
+                      authTriggerRef.current = event.currentTarget;
+                      setAuthMode('signin');
+                    }}
+                    disabled={submitting}
+                  >
+                    Sign in
+                  </button>
                   <button
                     type="button"
                     className="checkout-auth-banner__secondary"
-                    onClick={handleSignOut}
+                    onClick={(event) => {
+                      authTriggerRef.current = event.currentTarget;
+                      setAuthMode('signup');
+                    }}
                     disabled={submitting}
                   >
-                    Sign out
+                    Create account
                   </button>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <p className="checkout-auth-banner__title">
-                      Have an account?
-                    </p>
-                    <p className="checkout-auth-banner__subtitle">
-                      Sign in for faster checkout and order history.
-                    </p>
-                  </div>
-                  <div className="checkout-auth-banner__actions">
-                    <button
-                      type="button"
-                      className="checkout-auth-banner__primary"
-                      onClick={(event) => {
-                        authTriggerRef.current = event.currentTarget;
-                        setAuthMode('signin');
-                      }}
-                      disabled={submitting}
-                    >
-                      Sign in
-                    </button>
-                    <button
-                      type="button"
-                      className="checkout-auth-banner__secondary"
-                      onClick={(event) => {
-                        authTriggerRef.current = event.currentTarget;
-                        setAuthMode('signup');
-                      }}
-                      disabled={submitting}
-                    >
-                      Create account
-                    </button>
-                  </div>
-                </>
-              )}
+                </div>
+              </>
+            )}
           </section>
 
           {failure && (
@@ -371,10 +366,7 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
               data-kind={failure.kind}
             >
               {failure.kind === 'declined' && (
-                <p>
-                  Payment declined: {failure.reason}. Try another card and submit
-                  again.
-                </p>
+                <p>Payment declined: {failure.reason}. Try another card and submit again.</p>
               )}
               {failure.kind === 'stock_unavailable' && (
                 <div className="checkout-alert__reservation">
@@ -382,8 +374,7 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
                   <ul className="checkout-alert__lines">
                     {failure.failures.map((failed) => {
                       const name =
-                        items.find((item) => item.sku === failed.sku)?.productName ??
-                        failed.sku;
+                        items.find((item) => item.sku === failed.sku)?.productName ?? failed.sku;
                       return (
                         <li key={failed.sku} className="checkout-alert__line">
                           <span>
@@ -492,9 +483,7 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
                     value={form.cardNumber}
                     disabled={submitting}
                     aria-invalid={errors.cardNumber ? true : undefined}
-                    aria-describedby={
-                      errors.cardNumber ? 'checkout-card-number-error' : undefined
-                    }
+                    aria-describedby={errors.cardNumber ? 'checkout-card-number-error' : undefined}
                     onChange={(event) =>
                       setForm((prev) => ({ ...prev, cardNumber: event.target.value }))
                     }

@@ -8,10 +8,7 @@ import { clearCartId, getStoredCartId } from '../../services/cartId';
 import { getOrCreateCustomerId } from '../../services/customerId';
 import { getSession, signOut } from '../../services/mockAuth';
 import { authGateway } from '../../services/authGateway';
-import {
-  getCheckoutAddress,
-  saveCheckoutAddress,
-} from '../../services/savedAddress';
+import { getCheckoutAddress, saveCheckoutAddress } from '../../services/savedAddress';
 import type { NewOrderItem, Order } from '../../services/orderClient';
 
 vi.mock('../../services/checkoutGateway', () => ({
@@ -145,9 +142,7 @@ describe('Checkout', () => {
     fireEvent.change(screen.getByLabelText('Address line 1'), {
       target: { value: '1 Watchmaker Lane' },
     });
-    fireEvent.click(
-      screen.getByRole('checkbox', { name: 'Billing address same as shipping' }),
-    );
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Billing address same as shipping' }));
 
     const line1Inputs = screen.getAllByLabelText('Address line 1');
     expect(line1Inputs).toHaveLength(2);
@@ -202,9 +197,7 @@ describe('Checkout', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
-    expect(
-      await screen.findByText(/Payment declined: insufficient_funds/),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/Payment declined: insufficient_funds/)).toBeInTheDocument();
     expect(onOrderPlaced).not.toHaveBeenCalled();
     expect(clearCartIdMock).not.toHaveBeenCalled();
     expect(screen.getByLabelText('Card number')).toHaveValue('4242 4242 4242 4242');
@@ -246,12 +239,8 @@ describe('Checkout', () => {
 
     expect(await screen.findByText(/Widget: insufficient stock/)).toBeInTheDocument();
     expect(screen.getByText(/Gadget: unknown item/)).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Remove Widget from cart' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Remove Gadget from cart' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remove Widget from cart' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remove Gadget from cart' })).toBeInTheDocument();
     expect(submit).toHaveBeenCalledOnce();
   });
 
@@ -335,9 +324,7 @@ describe('Checkout', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
-    expect(
-      await screen.findByRole('button', { name: 'Placing order...' }),
-    ).toBeDisabled();
+    expect(await screen.findByRole('button', { name: 'Placing order...' })).toBeDisabled();
     expect(screen.getByLabelText('Address line 1')).toBeDisabled();
   });
 
@@ -366,9 +353,7 @@ describe('Checkout', () => {
     renderCheckout();
 
     expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Create account' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Create account' })).toBeInTheDocument();
     expect(screen.getByText('Have an account?')).toBeInTheDocument();
   });
 
@@ -405,15 +390,11 @@ describe('Checkout', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: 'Sign in' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
-    expect(screen.getByLabelText('Address line 1')).toHaveValue(
-      '1 Watchmaker Lane',
-    );
+    expect(screen.getByLabelText('Address line 1')).toHaveValue('1 Watchmaker Lane');
   });
 
   it('submits the signed-in user id as the customerId', async () => {
@@ -443,9 +424,7 @@ describe('Checkout', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
 
-    expect(
-      screen.getByRole('heading', { name: 'Create account' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Create account' })).toBeInTheDocument();
     expect(screen.getByLabelText('Confirm password')).toBeInTheDocument();
   });
 
@@ -534,9 +513,7 @@ describe('Checkout', () => {
 
     await waitFor(() => expect(submit).toHaveBeenCalled());
     expect(
-      Object.keys(localStorage).filter((key) =>
-        key.startsWith('gshop:savedAddress:'),
-      ),
+      Object.keys(localStorage).filter((key) => key.startsWith('gshop:savedAddress:')),
     ).toEqual([]);
   });
 
@@ -561,9 +538,7 @@ describe('Checkout', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Sign in' }));
 
     await waitFor(() =>
-      expect(screen.getAllByLabelText('Address line 1')[0]).toHaveValue(
-        '1 Watchmaker Lane',
-      ),
+      expect(screen.getAllByLabelText('Address line 1')[0]).toHaveValue('1 Watchmaker Lane'),
     );
   });
 });

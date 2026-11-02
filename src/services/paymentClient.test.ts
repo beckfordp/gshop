@@ -81,9 +81,7 @@ describe('paymentClient.createMethod', () => {
 
   it('falls back to a status-based message when the error body is not JSON', async () => {
     paymentClient.baseUrl = baseUrl;
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response('unavailable', { status: 503 }),
-    );
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('unavailable', { status: 503 }));
 
     try {
       await paymentClient.createMethod(input);

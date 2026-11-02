@@ -1,7 +1,11 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import AdminConsole from './AdminConsole';
-import { adminClient, type SentEmail, type ServiceReconciliation } from '../../services/adminClient';
+import {
+  adminClient,
+  type SentEmail,
+  type ServiceReconciliation,
+} from '../../services/adminClient';
 import { fulfilmentClient } from '../../services/fulfilmentClient';
 import type { Order } from '../../services/orderClient';
 
@@ -186,9 +190,7 @@ describe('AdminConsole', () => {
     await openOrder('order-1');
 
     fireEvent.click(await screen.findByRole('button', { name: 'Operator cancel order-1' }));
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Confirm operator cancel for order-1' }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm operator cancel for order-1' }));
 
     await waitFor(() => expect(client.operatorCancel).toHaveBeenCalledWith('order-1'));
     expect(await screen.findByRole('status')).toHaveTextContent(/cancelled by operator/i);
@@ -219,9 +221,7 @@ describe('AdminConsole', () => {
     await openOrder('order-1');
 
     fireEvent.click(await screen.findByRole('button', { name: 'Operator cancel order-1' }));
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Confirm operator cancel for order-1' }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm operator cancel for order-1' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Order is dispatched');
   });

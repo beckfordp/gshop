@@ -78,9 +78,7 @@ describe('OrderConfirmation', () => {
       />,
     );
 
-    expect(
-      screen.queryByRole('region', { name: 'Shipping address' }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Shipping address' })).not.toBeInTheDocument();
   });
 
   it('renders a WatchArt thumbnail for each order item', () => {
@@ -105,12 +103,7 @@ describe('OrderConfirmation', () => {
 
   it('calls onContinueShopping when "Continue Shopping" is clicked', () => {
     const onContinueShopping = vi.fn();
-    render(
-      <OrderConfirmation
-        order={makeOrder()}
-        onContinueShopping={onContinueShopping}
-      />,
-    );
+    render(<OrderConfirmation order={makeOrder()} onContinueShopping={onContinueShopping} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue Shopping' }));
 

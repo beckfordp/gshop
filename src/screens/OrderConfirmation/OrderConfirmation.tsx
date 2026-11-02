@@ -9,10 +9,7 @@ interface OrderConfirmationProps {
   onContinueShopping: () => void;
 }
 
-export default function OrderConfirmation({
-  order,
-  onContinueShopping,
-}: OrderConfirmationProps) {
+export default function OrderConfirmation({ order, onContinueShopping }: OrderConfirmationProps) {
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {

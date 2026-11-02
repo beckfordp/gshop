@@ -47,10 +47,7 @@ function hashPassword(email: string, password: string): string {
   return sha256Hex(`${email}:${password}`);
 }
 
-export async function signUp(
-  email: string,
-  password: string,
-): Promise<AuthSession> {
+export async function signUp(email: string, password: string): Promise<AuthSession> {
   const normalised = normaliseEmail(email);
   const users = readUsers();
   if (users.some((user) => user.email === normalised)) {
@@ -72,10 +69,7 @@ export async function signUp(
   return session;
 }
 
-export async function signIn(
-  email: string,
-  password: string,
-): Promise<AuthSession> {
+export async function signIn(email: string, password: string): Promise<AuthSession> {
   const normalised = normaliseEmail(email);
   const user = readUsers().find((candidate) => candidate.email === normalised);
   // Same message for an unknown email and a wrong password — don't leak which.

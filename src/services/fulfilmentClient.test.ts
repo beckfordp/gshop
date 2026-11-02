@@ -1,9 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
-  fulfilmentClient,
-  FulfilmentClientError,
-  type FulfilmentTask,
-} from './fulfilmentClient';
+import { fulfilmentClient, FulfilmentClientError, type FulfilmentTask } from './fulfilmentClient';
 
 const task: FulfilmentTask = {
   orderId: 'order-1',
@@ -36,9 +32,7 @@ function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status });
 }
 
-async function captureError(
-  promise: Promise<unknown>,
-): Promise<FulfilmentClientError> {
+async function captureError(promise: Promise<unknown>): Promise<FulfilmentClientError> {
   try {
     await promise;
     expect.unreachable();
@@ -56,9 +50,7 @@ describe('fulfilmentClient', () => {
 
   it('GETs the task list', async () => {
     fulfilmentClient.baseUrl = baseUrl;
-    const fetchMock = vi
-      .spyOn(globalThis, 'fetch')
-      .mockResolvedValue(jsonResponse([task]));
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse([task]));
 
     const result = await fulfilmentClient.listTasks();
 
@@ -73,71 +65,64 @@ describe('fulfilmentClient', () => {
       .mockResolvedValue(jsonResponse({ ...task, state: 'PICKING' }));
 
     const picking = await fulfilmentClient.startPicking('order-1');
-    expect(fetchMock).toHaveBeenCalledWith(
-      `${baseUrl}/fulfilment-tasks/order-1/start-picking`,
-      { method: 'POST' },
-    );
+    expect(fetchMock).toHaveBeenCalledWith(`${baseUrl}/fulfilment-tasks/order-1/start-picking`, {
+      method: 'POST',
+    });
     expect(picking.state).toBe('PICKING');
 
     fetchMock.mockResolvedValue(jsonResponse({ ...task, state: 'PACKED' }));
     const packed = await fulfilmentClient.pack('order-1');
-    expect(fetchMock).toHaveBeenCalledWith(
-      `${baseUrl}/fulfilment-tasks/order-1/pack`,
-      { method: 'POST' },
-    );
+    expect(fetchMock).toHaveBeenCalledWith(`${baseUrl}/fulfilment-tasks/order-1/pack`, {
+      method: 'POST',
+    });
     expect(packed.state).toBe('PACKED');
   });
 
   it('POSTs dispatch with tracking number and carrier', async () => {
     fulfilmentClient.baseUrl = baseUrl;
-    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      jsonResponse({ ...task, state: 'DISPATCHED', trackingNo: 'GLN-42', carrier: 'DHL' }),
-    );
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(
+        jsonResponse({ ...task, state: 'DISPATCHED', trackingNo: 'GLN-42', carrier: 'DHL' }),
+      );
 
     const result = await fulfilmentClient.dispatch('order-1', 'GLN-42', 'DHL');
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      `${baseUrl}/fulfilment-tasks/order-1/dispatch`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ trackingNo: 'GLN-42', carrier: 'DHL' }),
-      },
-    );
+    expect(fetchMock).toHaveBeenCalledWith(`${baseUrl}/fulfilment-tasks/order-1/dispatch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ trackingNo: 'GLN-42', carrier: 'DHL' }),
+    });
     expect(result.state).toBe('DISPATCHED');
   });
 
   it('POSTs fail with the reason', async () => {
     fulfilmentClient.baseUrl = baseUrl;
-    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      jsonResponse({ ...task, state: 'DISPATCH_FAILED', failureReason: 'Box crushed' }),
-    );
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(
+        jsonResponse({ ...task, state: 'DISPATCH_FAILED', failureReason: 'Box crushed' }),
+      );
 
     const result = await fulfilmentClient.fail('order-1', 'Box crushed');
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      `${baseUrl}/fulfilment-tasks/order-1/fail`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: 'Box crushed' }),
-      },
-    );
+    expect(fetchMock).toHaveBeenCalledWith(`${baseUrl}/fulfilment-tasks/order-1/fail`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason: 'Box crushed' }),
+    });
     expect(result.failureReason).toBe('Box crushed');
   });
 
   it('url-encodes the order id', async () => {
     fulfilmentClient.baseUrl = baseUrl;
-    const fetchMock = vi
-      .spyOn(globalThis, 'fetch')
-      .mockResolvedValue(jsonResponse(task));
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(task));
 
     await fulfilmentClient.pack('a b/c');
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      `${baseUrl}/fulfilment-tasks/a%20b%2Fc/pack`,
-      { method: 'POST' },
-    );
+    expect(fetchMock).toHaveBeenCalledWith(`${baseUrl}/fulfilment-tasks/a%20b%2Fc/pack`, {
+      method: 'POST',
+    });
   });
 
   it('surfaces the server error message and status on 409/404', async () => {
@@ -159,9 +144,7 @@ describe('fulfilmentClient', () => {
 
   it('falls back when the error body is not JSON', async () => {
     fulfilmentClient.baseUrl = baseUrl;
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response('boom', { status: 500 }),
-    );
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('boom', { status: 500 }));
 
     const error = await captureError(fulfilmentClient.listTasks());
 

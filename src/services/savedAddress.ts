@@ -24,10 +24,7 @@ function isAddress(value: unknown): value is Address {
   );
 }
 
-export function saveCheckoutAddress(
-  userId: string,
-  saved: SavedCheckoutAddress,
-): void {
+export function saveCheckoutAddress(userId: string, saved: SavedCheckoutAddress): void {
   try {
     localStorage.setItem(storageKey(userId), JSON.stringify(saved));
   } catch {
@@ -35,9 +32,7 @@ export function saveCheckoutAddress(
   }
 }
 
-export function getCheckoutAddress(
-  userId: string,
-): SavedCheckoutAddress | null {
+export function getCheckoutAddress(userId: string): SavedCheckoutAddress | null {
   try {
     const raw = localStorage.getItem(storageKey(userId));
     if (!raw) {

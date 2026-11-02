@@ -19,9 +19,7 @@ function validateEmail(email: string): string | undefined {
   if (!email.trim()) {
     return 'Enter your email address';
   }
-  return EMAIL_PATTERN.test(email.trim())
-    ? undefined
-    : 'Enter a valid email address';
+  return EMAIL_PATTERN.test(email.trim()) ? undefined : 'Enter a valid email address';
 }
 
 export function validateSignUp(values: AuthFormValues): AuthFormErrors {
@@ -42,9 +40,7 @@ export function validateSignUp(values: AuthFormValues): AuthFormErrors {
   return errors;
 }
 
-export function validateSignIn(
-  values: Pick<AuthFormValues, 'email' | 'password'>,
-): AuthFormErrors {
+export function validateSignIn(values: Pick<AuthFormValues, 'email' | 'password'>): AuthFormErrors {
   const errors: AuthFormErrors = {};
   const email = validateEmail(values.email);
   if (email) {

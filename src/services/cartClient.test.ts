@@ -64,10 +64,9 @@ describe('cartClient', () => {
 
     const result = await cartClient.removeItem('cart-1', 'watch-rolex-submariner');
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      `${baseUrl}/carts/cart-1/items/watch-rolex-submariner`,
-      { method: 'DELETE' },
-    );
+    expect(fetchMock).toHaveBeenCalledWith(`${baseUrl}/carts/cart-1/items/watch-rolex-submariner`, {
+      method: 'DELETE',
+    });
     expect(result).toEqual(cartBody);
   });
 
