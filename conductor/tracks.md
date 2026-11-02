@@ -2,9 +2,6 @@
 
 This file tracks all major tracks for the project.
 
-- [ ] **Track: Fulfilment CANCELLED state (Journey 5)**
-  *Link: [./tracks/fulfilment-cancelled-state_20261102/](./tracks/fulfilment-cancelled-state_20261102/)*
-
 ---
 
 ## Tracks
