@@ -145,6 +145,32 @@ async function remove(id: string): Promise<void> {
   }
 }
 
+/** PATCH /orders/{id} with the only accepted body. Returns the updated order;
+ * 409 means it is no longer `authorized` (already dispatched/cancelled). */
+async function cancel(id: string): Promise<Order> {
+  if (!orderClient.baseUrl) {
+    throw new OrderClientError('Order service URL is not configured');
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`${orderClient.baseUrl}/orders/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'cancelled' }),
+    });
+  } catch (error) {
+    throw new OrderClientError(`Failed to reach order service: ${errorMessage(error)}`);
+  }
+
+  if (response.status === 200) {
+    return (await response.json()) as Order;
+  }
+
+  const message = await serverErrorMessage(response, messageFor(response.status));
+  throw new OrderClientError(message, response.status);
+}
+
 async function list(customerId: string): Promise<Order[]> {
   if (!orderClient.baseUrl) {
     throw new OrderClientError('Order service URL is not configured');
@@ -170,12 +196,14 @@ export const orderClient: {
   baseUrl: string | undefined;
   health: () => Promise<boolean>;
   create: typeof create;
+  cancel: typeof cancel;
   list: typeof list;
   remove: typeof remove;
 } = {
   baseUrl: ORDER_SERVICE_URL,
   health: () => checkHealth(ORDER_SERVICE_URL),
   create,
+  cancel,
   list,
   remove,
 };

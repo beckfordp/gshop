@@ -14,13 +14,6 @@
   margin-top: 0;
 }
 
-.admin-confirm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  align-items: flex-start;
-}
-
 .admin-error {
   margin-top: var(--space-sm);
   color: var(--color-danger);

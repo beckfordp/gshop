@@ -3,8 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Admin from './Admin';
 import { catalogClient, type CatalogItem } from '../../services/catalogClient';
 import { inventoryClient, type InventoryItem } from '../../services/inventoryClient';
-import { orderClient, OrderClientError, type Order } from '../../services/orderClient';
-import { getStoredCustomerId } from '../../services/customerId';
 
 vi.mock('../../services/catalogClient', () => ({
   catalogClient: { list: vi.fn() },
@@ -14,26 +12,13 @@ vi.mock('../../services/inventoryClient', () => ({
   inventoryClient: { list: vi.fn(), adjust: vi.fn() },
 }));
 
-vi.mock('../../services/orderClient', async () => {
-  const actual = await vi.importActual<typeof import('../../services/orderClient')>(
-    '../../services/orderClient',
-  );
-  return {
-    ...actual,
-    orderClient: { list: vi.fn(), remove: vi.fn() },
-  };
-});
-
-vi.mock('../../services/customerId', () => ({
-  getStoredCustomerId: vi.fn(),
-}));
+// The prototype has its own suite; keep its demo tables/buttons out of the
+// existing Admin selectors.
+vi.mock('./WorkflowDemo', () => ({ default: () => null }));
 
 const catalogList = vi.mocked(catalogClient.list);
 const inventoryList = vi.mocked(inventoryClient.list);
 const inventoryAdjust = vi.mocked(inventoryClient.adjust);
-const orderList = vi.mocked(orderClient.list);
-const orderRemove = vi.mocked(orderClient.remove);
-const getStoredCustomerIdMock = vi.mocked(getStoredCustomerId);
 
 function makeInventoryItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
   return {
@@ -60,18 +45,9 @@ function makeCatalogItem(overrides: Partial<CatalogItem> = {}): CatalogItem {
   };
 }
 
-function makeOrder(overrides: Partial<Order> = {}): Order {
-  return {
-    id: 'order-1',
-    customerId: 'customer-1',
-    totalCents: 950000,
-    status: 'pending',
-    items: [],
-    createdAt: '2026-01-01T00:00:00Z',
-    updatedAt: '2026-01-01T00:00:00Z',
-    shippingAddress: null,
-    ...overrides,
-  };
+async function showInventory() {
+  fireEvent.click(await screen.findByRole('button', { name: 'Show complete inventory' }));
+  await screen.findByText('Rolex Submariner');
 }
 
 describe('Admin', () => {
@@ -79,20 +55,42 @@ describe('Admin', () => {
     catalogList.mockReset();
     inventoryList.mockReset();
     inventoryAdjust.mockReset();
-    orderList.mockReset();
-    orderRemove.mockReset();
-    getStoredCustomerIdMock.mockReset();
     catalogList.mockResolvedValue({ items: [makeCatalogItem()], total: 1 });
     inventoryList.mockResolvedValue([makeInventoryItem()]);
   });
 
-  it('renders the inventory table joined against the catalog for display names', async () => {
+  it('hides the inventory table until Show complete inventory is clicked', async () => {
     render(<Admin />);
 
-    await screen.findByText('Rolex Submariner');
+    const button = await screen.findByRole('button', { name: 'Show complete inventory' });
+    expect(screen.queryByText('Rolex Submariner')).not.toBeInTheDocument();
+
+    fireEvent.click(button);
+
+    expect(await screen.findByText('Rolex Submariner')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Show complete inventory' }),
+    ).not.toBeInTheDocument();
     expect(screen.getByText('watch-rolex-submariner')).toBeInTheDocument();
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(screen.getByText('1')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide inventory' }));
+
+    expect(screen.queryByText('Rolex Submariner')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Show complete inventory' }),
+    ).toBeInTheDocument();
+  });
+
+  it('no longer renders the order history section', async () => {
+    render(<Admin />);
+
+    await screen.findByRole('button', { name: 'Show complete inventory' });
+    expect(screen.queryByText(/Order history \(this browser\)/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Clear order history' }),
+    ).not.toBeInTheDocument();
   });
 
   it('shows a loading state while fetching inventory', async () => {
@@ -120,7 +118,7 @@ describe('Admin', () => {
     await screen.findByText('inventory down');
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
 
-    await screen.findByText('Rolex Submariner');
+    await showInventory();
     expect(screen.queryByText('inventory down')).not.toBeInTheDocument();
   });
 
@@ -128,8 +126,8 @@ describe('Admin', () => {
     inventoryAdjust.mockResolvedValue(makeInventoryItem({ quantityAvailable: 6, quantityReserved: 1 }));
 
     render(<Admin />);
+    await showInventory();
 
-    await screen.findByText('Rolex Submariner');
     fireEvent.click(screen.getByRole('button', { name: '+1' }));
 
     await waitFor(() => expect(screen.getByText('6')).toBeInTheDocument());
@@ -141,8 +139,8 @@ describe('Admin', () => {
     inventoryAdjust.mockResolvedValue(makeInventoryItem({ quantityAvailable: 0, quantityReserved: 0 }));
 
     render(<Admin />);
+    await showInventory();
 
-    await screen.findByText('Rolex Submariner');
     fireEvent.click(screen.getByRole('button', { name: '−1' }));
 
     await waitFor(() => expect(inventoryAdjust).toHaveBeenCalledWith('inv-1', 0, 0));
@@ -155,8 +153,8 @@ describe('Admin', () => {
       .mockResolvedValueOnce(makeInventoryItem({ quantityAvailable: 6, quantityReserved: 1 }));
 
     render(<Admin />);
+    await showInventory();
 
-    await screen.findByText('Rolex Submariner');
     fireEvent.click(screen.getByRole('button', { name: '+1' }));
 
     await screen.findByText('adjust failed');
@@ -164,93 +162,5 @@ describe('Admin', () => {
 
     await waitFor(() => expect(screen.getByText('6')).toBeInTheDocument());
     expect(screen.queryByText('adjust failed')).not.toBeInTheDocument();
-  });
-
-  it('"Clear order history" requires confirmation before deleting anything', async () => {
-    render(<Admin />);
-
-    await screen.findByText('Rolex Submariner');
-    fireEvent.click(screen.getByRole('button', { name: 'Clear order history' }));
-
-    expect(screen.getByText(/are you sure/i)).toBeInTheDocument();
-    expect(orderList).not.toHaveBeenCalled();
-    expect(orderRemove).not.toHaveBeenCalled();
-  });
-
-  it('canceling the confirmation makes no network calls', async () => {
-    render(<Admin />);
-
-    await screen.findByText('Rolex Submariner');
-    fireEvent.click(screen.getByRole('button', { name: 'Clear order history' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
-
-    expect(screen.getByRole('button', { name: 'Clear order history' })).toBeInTheDocument();
-    expect(orderList).not.toHaveBeenCalled();
-  });
-
-  it('confirming deletes every order for the current customer and shows a done message', async () => {
-    getStoredCustomerIdMock.mockReturnValue('customer-1');
-    orderList.mockResolvedValue([makeOrder({ id: 'order-1' }), makeOrder({ id: 'order-2' })]);
-    orderRemove.mockResolvedValue(undefined);
-
-    render(<Admin />);
-
-    await screen.findByText('Rolex Submariner');
-    fireEvent.click(screen.getByRole('button', { name: 'Clear order history' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Yes, clear it' }));
-
-    await screen.findByText(/cleared/i);
-    expect(orderList).toHaveBeenCalledWith('customer-1');
-    expect(orderRemove).toHaveBeenCalledWith('order-1');
-    expect(orderRemove).toHaveBeenCalledWith('order-2');
-  });
-
-  it('treats a 404 from orderClient.remove as already-cleared, not an error', async () => {
-    getStoredCustomerIdMock.mockReturnValue('customer-1');
-    orderList.mockResolvedValue([makeOrder({ id: 'order-1' }), makeOrder({ id: 'order-2' })]);
-    orderRemove.mockImplementation((id: string) =>
-      id === 'order-1'
-        ? Promise.reject(new OrderClientError('Order request failed with status 404', 404))
-        : Promise.resolve(undefined),
-    );
-
-    render(<Admin />);
-
-    await screen.findByText('Rolex Submariner');
-    fireEvent.click(screen.getByRole('button', { name: 'Clear order history' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Yes, clear it' }));
-
-    await screen.findByText(/cleared/i);
-    expect(screen.queryByText(/failed with status 404/)).not.toBeInTheDocument();
-  });
-
-  it('shows an error and working Retry when clearing fails', async () => {
-    getStoredCustomerIdMock.mockReturnValue('customer-1');
-    orderList.mockRejectedValueOnce(new Error('order service down')).mockResolvedValueOnce([]);
-
-    render(<Admin />);
-
-    await screen.findByText('Rolex Submariner');
-    fireEvent.click(screen.getByRole('button', { name: 'Clear order history' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Yes, clear it' }));
-
-    await screen.findByText('order service down');
-    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
-
-    await screen.findByText(/cleared/i);
-    expect(screen.queryByText('order service down')).not.toBeInTheDocument();
-  });
-
-  it('clearing with no stored customer id completes immediately with no network calls', async () => {
-    getStoredCustomerIdMock.mockReturnValue(null);
-
-    render(<Admin />);
-
-    await screen.findByText('Rolex Submariner');
-    fireEvent.click(screen.getByRole('button', { name: 'Clear order history' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Yes, clear it' }));
-
-    await screen.findByText(/cleared/i);
-    expect(orderList).not.toHaveBeenCalled();
   });
 });

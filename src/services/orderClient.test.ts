@@ -303,3 +303,53 @@ describe('orderClient.remove', () => {
     await expect(orderClient.remove('order-1')).rejects.toThrow(OrderClientError);
   });
 });
+
+describe('orderClient.cancel', () => {
+  const baseUrl = 'http://order.test';
+
+  afterEach(() => {
+    orderClient.baseUrl = baseUrl;
+    vi.restoreAllMocks();
+  });
+
+  it('PATCHes /orders/{id} with status=cancelled and returns the updated order', async () => {
+    orderClient.baseUrl = baseUrl;
+    const cancelled = { ...orderBody, status: 'cancelled' as const };
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify(cancelled), { status: 200 }));
+
+    const result = await orderClient.cancel('order-1');
+
+    expect(fetchMock).toHaveBeenCalledWith(`${baseUrl}/orders/order-1`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'cancelled' }),
+    });
+    expect(result).toEqual(cancelled);
+  });
+
+  it('surfaces the server error body and HTTP status on a 409', async () => {
+    orderClient.baseUrl = baseUrl;
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ error: "Illegal status transition to 'cancelled'" }), {
+        status: 409,
+      }),
+    );
+
+    try {
+      await orderClient.cancel('order-1');
+      expect.unreachable();
+    } catch (error) {
+      expect(error).toBeInstanceOf(OrderClientError);
+      expect((error as OrderClientError).message).toContain('Illegal status transition');
+      expect((error as OrderClientError).status).toBe(409);
+    }
+  });
+
+  it('throws OrderClientError when the base URL is not configured', async () => {
+    orderClient.baseUrl = undefined;
+
+    await expect(orderClient.cancel('order-1')).rejects.toThrow(OrderClientError);
+  });
+});

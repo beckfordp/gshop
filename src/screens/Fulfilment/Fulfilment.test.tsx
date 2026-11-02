@@ -88,6 +88,44 @@ describe('Fulfilment', () => {
     expect(within(card('order-1')).getByText(/Total: \$90/)).toBeInTheDocument();
   });
 
+  it('defaults to All and filters the queue by state tabs with counts', async () => {
+    render(<Fulfilment onBackToAdmin={vi.fn()} />);
+    await screen.findByText('order-1');
+
+    expect(screen.getByRole('tab', { name: /^All/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(screen.getByRole('tab', { name: 'Pending 1' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Cancelled 1' })).toBeInTheDocument();
+    expect(screen.getByText('order-6')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Pending 1' }));
+
+    expect(screen.getByText('order-1')).toBeInTheDocument();
+    expect(screen.queryByText('order-2')).not.toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Pending 1' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Dispatched 1' }));
+
+    expect(screen.getByText('order-4')).toBeInTheDocument();
+    expect(screen.queryByText('order-1')).not.toBeInTheDocument();
+  });
+
+  it('shows an empty message for a state with no orders', async () => {
+    clientMock.listTasks.mockResolvedValue([task('order-1', 'PENDING')]);
+
+    render(<Fulfilment onBackToAdmin={vi.fn()} />);
+    await screen.findByText('order-1');
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Packed 0' }));
+
+    expect(screen.getByText('No orders in Packed.')).toBeInTheDocument();
+  });
+
   it('drives a PENDING order through picking, packing and dispatch', async () => {
     clientMock.startPicking.mockResolvedValue(task('order-1', 'PICKING'));
     clientMock.pack.mockResolvedValue(task('order-1', 'PACKED'));

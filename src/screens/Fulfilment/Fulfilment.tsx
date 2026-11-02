@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { errorMessage, formatPrice } from '../../lib/format';
 import {
   AUTO_DRIVE_FAILURE_REASON,
@@ -29,6 +29,18 @@ const STATE_LABELS: Record<FulfilmentState, string> = {
   DISPATCH_FAILED: 'Dispatch failed',
   CANCELLED: 'Cancelled',
 };
+
+type QueueFilter = 'ALL' | FulfilmentState;
+
+const QUEUE_FILTERS: { value: QueueFilter; label: string }[] = [
+  { value: 'ALL', label: 'All' },
+  { value: 'PENDING', label: STATE_LABELS.PENDING },
+  { value: 'PICKING', label: STATE_LABELS.PICKING },
+  { value: 'PACKED', label: STATE_LABELS.PACKED },
+  { value: 'DISPATCHED', label: STATE_LABELS.DISPATCHED },
+  { value: 'DISPATCH_FAILED', label: STATE_LABELS.DISPATCH_FAILED },
+  { value: 'CANCELLED', label: STATE_LABELS.CANCELLED },
+];
 
 function isTerminalState(state: FulfilmentState): boolean {
   return (
@@ -62,6 +74,7 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
   const [reason, setReason] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [autoDrive, setAutoDrive] = useState(false);
+  const [filter, setFilter] = useState<QueueFilter>('ALL');
 
   const alertRef = useRef<HTMLDivElement>(null);
 
@@ -125,8 +138,19 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
     [],
   );
 
+  const visibleQueue = useMemo(
+    () => (filter === 'ALL' ? queue : queue.filter((task) => task.state === filter)),
+    [queue, filter],
+  );
+
+  const countFor = (value: QueueFilter): number =>
+    value === 'ALL'
+      ? queue.length
+      : queue.filter((task) => task.state === value).length;
+
   // Auto-drive (demo): call the real operator endpoints on a timer, with an
   // occasional simulated warehouse failure so DispatchFailed shows up too.
+  // It advances the first non-terminal order in the selected state tab.
   const advance = useCallback(
     async (task: FulfilmentTask): Promise<boolean> => {
       const id = task.orderId;
@@ -162,7 +186,7 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
     if (!autoDrive || loading || busy || dispatchFor || problemFor) {
       return;
     }
-    const target = queue.find((task) => !isTerminalState(task.state));
+    const target = visibleQueue.find((task) => !isTerminalState(task.state));
     if (!target) {
       return;
     }
@@ -174,7 +198,7 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
       });
     }, AUTO_DRIVE_INTERVAL_MS);
     return () => clearTimeout(timer);
-  }, [autoDrive, loading, busy, dispatchFor, problemFor, queue, advance]);
+  }, [autoDrive, loading, busy, dispatchFor, problemFor, visibleQueue, advance]);
 
   return (
     <div className="fulfilment">
@@ -209,19 +233,53 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
         </button>
       </div>
 
-      {loading && queue.length === 0 && (
-        <p className="fulfilment__empty">Loading fulfilment queue…</p>
-      )}
+      <div
+        className="fulfilment__tabs"
+        role="tablist"
+        aria-label="Orders by state"
+      >
+        {QUEUE_FILTERS.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            role="tab"
+            id={`fulfilment-tab-${option.value}`}
+            aria-selected={filter === option.value}
+            aria-controls="fulfilment-queue-panel"
+            onClick={() => setFilter(option.value)}
+          >
+            {option.label}
+            <span className="fulfilment__tab-count">
+              {countFor(option.value)}
+            </span>
+          </button>
+        ))}
+      </div>
 
-      {!loading && !error && queue.length === 0 && (
-        <p className="fulfilment__empty">
-          No fulfilment tasks yet — they appear when an order&apos;s payment is
-          authorized.
-        </p>
-      )}
+      <div
+        id="fulfilment-queue-panel"
+        role="tabpanel"
+        aria-labelledby={`fulfilment-tab-${filter}`}
+      >
+        {loading && queue.length === 0 && (
+          <p className="fulfilment__empty">Loading fulfilment queue…</p>
+        )}
 
-      <ul className="fulfilment-list">
-        {queue.map((order) => {
+        {!loading && !error && queue.length === 0 && (
+          <p className="fulfilment__empty">
+            No fulfilment tasks yet — they appear when an order&apos;s payment is
+            authorized.
+          </p>
+        )}
+
+        {queue.length > 0 && visibleQueue.length === 0 && (
+          <p className="fulfilment__empty">
+            No orders in {QUEUE_FILTERS.find((option) => option.value === filter)?.label}.
+          </p>
+        )}
+
+        <ul className="fulfilment-list">
+          {visibleQueue.map((order) => {
           const terminal = isTerminalState(order.state);
           const working = busy === order.orderId;
           return (
@@ -410,8 +468,9 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
               )}
             </li>
           );
-        })}
-      </ul>
+          })}
+        </ul>
+      </div>
     </div>
   );
 }

@@ -1,17 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { catalogClient } from '../../services/catalogClient';
 import { inventoryClient } from '../../services/inventoryClient';
-import { orderClient, OrderClientError } from '../../services/orderClient';
-import { getStoredCustomerId } from '../../services/customerId';
 import { errorMessage } from '../../lib/format';
+import WorkflowDemo from './WorkflowDemo';
 import './Admin.css';
 
 // catalog-service has no lookup-by-sku endpoint, so the join below fetches
 // the whole catalog in one page — same approach as Cart.tsx's join (see
 // its own comment), fine at today's ~100-item scale.
 const CATALOG_PAGE_SIZE = 100;
-
-type ClearStep = 'idle' | 'confirming' | 'clearing' | 'done' | 'error';
 
 interface InventoryRow {
   id: string;
@@ -33,8 +30,7 @@ export default function Admin({ onOpenFulfilment }: AdminProps = {}) {
   const [adjustError, setAdjustError] = useState<Record<string, string>>({});
   const [lastDelta, setLastDelta] = useState<Record<string, number>>({});
 
-  const [clearStep, setClearStep] = useState<ClearStep>('idle');
-  const [clearError, setClearError] = useState<string | null>(null);
+  const [showInventory, setShowInventory] = useState(false);
 
   const loadInventory = useCallback(async () => {
     setInventoryLoading(true);
@@ -97,43 +93,11 @@ export default function Admin({ onOpenFulfilment }: AdminProps = {}) {
     }
   };
 
-  // order-service's order-list read is cached with no invalidation on
-  // delete (see tech-stack.md), so a Retry after a partial failure can see
-  // a stale list that still includes orders already removed in the
-  // previous attempt — treat "already gone" (404) as success rather than
-  // a real failure.
-  const removeOrderIgnoringAlreadyGone = async (id: string) => {
-    try {
-      await orderClient.remove(id);
-    } catch (error) {
-      if (error instanceof OrderClientError && error.status === 404) {
-        return;
-      }
-      throw error;
-    }
-  };
-
-  const handleClearHistory = async () => {
-    const customerId = getStoredCustomerId();
-    if (!customerId) {
-      setClearStep('done');
-      return;
-    }
-    setClearStep('clearing');
-    setClearError(null);
-    try {
-      const orders = await orderClient.list(customerId);
-      await Promise.all(orders.map((order) => removeOrderIgnoringAlreadyGone(order.id)));
-      setClearStep('done');
-    } catch (error) {
-      setClearError(errorMessage(error));
-      setClearStep('error');
-    }
-  };
-
   return (
     <div className="admin">
       <h1>Admin</h1>
+
+      <WorkflowDemo />
 
       {onOpenFulfilment && (
         <section className="admin-section">
@@ -144,28 +108,6 @@ export default function Admin({ onOpenFulfilment }: AdminProps = {}) {
       )}
 
       <section className="admin-section">
-        <h2>Order history (this browser)</h2>
-        {clearStep === 'idle' && (
-          <button onClick={() => setClearStep('confirming')}>Clear order history</button>
-        )}
-        {clearStep === 'confirming' && (
-          <div className="admin-confirm">
-            <p>This permanently deletes every order made by this browser's profile. Admin-wide order listing is pending the backend change. Are you sure?</p>
-            <button onClick={handleClearHistory}>Yes, clear it</button>
-            <button onClick={() => setClearStep('idle')}>Cancel</button>
-          </div>
-        )}
-        {clearStep === 'clearing' && <p>Clearing...</p>}
-        {clearStep === 'done' && <p>Order history cleared.</p>}
-        {clearStep === 'error' && (
-          <div className="admin-error">
-            <p role="alert">{clearError}</p>
-            <button onClick={handleClearHistory}>Retry</button>
-          </div>
-        )}
-      </section>
-
-      <section className="admin-section">
         <h2>Inventory</h2>
         {inventoryLoading && <p>Loading...</p>}
         {inventoryError && (
@@ -174,7 +116,13 @@ export default function Admin({ onOpenFulfilment }: AdminProps = {}) {
             <button onClick={loadInventory}>Retry</button>
           </div>
         )}
-        {!inventoryLoading && !inventoryError && (
+        {!inventoryLoading && !inventoryError && !showInventory && (
+          <button onClick={() => setShowInventory(true)}>Show complete inventory</button>
+        )}
+        {!inventoryLoading && !inventoryError && showInventory && (
+          <button onClick={() => setShowInventory(false)}>Hide inventory</button>
+        )}
+        {!inventoryLoading && !inventoryError && showInventory && (
           <table className="admin-inventory-table">
             <thead>
               <tr>

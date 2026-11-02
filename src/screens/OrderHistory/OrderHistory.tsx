@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { orderClient, type Order } from '../../services/orderClient';
+import { orderClient, OrderClientError, type Order } from '../../services/orderClient';
 import { getStoredCustomerId } from '../../services/customerId';
 import { getSession } from '../../services/mockAuth';
 import { resolveIdentity } from '../../services/identityStore';
@@ -15,6 +15,14 @@ export default function OrderHistory() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [cancelFor, setCancelFor] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState<string | null>(null);
+  const [cancelError, setCancelError] = useState<{
+    orderId: string;
+    message: string;
+    status?: number;
+  } | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const customerId = getSession()?.user.userId ?? getStoredCustomerId();
@@ -39,6 +47,25 @@ export default function OrderHistory() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const handleCancel = async (id: string) => {
+    setCancelling(id);
+    setCancelError(null);
+    try {
+      const updated = await orderClient.cancel(id);
+      setOrders((current) => current.map((order) => (order.id === id ? updated : order)));
+      setCancelFor(null);
+      setNotice(`Order ${id} cancelled. The payment hold and reserved stock will be released shortly.`);
+    } catch (err) {
+      setCancelError({
+        orderId: id,
+        message: errorMessage(err),
+        status: err instanceof OrderClientError ? err.status : undefined,
+      });
+    } finally {
+      setCancelling(null);
+    }
+  };
 
   const session = getSession();
   const identityHeader = (
@@ -81,6 +108,11 @@ export default function OrderHistory() {
   return (
     <div className="order-history">
       {identityHeader}
+      {notice && (
+        <p className="order-history-notice" role="status">
+          {notice}
+        </p>
+      )}
       <ul className="order-history-list">
         {orders.map((order) => {
           const identity = resolveIdentity(order.customerId);
@@ -113,6 +145,52 @@ export default function OrderHistory() {
               ))}
             </ul>
             <p className="order-history-total">Total: {formatPrice(order.totalCents)}</p>
+            {order.status === 'authorized' && (
+              <div className="order-history-card__actions">
+                {cancelFor === order.id ? (
+                  <div className="order-history-confirm">
+                    <p>
+                      Cancel this order? The payment hold and reserved stock will be released
+                      shortly.
+                    </p>
+                    <button
+                      type="button"
+                      aria-label={`Confirm cancel ${order.id}`}
+                      disabled={cancelling === order.id}
+                      onClick={() => void handleCancel(order.id)}
+                    >
+                      Yes, cancel order
+                    </button>
+                    <button
+                      type="button"
+                      disabled={cancelling === order.id}
+                      onClick={() => setCancelFor(null)}
+                    >
+                      Keep order
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    aria-label={`Cancel order ${order.id}`}
+                    onClick={() => {
+                      setCancelFor(order.id);
+                      setCancelError(null);
+                    }}
+                  >
+                    Cancel order
+                  </button>
+                )}
+                {cancelError?.orderId === order.id && (
+                  <p role="alert">
+                    {cancelError.message}
+                    {cancelError.status === 409
+                      ? ' The order may already be cancelled or dispatched.'
+                      : ''}
+                  </p>
+                )}
+              </div>
+            )}
           </li>
           );
         })}

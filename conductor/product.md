@@ -139,13 +139,15 @@ All four in-scope user stories are live: US-1 (browse catalog), US-2
   customer-hidden screen (`src/screens/Admin/Admin.tsx`), reachable only
   via a small, low-contrast text link fixed to the page's bottom-right
   corner — no auth/login, consistent with the rest of this demo app's
-  no-auth architecture, discretion only. Two features: "Clear order
-  history" (lists the current customer's orders and deletes each one,
-  behind a confirm step — irreversible, no undo); an inventory table
-  (real rows from `inventory-service`, joined against the catalog for
-  display names) with "+1"/"−1" buttons adjusting `quantityAvailable`
-  (`quantityReserved` shown read-only, system-managed by the
-  order/checkout flow). Required adding a previously-missing
+  no-auth architecture, discretion only. Current sections: the
+  mock-backed "Workflow demo" prototype (Orders/Customers — see README),
+  the fulfilment queue link, and an inventory table (real rows from
+  `inventory-service`, joined against the catalog for display names),
+  hidden behind a "Show complete inventory" button, with "+1"/"−1" buttons
+  adjusting `quantityAvailable` (`quantityReserved` shown read-only,
+  system-managed by the order/checkout flow). The old "Clear order
+  history" section was removed once the Workflow demo's customer order
+  views made it redundant. Required adding a previously-missing
   `GET /inventorys` list/filter-by-sku endpoint to `inventory-service`
   itself (tracked there as `list-inventory-endpoint_20261010`) — it only
   had lookup-by-internal-UUID before, which gshop had no way to discover.

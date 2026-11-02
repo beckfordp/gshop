@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import OrderHistory from './OrderHistory';
 import {
   orderClient,
+  OrderClientError,
   type Order,
   type OrderStatus,
 } from '../../services/orderClient';
@@ -10,9 +11,15 @@ import { getStoredCustomerId } from '../../services/customerId';
 import { getSession } from '../../services/mockAuth';
 import { resolveIdentity } from '../../services/identityStore';
 
-vi.mock('../../services/orderClient', () => ({
-  orderClient: { list: vi.fn() },
-}));
+vi.mock('../../services/orderClient', async () => {
+  const actual = await vi.importActual<typeof import('../../services/orderClient')>(
+    '../../services/orderClient',
+  );
+  return {
+    ...actual,
+    orderClient: { list: vi.fn(), cancel: vi.fn() },
+  };
+});
 
 vi.mock('../../services/customerId', () => ({
   getStoredCustomerId: vi.fn(),
@@ -27,6 +34,7 @@ vi.mock('../../services/identityStore', () => ({
 }));
 
 const list = vi.mocked(orderClient.list);
+const cancel = vi.mocked(orderClient.cancel);
 const getStoredCustomerIdMock = vi.mocked(getStoredCustomerId);
 const getSessionMock = vi.mocked(getSession);
 const resolveIdentityMock = vi.mocked(resolveIdentity);
@@ -56,6 +64,7 @@ function makeOrder(overrides: Partial<Order> = {}): Order {
 describe('OrderHistory', () => {
   beforeEach(() => {
     list.mockReset();
+    cancel.mockReset();
     getStoredCustomerIdMock.mockReset();
     getSessionMock.mockReset();
     getSessionMock.mockReturnValue(null);
@@ -245,5 +254,74 @@ describe('OrderHistory', () => {
     render(<OrderHistory />);
 
     expect(await screen.findByText(/Signed in as/)).toBeInTheDocument();
+  });
+
+  it('cancels an authorized order after confirmation and updates the card', async () => {
+    getStoredCustomerIdMock.mockReturnValue('customer-1');
+    list.mockResolvedValue([makeOrder({ id: 'order-1', status: 'authorized' })]);
+    cancel.mockResolvedValue(makeOrder({ id: 'order-1', status: 'cancelled' }));
+
+    render(<OrderHistory />);
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Cancel order order-1' }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm cancel order-1' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Order order-1 cancelled',
+    );
+    expect(cancel).toHaveBeenCalledWith('order-1');
+    expect(screen.getByText('Status: Cancelled')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Cancel order order-1' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the server message when a cancel is rejected with 409', async () => {
+    getStoredCustomerIdMock.mockReturnValue('customer-1');
+    list.mockResolvedValue([makeOrder({ id: 'order-1', status: 'authorized' })]);
+    cancel.mockRejectedValue(
+      new OrderClientError("Illegal status transition to 'cancelled'", 409),
+    );
+
+    render(<OrderHistory />);
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Cancel order order-1' }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm cancel order-1' }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent("Illegal status transition to 'cancelled'");
+    expect(alert).toHaveTextContent('may already be cancelled or dispatched');
+    expect(screen.getByText('Status: Authorized')).toBeInTheDocument();
+  });
+
+  it('dismissing the cancel confirmation makes no API call', async () => {
+    getStoredCustomerIdMock.mockReturnValue('customer-1');
+    list.mockResolvedValue([makeOrder({ id: 'order-1', status: 'authorized' })]);
+
+    render(<OrderHistory />);
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Cancel order order-1' }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Keep order' }));
+
+    expect(cancel).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Cancel order order-1' })).toBeInTheDocument();
+  });
+
+  it('offers no cancel action for a non-authorized order', async () => {
+    getStoredCustomerIdMock.mockReturnValue('customer-1');
+    list.mockResolvedValue([makeOrder({ id: 'order-1', status: 'dispatched' })]);
+
+    render(<OrderHistory />);
+
+    await screen.findByText('Status: Dispatched');
+    expect(
+      screen.queryByRole('button', { name: 'Cancel order order-1' }),
+    ).not.toBeInTheDocument();
   });
 });

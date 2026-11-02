@@ -102,6 +102,29 @@ API:
   Dispatch failed path also appears. Manual forms pause it; any error turns it
   off.
 
+## Admin workflow demo (prototype)
+
+Admin's top section is a **mock-data prototype** of the operator views the
+backend does not expose yet. It is always on and clearly labelled; it never
+calls the cluster.
+
+- **Orders**: open an authorized order to see payment, fulfilment and its
+  reservation ledger. **Operator cancel** and **Simulate authorization
+  timeout** simulate the full fan-out: order cancelled, payment voided,
+  reservation lines released, non-dispatched fulfilment cancelled, and a
+  cancellation email queued. Dispatched/confirmed orders show why they are
+  past cancelling (returns are out of scope).
+- **Customers**: open a customer to see their orders and email history. Email
+  rows show the recipient key the real system has today (`customerId`,
+  email address for `UserRegistered`, or `orderId` for payment/fulfilment
+  events), with an expandable body. Cancellation emails appear after the
+  actions above.
+- **Reset demo** restores the seed data.
+
+This is UX-only: real ledger/email/admin-order APIs, an expiry trigger and
+operator identity are follow-up tasks. The ledger/email shapes mirror the
+existing `order_reservations` table and notification-service's email copy.
+
 ## Scripts
 
 - `npm run dev` — local dev server
@@ -111,7 +134,9 @@ API:
 ## Status
 
 Catalog, Cart, Checkout (form + confirmation), Order History, and Admin
-screens are live. Signup/login is a mock-backed prototype pending
+screens are live. Order History now includes a real **Cancel order** action
+for `authorized` orders (US-9.8), calling `PATCH /orders/{id}`; the Admin
+workflow tabs above are mock-backed. Signup/login is a mock-backed prototype pending
 user-service (see "Auth prototype" above). Checkout collects shipping/billing addresses and card
 details, creates a payment method, then submits the order against the real
 `POST /orders` contract: `201` → confirmation, `402` → inline decline with
