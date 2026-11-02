@@ -9,6 +9,7 @@ import {
 } from '../../services/adminClient';
 import { fulfilmentClient, type FulfilmentTask } from '../../services/fulfilmentClient';
 import type { Order } from '../../services/orderClient';
+import CollapsibleSection from './CollapsibleSection';
 import './AdminConsole.css';
 
 // Admin console (ADM-7/8), real-wired. Writes are asynchronous fan-outs over
@@ -126,20 +127,16 @@ export default function AdminConsole() {
   const showPanels = !initialLoading && !ordersError;
 
   return (
-    <section className="admin-console" aria-labelledby="admin-console-heading">
-      <div className="admin-console__header">
-        <div>
-          <h2 id="admin-console-heading">Operations</h2>
-          <p className="admin-console__note">
-            Live cluster data. Cancellations and expiry fan out asynchronously over Kafka — use
-            Refresh to see each service catch up.
-          </p>
-        </div>
+    <CollapsibleSection
+      title="Operations"
+      className="admin-console"
+      note="Live cluster data. Cancellations and expiry fan out asynchronously over Kafka — use Refresh to see each service catch up."
+      actions={
         <button type="button" onClick={loadOrders}>
           Refresh
         </button>
-      </div>
-
+      }
+    >
       <div className="admin-console__tabs" role="tablist" aria-label="Admin views">
         <button
           type="button"
@@ -232,7 +229,7 @@ export default function AdminConsole() {
           )}
         </div>
       )}
-    </section>
+    </CollapsibleSection>
   );
 }
 

@@ -15,6 +15,7 @@ vi.mock('../../services/inventoryClient', () => ({
 // The console has its own suite; keep its tables/buttons out of the existing
 // Admin selectors.
 vi.mock('./AdminConsole', () => ({ default: () => null }));
+vi.mock('../Fulfilment/Fulfilment', () => ({ default: () => <p>Fulfilment queue</p> }));
 
 const catalogList = vi.mocked(catalogClient.list);
 const inventoryList = vi.mocked(inventoryClient.list);
@@ -45,8 +46,12 @@ function makeCatalogItem(overrides: Partial<CatalogItem> = {}): CatalogItem {
   };
 }
 
+function openInventory() {
+  fireEvent.click(screen.getByRole('button', { name: 'Show inventory' }));
+}
+
 async function showInventory() {
-  fireEvent.click(await screen.findByRole('button', { name: 'Show complete inventory' }));
+  openInventory();
   await screen.findByText('Rolex Submariner');
 }
 
@@ -59,18 +64,15 @@ describe('Admin', () => {
     inventoryList.mockResolvedValue([makeInventoryItem()]);
   });
 
-  it('hides the inventory table until Show complete inventory is clicked', async () => {
+  it('hides the inventory table until Show inventory is clicked', async () => {
     render(<Admin />);
 
-    const button = await screen.findByRole('button', { name: 'Show complete inventory' });
     expect(screen.queryByText('Rolex Submariner')).not.toBeInTheDocument();
 
-    fireEvent.click(button);
+    openInventory();
 
     expect(await screen.findByText('Rolex Submariner')).toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: 'Show complete inventory' }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Show inventory' })).not.toBeInTheDocument();
     expect(screen.getByText('watch-rolex-submariner')).toBeInTheDocument();
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(screen.getByText('1')).toBeInTheDocument();
@@ -78,13 +80,24 @@ describe('Admin', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Hide inventory' }));
 
     expect(screen.queryByText('Rolex Submariner')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Show complete inventory' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Show inventory' })).toBeInTheDocument();
+  });
+
+  it('collapses Fulfilment behind Show fulfilment', () => {
+    render(<Admin />);
+
+    expect(screen.queryByText('Fulfilment queue')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Show fulfilment' }));
+    expect(screen.getByText('Fulfilment queue')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide fulfilment' }));
+    expect(screen.queryByText('Fulfilment queue')).not.toBeInTheDocument();
   });
 
   it('no longer renders the order history section', async () => {
     render(<Admin />);
 
-    await screen.findByRole('button', { name: 'Show complete inventory' });
+    await waitFor(() => expect(inventoryList).toHaveBeenCalled());
     expect(screen.queryByText(/Order history \(this browser\)/)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Clear order history' })).not.toBeInTheDocument();
   });
@@ -98,6 +111,7 @@ describe('Admin', () => {
     );
 
     render(<Admin />);
+    openInventory();
 
     expect(screen.getByText('Loading...')).toBeInTheDocument();
     resolveList([]);
@@ -110,11 +124,12 @@ describe('Admin', () => {
       .mockResolvedValueOnce([makeInventoryItem()]);
 
     render(<Admin />);
+    openInventory();
 
     await screen.findByText('inventory down');
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
 
-    await showInventory();
+    await screen.findByText('Rolex Submariner');
     expect(screen.queryByText('inventory down')).not.toBeInTheDocument();
   });
 

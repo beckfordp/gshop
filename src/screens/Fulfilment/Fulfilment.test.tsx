@@ -70,7 +70,7 @@ describe('Fulfilment', () => {
   });
 
   it('renders one card per state with its badge and ship-to address', async () => {
-    render(<Fulfilment onBackToAdmin={vi.fn()} />);
+    render(<Fulfilment />);
 
     expect(await screen.findByText('order-1')).toBeInTheDocument();
     expect(within(card('order-1')).getByText('Pending')).toBeInTheDocument();
@@ -85,7 +85,7 @@ describe('Fulfilment', () => {
   });
 
   it('defaults to All and filters the queue by state tabs with counts', async () => {
-    render(<Fulfilment onBackToAdmin={vi.fn()} />);
+    render(<Fulfilment />);
     await screen.findByText('order-1');
 
     expect(screen.getByRole('tab', { name: /^All/ })).toHaveAttribute('aria-selected', 'true');
@@ -108,7 +108,7 @@ describe('Fulfilment', () => {
   it('shows an empty message for a state with no orders', async () => {
     clientMock.listTasks.mockResolvedValue([task('order-1', 'PENDING')]);
 
-    render(<Fulfilment onBackToAdmin={vi.fn()} />);
+    render(<Fulfilment />);
     await screen.findByText('order-1');
 
     fireEvent.click(screen.getByRole('tab', { name: 'Packed 0' }));
@@ -121,7 +121,7 @@ describe('Fulfilment', () => {
     clientMock.pack.mockResolvedValue(task('order-1', 'PACKED'));
     clientMock.dispatch.mockResolvedValue(task('order-1', 'DISPATCHED'));
 
-    render(<Fulfilment onBackToAdmin={vi.fn()} />);
+    render(<Fulfilment />);
     await screen.findByText('order-1');
 
     fireEvent.click(within(card('order-1')).getByText('Start picking'));
@@ -156,7 +156,7 @@ describe('Fulfilment', () => {
   });
 
   it('requires tracking number and carrier before dispatching', async () => {
-    render(<Fulfilment onBackToAdmin={vi.fn()} />);
+    render(<Fulfilment />);
     await screen.findByText('order-3');
 
     fireEvent.click(within(card('order-3')).getByText('Dispatch'));
@@ -175,7 +175,7 @@ describe('Fulfilment', () => {
   it('reports a problem with a required reason', async () => {
     clientMock.fail.mockResolvedValue(task('order-2', 'DISPATCH_FAILED'));
 
-    render(<Fulfilment onBackToAdmin={vi.fn()} />);
+    render(<Fulfilment />);
     await screen.findByText('order-2');
 
     fireEvent.click(within(card('order-2')).getByText('Report problem'));
@@ -195,7 +195,7 @@ describe('Fulfilment', () => {
   it('surfaces server errors in the alert banner', async () => {
     clientMock.startPicking.mockRejectedValue(new Error('Cannot start picking a PACKED task'));
 
-    render(<Fulfilment onBackToAdmin={vi.fn()} />);
+    render(<Fulfilment />);
     await screen.findByText('order-1');
 
     fireEvent.click(within(card('order-1')).getByText('Start picking'));
@@ -207,7 +207,7 @@ describe('Fulfilment', () => {
   });
 
   it('refreshes the queue', async () => {
-    render(<Fulfilment onBackToAdmin={vi.fn()} />);
+    render(<Fulfilment />);
     await screen.findByText('order-1');
     expect(clientMock.listTasks).toHaveBeenCalledTimes(1);
 
@@ -222,13 +222,13 @@ describe('Fulfilment', () => {
   it('shows an empty state when there are no tasks', async () => {
     clientMock.listTasks.mockResolvedValue([]);
 
-    render(<Fulfilment onBackToAdmin={vi.fn()} />);
+    render(<Fulfilment />);
 
     expect(await screen.findByText(/No fulfilment tasks yet/)).toBeInTheDocument();
   });
 
   it('shows no actions for terminal orders', async () => {
-    render(<Fulfilment onBackToAdmin={vi.fn()} />);
+    render(<Fulfilment />);
     await screen.findByText('order-4');
 
     expect(within(card('order-4')).queryByText('Report problem')).not.toBeInTheDocument();
@@ -242,7 +242,7 @@ describe('Fulfilment', () => {
       new Error('Failed to reach fulfilment service: fetch failed'),
     );
 
-    render(<Fulfilment onBackToAdmin={vi.fn()} />);
+    render(<Fulfilment />);
 
     await waitFor(() =>
       expect(screen.getByRole('alert')).toHaveTextContent(
@@ -275,7 +275,7 @@ describe('Fulfilment', () => {
         carrier: 'DHL',
       });
 
-      render(<Fulfilment onBackToAdmin={vi.fn()} />);
+      render(<Fulfilment />);
       await act(async () => {});
       fireEvent.click(screen.getByText('Auto-drive: off'));
 
@@ -299,7 +299,7 @@ describe('Fulfilment', () => {
       clientMock.listTasks.mockResolvedValue([task('order-2', 'PICKING')]);
       clientMock.fail.mockResolvedValue(task('order-2', 'DISPATCH_FAILED'));
 
-      render(<Fulfilment onBackToAdmin={vi.fn()} />);
+      render(<Fulfilment />);
       await act(async () => {});
       fireEvent.click(screen.getByText('Auto-drive: off'));
       await tick();
@@ -317,7 +317,7 @@ describe('Fulfilment', () => {
       vi.spyOn(Math, 'random').mockReturnValue(0.9);
       clientMock.listTasks.mockResolvedValue([task('order-1', 'PENDING')]);
 
-      render(<Fulfilment onBackToAdmin={vi.fn()} />);
+      render(<Fulfilment />);
       await act(async () => {});
       fireEvent.click(screen.getByText('Auto-drive: off'));
       fireEvent.click(screen.getByText('Auto-drive: on'));
@@ -333,7 +333,7 @@ describe('Fulfilment', () => {
       clientMock.listTasks.mockResolvedValue([task('order-1', 'PENDING')]);
       clientMock.startPicking.mockRejectedValue(new Error('Cannot start picking a PACKED task'));
 
-      render(<Fulfilment onBackToAdmin={vi.fn()} />);
+      render(<Fulfilment />);
       await act(async () => {});
       fireEvent.click(screen.getByText('Auto-drive: off'));
       await tick();
@@ -341,15 +341,5 @@ describe('Fulfilment', () => {
       expect(screen.getByText('Auto-drive: off')).toBeInTheDocument();
       expect(screen.getByRole('alert')).toHaveTextContent('Cannot start picking a PACKED task');
     });
-  });
-
-  it('goes back to Admin', async () => {
-    const onBackToAdmin = vi.fn();
-    render(<Fulfilment onBackToAdmin={onBackToAdmin} />);
-    await screen.findByText('order-1');
-
-    fireEvent.click(screen.getByText('Back to Admin'));
-
-    expect(onBackToAdmin).toHaveBeenCalledOnce();
   });
 });

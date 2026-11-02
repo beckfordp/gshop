@@ -109,8 +109,13 @@ beforeEach(() => {
   listTasks.mockResolvedValue([]);
 });
 
-async function renderOrdersTab() {
+function renderConsole() {
   render(<AdminConsole />);
+  fireEvent.click(screen.getByRole('button', { name: 'Show operations' }));
+}
+
+async function renderOrdersTab() {
+  renderConsole();
   await screen.findByRole('table', { name: 'Customers' });
   fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
   return screen.findByRole('table', { name: 'Orders' });
@@ -122,8 +127,20 @@ async function openOrder(orderId: string) {
 }
 
 describe('AdminConsole', () => {
-  it('opens on the Customers tab', async () => {
+  it('starts collapsed and toggles open and closed', async () => {
     render(<AdminConsole />);
+
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Show operations' }));
+    expect(await screen.findByRole('table', { name: 'Customers' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide operations' }));
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Refresh' })).not.toBeInTheDocument();
+  });
+
+  it('opens on the Customers tab', async () => {
+    renderConsole();
 
     expect(await screen.findByRole('table', { name: 'Customers' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Customers' })).toHaveAttribute('aria-selected', 'true');
@@ -234,7 +251,7 @@ describe('AdminConsole', () => {
   });
 
   it('shows a customer’s orders and email history', async () => {
-    render(<AdminConsole />);
+    renderConsole();
 
     const customers = await screen.findByRole('table', { name: 'Customers' });
     fireEvent.click(await within(customers).findByRole('button', { name: 'ada@example.com' }));
@@ -249,7 +266,7 @@ describe('AdminConsole', () => {
   });
 
   it('labels a guest customer', async () => {
-    render(<AdminConsole />);
+    renderConsole();
 
     const customers = await screen.findByRole('table', { name: 'Customers' });
     fireEvent.click(await within(customers).findByRole('button', { name: 'Guest guest-12' }));
@@ -267,7 +284,7 @@ describe('AdminConsole', () => {
 
   it('shows a retryable error when the order list fails', async () => {
     client.listOrders.mockRejectedValueOnce(new Error('Order service URL is not configured'));
-    render(<AdminConsole />);
+    renderConsole();
 
     expect(await screen.findByRole('alert')).toHaveTextContent('not configured');
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));

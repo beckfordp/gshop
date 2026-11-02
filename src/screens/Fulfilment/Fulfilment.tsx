@@ -13,10 +13,6 @@ import {
 } from '../../services/fulfilmentClient';
 import './Fulfilment.css';
 
-interface FulfilmentProps {
-  onBackToAdmin: () => void;
-}
-
 const STATE_LABELS: Record<FulfilmentState, string> = {
   PENDING: 'Pending',
   PICKING: 'Picking',
@@ -52,7 +48,7 @@ function shipTo(task: FulfilmentTask): string {
   return `Ship to: ${street}, ${city} ${postalCode}, ${country}`;
 }
 
-export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
+export default function Fulfilment() {
   const [queue, setQueue] = useState<FulfilmentTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
@@ -174,16 +170,6 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
 
   return (
     <div className="fulfilment">
-      <div className="fulfilment__header">
-        <div>
-          <h1>Order processing</h1>
-          <p className="fulfilment__intro">Pick, pack and dispatch authorized orders.</p>
-        </div>
-        <button type="button" onClick={onBackToAdmin}>
-          Back to Admin
-        </button>
-      </div>
-
       {error && (
         <div ref={alertRef} className="fulfilment__alert" role="alert" tabIndex={-1}>
           {error}

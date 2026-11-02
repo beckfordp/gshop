@@ -3,6 +3,8 @@ import { catalogClient } from '../../services/catalogClient';
 import { inventoryClient } from '../../services/inventoryClient';
 import { errorMessage } from '../../lib/format';
 import AdminConsole from './AdminConsole';
+import CollapsibleSection from './CollapsibleSection';
+import Fulfilment from '../Fulfilment/Fulfilment';
 import './Admin.css';
 
 // catalog-service has no lookup-by-sku endpoint, so the join below fetches
@@ -18,19 +20,13 @@ interface InventoryRow {
   quantityReserved: number;
 }
 
-interface AdminProps {
-  onOpenFulfilment?: () => void;
-}
-
-export default function Admin({ onOpenFulfilment }: AdminProps = {}) {
+export default function Admin() {
   const [inventoryLoading, setInventoryLoading] = useState(true);
   const [inventoryError, setInventoryError] = useState<string | null>(null);
   const [rows, setRows] = useState<InventoryRow[]>([]);
   const [adjustLoading, setAdjustLoading] = useState<Record<string, boolean>>({});
   const [adjustError, setAdjustError] = useState<Record<string, string>>({});
   const [lastDelta, setLastDelta] = useState<Record<string, number>>({});
-
-  const [showInventory, setShowInventory] = useState(false);
 
   const loadInventory = useCallback(async () => {
     setInventoryLoading(true);
@@ -99,16 +95,11 @@ export default function Admin({ onOpenFulfilment }: AdminProps = {}) {
 
       <AdminConsole />
 
-      {onOpenFulfilment && (
-        <section className="admin-section">
-          <h2>Fulfilment</h2>
-          <p>Pick, pack and dispatch orders — prototype queue.</p>
-          <button onClick={onOpenFulfilment}>Open order processing</button>
-        </section>
-      )}
+      <CollapsibleSection title="Fulfilment" note="Pick, pack and dispatch authorized orders.">
+        <Fulfilment />
+      </CollapsibleSection>
 
-      <section className="admin-section">
-        <h2>Inventory</h2>
+      <CollapsibleSection title="Inventory" note="Stock per SKU — adjust available quantity.">
         {inventoryLoading && <p>Loading...</p>}
         {inventoryError && (
           <div className="admin-error">
@@ -116,13 +107,7 @@ export default function Admin({ onOpenFulfilment }: AdminProps = {}) {
             <button onClick={loadInventory}>Retry</button>
           </div>
         )}
-        {!inventoryLoading && !inventoryError && !showInventory && (
-          <button onClick={() => setShowInventory(true)}>Show complete inventory</button>
-        )}
-        {!inventoryLoading && !inventoryError && showInventory && (
-          <button onClick={() => setShowInventory(false)}>Hide inventory</button>
-        )}
-        {!inventoryLoading && !inventoryError && showInventory && (
+        {!inventoryLoading && !inventoryError && (
           <table className="admin-inventory-table">
             <thead>
               <tr>
@@ -164,7 +149,7 @@ export default function Admin({ onOpenFulfilment }: AdminProps = {}) {
             </tbody>
           </table>
         )}
-      </section>
+      </CollapsibleSection>
     </div>
   );
 }

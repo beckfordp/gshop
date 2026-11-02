@@ -2,23 +2,6 @@
   padding: var(--space-md) 0;
 }
 
-.fulfilment h1:focus {
-  outline: none;
-}
-
-.fulfilment__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-}
-
-.fulfilment__intro {
-  color: var(--color-text-muted);
-  margin-top: var(--space-xs);
-}
-
 .fulfilment__toolbar {
   margin: var(--space-sm) 0 var(--space-md);
 }
