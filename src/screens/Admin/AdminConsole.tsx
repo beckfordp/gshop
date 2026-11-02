@@ -103,7 +103,12 @@ export default function AdminConsole() {
   const customerLabel = (customerId: string): string => {
     const account = accounts[customerId];
     if (account === undefined) return customerId;
-    return account ? account.email : `Guest ${customerId.slice(0, 8)}`;
+    if (account) return account.email;
+    // ADM-10: a guest order carries the email captured at checkout.
+    const guestEmail = orders.find(
+      (order) => order.customerId === customerId && order.guestEmail,
+    )?.guestEmail;
+    return guestEmail ? `Guest ${guestEmail}` : `Guest ${customerId.slice(0, 8)}`;
   };
 
   const openOrder = (orderId: string) => {

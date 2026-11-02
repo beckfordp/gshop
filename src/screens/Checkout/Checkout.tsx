@@ -47,6 +47,7 @@ const initialForm: CheckoutFormValues = {
   billing: EMPTY_ADDRESS,
   cardNumber: '',
   expiry: '',
+  email: '',
 };
 
 function formFromSaved(saved: SavedCheckoutAddress): CheckoutFormValues {
@@ -56,6 +57,7 @@ function formFromSaved(saved: SavedCheckoutAddress): CheckoutFormValues {
     billing: toAddressValues(saved.billing),
     cardNumber: '',
     expiry: '',
+    email: '',
   };
 }
 
@@ -97,9 +99,9 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
 
   useEffect(() => {
     if (submitted) {
-      setErrors(validateCheckout(form));
+      setErrors(validateCheckout(form, { guest: !authSession }));
     }
-  }, [form, submitted]);
+  }, [form, submitted, authSession]);
 
   useEffect(() => {
     if (failure) {
@@ -188,7 +190,7 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
     }
 
     setSubmitted(true);
-    const nextErrors = validateCheckout(form);
+    const nextErrors = validateCheckout(form, { guest: !authSession });
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
       setTimeout(() => {
@@ -206,6 +208,8 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
       const result = await checkoutGateway.submit(
         {
           customerId: authSession?.user.userId ?? getOrCreateCustomerId(),
+          // ADM-10: a guest has no account, so order emails go here.
+          ...(authSession ? {} : { email: form.email.trim().toLowerCase() }),
           items,
           shippingAddress: toAddress(form.shipping),
           billingAddress: toAddress(form.sameAsShipping ? form.shipping : form.billing),
@@ -405,6 +409,36 @@ export default function Checkout({ items: initialItems, onOrderPlaced, onBackToC
 
           <div className="checkout__layout">
             <div className="checkout__fields">
+              {!authSession && (
+                <fieldset className="checkout-section" disabled={submitting}>
+                  <legend className="checkout-section__legend">Contact</legend>
+                  <div className="checkout-field">
+                    <label className="checkout-field__label" htmlFor="checkout-email">
+                      Email for order updates
+                    </label>
+                    <input
+                      id="checkout-email"
+                      className="checkout-field__input"
+                      type="email"
+                      autoComplete="email"
+                      spellCheck={false}
+                      value={form.email}
+                      disabled={submitting}
+                      aria-invalid={errors.email ? true : undefined}
+                      aria-describedby={errors.email ? 'checkout-email-error' : undefined}
+                      onChange={(event) =>
+                        setForm((prev) => ({ ...prev, email: event.target.value }))
+                      }
+                    />
+                    {errors.email && (
+                      <p className="checkout-field__error" id="checkout-email-error">
+                        {errors.email}
+                      </p>
+                    )}
+                  </div>
+                </fieldset>
+              )}
+
               <fieldset className="checkout-section" disabled={submitting}>
                 <legend className="checkout-section__legend">Shipping address</legend>
                 <AddressFields

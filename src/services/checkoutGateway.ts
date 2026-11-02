@@ -20,6 +20,8 @@ export { CheckoutGatewayError } from './checkoutTypes';
 
 export interface CheckoutRequest {
   customerId: string;
+  /** ADM-10: guest checkout email; absent when signed in. */
+  email?: string;
   items: NewOrderItem[];
   shippingAddress: Address;
   billingAddress: Address;
@@ -61,6 +63,7 @@ export function createHttpCheckoutGateway(
       const result = await deps.orderClient.create(
         {
           customerId: request.customerId,
+          ...(request.email ? { email: request.email } : {}),
           items: request.items,
           shippingAddress: request.shippingAddress,
           paymentMethodId: paymentMethod.id,

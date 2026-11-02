@@ -250,6 +250,16 @@ describe('AdminConsole', () => {
     expect(await screen.findByText(/Guest checkout — no user-service account/)).toBeInTheDocument();
   });
 
+  it('labels a guest by the email captured at checkout (ADM-10)', async () => {
+    client.listOrders.mockResolvedValue([
+      order({ customerId: 'guest-123456789', guestEmail: 'guest@example.com' }),
+    ]);
+    render(<AdminConsole />);
+
+    const table = await screen.findByRole('table', { name: 'Orders' });
+    expect(await within(table).findByText('Guest guest@example.com')).toBeInTheDocument();
+  });
+
   it('shows a retryable error when the order list fails', async () => {
     client.listOrders.mockRejectedValueOnce(new Error('Order service URL is not configured'));
     render(<AdminConsole />);

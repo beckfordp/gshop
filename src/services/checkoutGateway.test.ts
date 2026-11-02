@@ -84,6 +84,17 @@ describe('createHttpCheckoutGateway', () => {
     expect(result).toEqual({ kind: 'authorized', order });
   });
 
+  it('passes a guest email through to the order (ADM-10)', async () => {
+    const { deps, create } = fakeDeps({ kind: 'created', order: makeOrder() });
+
+    await createHttpCheckoutGateway(deps).submit({ ...request, email: 'guest@example.com' });
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'guest@example.com' }),
+      {},
+    );
+  });
+
   it('maps a declined order to a decline result with no order', async () => {
     const { deps } = fakeDeps({ kind: 'declined', reason: 'insufficient_funds' });
 

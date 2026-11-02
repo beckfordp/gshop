@@ -24,6 +24,7 @@ function makeValues(overrides: Partial<CheckoutFormValues> = {}): CheckoutFormVa
     billing: EMPTY_ADDRESS,
     cardNumber: '4242424242424242',
     expiry: '12/30',
+    email: '',
     ...overrides,
   };
 }
@@ -130,5 +131,29 @@ describe('toAddress', () => {
 describe('normalizeCardNumber', () => {
   it('strips spaces and hyphens', () => {
     expect(normalizeCardNumber('4242-4242 4242 4242')).toBe('4242424242424242');
+  });
+});
+
+describe('validateCheckout guest email (ADM-10)', () => {
+  it('requires an email for a guest checkout', () => {
+    expect(validateCheckout(makeValues(), { guest: true }).email).toBe(
+      'Enter an email address for order updates',
+    );
+  });
+
+  it('rejects a malformed guest email', () => {
+    expect(validateCheckout(makeValues({ email: 'guest@' }), { guest: true }).email).toBe(
+      'Enter a valid email address',
+    );
+  });
+
+  it('accepts a valid guest email', () => {
+    expect(
+      validateCheckout(makeValues({ email: ' Guest@Example.com ' }), { guest: true }).email,
+    ).toBeUndefined();
+  });
+
+  it('ignores the email when signed in', () => {
+    expect(validateCheckout(makeValues()).email).toBeUndefined();
   });
 });

@@ -87,6 +87,11 @@ function renderCheckout(props: Partial<ComponentProps<typeof Checkout>> = {}) {
 }
 
 function fillForm() {
+  // ADM-10: only a guest (signed-out) checkout shows the email field.
+  const email = screen.queryByLabelText('Email for order updates');
+  if (email) {
+    fireEvent.change(email, { target: { value: ' Guest@Example.com ' } });
+  }
   fireEvent.change(screen.getByLabelText('Address line 1'), {
     target: { value: '1 Watchmaker Lane' },
   });
@@ -157,8 +162,9 @@ describe('Checkout', () => {
 
     expect(await screen.findByText('Enter the first line of the address')).toBeInTheDocument();
     expect(screen.getByText('Enter a card number')).toBeInTheDocument();
+    expect(screen.getByText('Enter an email address for order updates')).toBeInTheDocument();
     expect(submit).not.toHaveBeenCalled();
-    await waitFor(() => expect(screen.getByLabelText('Address line 1')).toHaveFocus());
+    await waitFor(() => expect(screen.getByLabelText('Email for order updates')).toHaveFocus());
   });
 
   it('submits the payment method and order with normalized values, then reports success', async () => {
@@ -176,6 +182,7 @@ describe('Checkout', () => {
     expect(submit).toHaveBeenCalledWith(
       {
         customerId: 'customer-1',
+        email: 'guest@example.com',
         items,
         shippingAddress,
         billingAddress: shippingAddress,
@@ -426,6 +433,8 @@ describe('Checkout', () => {
       expect.objectContaining({ customerId: 'user-1' }),
       expect.anything(),
     );
+    expect(submit.mock.calls[0][0]).not.toHaveProperty('email');
+    expect(screen.queryByLabelText('Email for order updates')).not.toBeInTheDocument();
     expect(getOrCreateCustomerIdMock).not.toHaveBeenCalled();
   });
 

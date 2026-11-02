@@ -17,6 +17,8 @@ export interface CheckoutFormValues {
   billing: AddressValues;
   cardNumber: string;
   expiry: string;
+  /** ADM-10: required for a guest (signed-out) checkout, ignored otherwise. */
+  email: string;
 }
 
 export interface AddressErrors {
@@ -32,7 +34,11 @@ export interface CheckoutErrors {
   billing?: AddressErrors;
   cardNumber?: string;
   expiry?: string;
+  email?: string;
 }
+
+// Same shape order-service accepts (GuestEmail.normalize).
+const EMAIL_SHAPE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 export const EMPTY_ADDRESS: AddressValues = {
   line1: '',
@@ -76,9 +82,18 @@ export function validateAddress(values: AddressValues): AddressErrors {
 
 export function validateCheckout(
   values: CheckoutFormValues,
-  options: { now?: Date } = {},
+  options: { now?: Date; guest?: boolean } = {},
 ): CheckoutErrors {
   const errors: CheckoutErrors = {};
+
+  if (options.guest) {
+    const email = values.email.trim();
+    if (!email) {
+      errors.email = 'Enter an email address for order updates';
+    } else if (!EMAIL_SHAPE.test(email) || email.length > 254) {
+      errors.email = 'Enter a valid email address';
+    }
+  }
 
   const shippingErrors = validateAddress(values.shipping);
   if (Object.keys(shippingErrors).length > 0) {

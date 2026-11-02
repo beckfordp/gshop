@@ -41,6 +41,8 @@ export interface Order {
   createdAt: string;
   updatedAt: string;
   shippingAddress: Address | null;
+  /** ADM-10: present only on guest orders. */
+  guestEmail?: string | null;
 }
 
 export type CreateOrderResult =
@@ -50,6 +52,8 @@ export type CreateOrderResult =
 
 export interface CreateOrderInput {
   customerId: string;
+  /** ADM-10: required by gshop for a guest checkout; omitted when signed in. */
+  email?: string;
   items: NewOrderItem[];
   shippingAddress: Address;
   paymentMethodId: string;
