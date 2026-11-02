@@ -1,0 +1,8 @@
+{
+  "track_id": "j7-cancel-polish_20261102",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-11-02T00:00:00Z",
+  "updated_at": "2026-11-02T00:00:00Z",
+  "description": "Checkout Journey 7: cancel 409 returns hint, cancelled-status test, mock shipped ledger state (US-21.5)"
+}
