@@ -27,10 +27,15 @@ const STATE_LABELS: Record<FulfilmentState, string> = {
   PACKED: 'Packed',
   DISPATCHED: 'Dispatched',
   DISPATCH_FAILED: 'Dispatch failed',
+  CANCELLED: 'Cancelled',
 };
 
 function isTerminalState(state: FulfilmentState): boolean {
-  return state === 'DISPATCHED' || state === 'DISPATCH_FAILED';
+  return (
+    state === 'DISPATCHED' ||
+    state === 'DISPATCH_FAILED' ||
+    state === 'CANCELLED'
+  );
 }
 
 function totalCents(items: FulfilmentTask['items']): number {
@@ -250,6 +255,11 @@ export default function Fulfilment({ onBackToAdmin }: FulfilmentProps) {
               {order.state === 'DISPATCH_FAILED' && (
                 <p className="fulfilment-card__outcome">
                   Not dispatched: {order.failureReason}
+                </p>
+              )}
+              {order.state === 'CANCELLED' && (
+                <p className="fulfilment-card__outcome">
+                  Cancelled before dispatch
                 </p>
               )}
 

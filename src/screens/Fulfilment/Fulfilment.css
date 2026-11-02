@@ -130,6 +130,11 @@
   color: var(--color-danger);
 }
 
+.fulfilment-badge--cancelled {
+  border: 1px solid var(--color-text-muted);
+  color: var(--color-text-muted);
+}
+
 .fulfilment-form {
   display: flex;
   flex-direction: column;

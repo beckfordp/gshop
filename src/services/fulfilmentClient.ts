@@ -15,7 +15,8 @@ export type FulfilmentState =
   | 'PICKING'
   | 'PACKED'
   | 'DISPATCHED'
-  | 'DISPATCH_FAILED';
+  | 'DISPATCH_FAILED'
+  | 'CANCELLED';
 
 export interface FulfilmentItem {
   sku: string;

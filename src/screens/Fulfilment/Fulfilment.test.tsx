@@ -52,6 +52,7 @@ const queue: FulfilmentTask[] = [
   task('order-3', 'PACKED'),
   task('order-4', 'DISPATCHED'),
   task('order-5', 'DISPATCH_FAILED'),
+  task('order-6', 'CANCELLED'),
 ];
 
 function card(orderId: string): HTMLElement {
@@ -77,6 +78,10 @@ describe('Fulfilment', () => {
     expect(within(card('order-3')).getByText('Packed')).toBeInTheDocument();
     expect(within(card('order-4')).getByText('Dispatched')).toBeInTheDocument();
     expect(within(card('order-5')).getByText('Dispatch failed')).toBeInTheDocument();
+    expect(within(card('order-6')).getByText('Cancelled')).toBeInTheDocument();
+    expect(
+      within(card('order-6')).getByText('Cancelled before dispatch'),
+    ).toBeInTheDocument();
     expect(
       within(card('order-1')).getByText(/122 Wilmot Street/),
     ).toBeInTheDocument();
@@ -214,6 +219,12 @@ describe('Fulfilment', () => {
     ).not.toBeInTheDocument();
     expect(
       within(card('order-5')).queryByText('Report problem'),
+    ).not.toBeInTheDocument();
+    expect(
+      within(card('order-6')).queryByText('Report problem'),
+    ).not.toBeInTheDocument();
+    expect(
+      within(card('order-6')).queryByText('Start picking'),
     ).not.toBeInTheDocument();
   });
 
