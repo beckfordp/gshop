@@ -1,94 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
-import { catalogClient } from '../../services/catalogClient';
-import { inventoryClient } from '../../services/inventoryClient';
-import { errorMessage } from '../../lib/format';
 import AdminConsole from './AdminConsole';
+import CatalogueAdmin from './CatalogueAdmin';
 import CollapsibleSection from './CollapsibleSection';
 import Fulfilment from '../Fulfilment/Fulfilment';
 import './Admin.css';
 
-// catalog-service has no lookup-by-sku endpoint, so the join below fetches
-// the whole catalog in one page — same approach as Cart.tsx's join (see
-// its own comment), fine at today's ~100-item scale.
-const CATALOG_PAGE_SIZE = 100;
-
-interface InventoryRow {
-  id: string;
-  sku: string;
-  name: string;
-  quantityAvailable: number;
-  quantityReserved: number;
-}
-
 export default function Admin() {
-  const [inventoryLoading, setInventoryLoading] = useState(true);
-  const [inventoryError, setInventoryError] = useState<string | null>(null);
-  const [rows, setRows] = useState<InventoryRow[]>([]);
-  const [adjustLoading, setAdjustLoading] = useState<Record<string, boolean>>({});
-  const [adjustError, setAdjustError] = useState<Record<string, string>>({});
-  const [lastDelta, setLastDelta] = useState<Record<string, number>>({});
-
-  const loadInventory = useCallback(async () => {
-    setInventoryLoading(true);
-    setInventoryError(null);
-    try {
-      const [items, catalog] = await Promise.all([
-        inventoryClient.list(),
-        catalogClient.list({ limit: CATALOG_PAGE_SIZE, offset: 0 }),
-      ]);
-      const catalogBySku = new Map(catalog.items.map((item) => [item.sku, item]));
-      setRows(
-        items.map((item) => ({
-          id: item.id,
-          sku: item.sku,
-          name: catalogBySku.get(item.sku)?.name ?? item.sku,
-          quantityAvailable: item.quantityAvailable,
-          quantityReserved: item.quantityReserved,
-        })),
-      );
-    } catch (error) {
-      setInventoryError(errorMessage(error));
-    } finally {
-      setInventoryLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadInventory();
-  }, [loadInventory]);
-
-  const handleAdjust = async (row: InventoryRow, delta: number) => {
-    const nextAvailable = row.quantityAvailable + delta;
-    if (nextAvailable < 0) {
-      return;
-    }
-    setLastDelta((prev) => ({ ...prev, [row.id]: delta }));
-    setAdjustLoading((prev) => ({ ...prev, [row.id]: true }));
-    setAdjustError((prev) => {
-      const next = { ...prev };
-      delete next[row.id];
-      return next;
-    });
-    try {
-      const updated = await inventoryClient.adjust(row.id, nextAvailable, row.quantityReserved);
-      setRows((prev) =>
-        prev.map((r) =>
-          r.id === row.id
-            ? {
-                ...r,
-                quantityAvailable: updated.quantityAvailable,
-                quantityReserved: updated.quantityReserved,
-              }
-            : r,
-        ),
-      );
-    } catch (error) {
-      setAdjustError((prev) => ({ ...prev, [row.id]: errorMessage(error) }));
-    } finally {
-      setAdjustLoading((prev) => ({ ...prev, [row.id]: false }));
-    }
-  };
-
   return (
     <div className="admin">
       <h1>Admin</h1>
@@ -99,56 +15,11 @@ export default function Admin() {
         <Fulfilment />
       </CollapsibleSection>
 
-      <CollapsibleSection title="Inventory" note="Stock per SKU — adjust available quantity.">
-        {inventoryLoading && <p>Loading...</p>}
-        {inventoryError && (
-          <div className="admin-error">
-            <p role="alert">{inventoryError}</p>
-            <button onClick={loadInventory}>Retry</button>
-          </div>
-        )}
-        {!inventoryLoading && !inventoryError && (
-          <table className="admin-inventory-table">
-            <thead>
-              <tr>
-                <th>Sku</th>
-                <th>Name</th>
-                <th>Available</th>
-                <th>Reserved</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.id}>
-                  <td>{row.sku}</td>
-                  <td>{row.name}</td>
-                  <td>{row.quantityAvailable}</td>
-                  <td>{row.quantityReserved}</td>
-                  <td>
-                    <button
-                      onClick={() => handleAdjust(row, -1)}
-                      disabled={adjustLoading[row.id] || row.quantityAvailable <= 0}
-                    >
-                      −1
-                    </button>
-                    <button onClick={() => handleAdjust(row, 1)} disabled={adjustLoading[row.id]}>
-                      +1
-                    </button>
-                    {adjustError[row.id] && (
-                      <span className="admin-error">
-                        <span role="alert">{adjustError[row.id]}</span>
-                        <button onClick={() => handleAdjust(row, lastDelta[row.id] ?? 0)}>
-                          Retry
-                        </button>
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+      <CollapsibleSection
+        title="Catalogue"
+        note="Products, prices and stock — add, edit, retire and adjust stock."
+      >
+        <CatalogueAdmin />
       </CollapsibleSection>
     </div>
   );

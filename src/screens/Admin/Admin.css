@@ -36,21 +36,3 @@
   margin-top: var(--space-sm);
   color: var(--color-danger);
 }
-
-.admin-inventory-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.admin-inventory-table th,
-.admin-inventory-table td {
-  text-align: left;
-  padding: var(--space-sm);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.admin-inventory-table th {
-  color: var(--color-text-muted);
-  font-weight: 500;
-  font-size: 0.85rem;
-}

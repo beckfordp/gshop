@@ -1,88 +1,14 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import Admin from './Admin';
-import { catalogClient, type CatalogItem } from '../../services/catalogClient';
-import { inventoryClient, type InventoryItem } from '../../services/inventoryClient';
 
-vi.mock('../../services/catalogClient', () => ({
-  catalogClient: { list: vi.fn() },
-}));
-
-vi.mock('../../services/inventoryClient', () => ({
-  inventoryClient: { list: vi.fn(), adjust: vi.fn() },
-}));
-
-// The console has its own suite; keep its tables/buttons out of the existing
+// Each section has its own suite; keep their tables/buttons out of these
 // Admin selectors.
 vi.mock('./AdminConsole', () => ({ default: () => null }));
 vi.mock('../Fulfilment/Fulfilment', () => ({ default: () => <p>Fulfilment queue</p> }));
-
-const catalogList = vi.mocked(catalogClient.list);
-const inventoryList = vi.mocked(inventoryClient.list);
-const inventoryAdjust = vi.mocked(inventoryClient.adjust);
-
-function makeInventoryItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
-  return {
-    id: 'inv-1',
-    sku: 'watch-rolex-submariner',
-    quantityAvailable: 5,
-    quantityReserved: 1,
-    createdAt: '2026-01-01T00:00:00Z',
-    updatedAt: '2026-01-01T00:00:00Z',
-    ...overrides,
-  };
-}
-
-function makeCatalogItem(overrides: Partial<CatalogItem> = {}): CatalogItem {
-  return {
-    id: 'catalog-1',
-    name: 'Rolex Submariner',
-    description: 'A watch',
-    priceCents: 950000,
-    sku: 'watch-rolex-submariner',
-    createdAt: '2026-01-01T00:00:00Z',
-    updatedAt: '2026-01-01T00:00:00Z',
-    ...overrides,
-  };
-}
-
-function openInventory() {
-  fireEvent.click(screen.getByRole('button', { name: 'Show inventory' }));
-}
-
-async function showInventory() {
-  openInventory();
-  await screen.findByText('Rolex Submariner');
-}
+vi.mock('./CatalogueAdmin', () => ({ default: () => <p>Catalogue table</p> }));
 
 describe('Admin', () => {
-  beforeEach(() => {
-    catalogList.mockReset();
-    inventoryList.mockReset();
-    inventoryAdjust.mockReset();
-    catalogList.mockResolvedValue({ items: [makeCatalogItem()], total: 1 });
-    inventoryList.mockResolvedValue([makeInventoryItem()]);
-  });
-
-  it('hides the inventory table until Show inventory is clicked', async () => {
-    render(<Admin />);
-
-    expect(screen.queryByText('Rolex Submariner')).not.toBeInTheDocument();
-
-    openInventory();
-
-    expect(await screen.findByText('Rolex Submariner')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Show inventory' })).not.toBeInTheDocument();
-    expect(screen.getByText('watch-rolex-submariner')).toBeInTheDocument();
-    expect(screen.getByText('5')).toBeInTheDocument();
-    expect(screen.getByText('1')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Hide inventory' }));
-
-    expect(screen.queryByText('Rolex Submariner')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Show inventory' })).toBeInTheDocument();
-  });
-
   it('collapses Fulfilment behind Show fulfilment', () => {
     render(<Admin />);
 
@@ -94,90 +20,22 @@ describe('Admin', () => {
     expect(screen.queryByText('Fulfilment queue')).not.toBeInTheDocument();
   });
 
-  it('no longer renders the order history section', async () => {
+  it('collapses the Catalogue behind Show catalogue, replacing the Inventory section', () => {
     render(<Admin />);
 
-    await waitFor(() => expect(inventoryList).toHaveBeenCalled());
+    expect(screen.queryByRole('button', { name: 'Show inventory' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Catalogue table')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Show catalogue' }));
+    expect(screen.getByText('Catalogue table')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide catalogue' }));
+    expect(screen.queryByText('Catalogue table')).not.toBeInTheDocument();
+  });
+
+  it('no longer renders the order history section', () => {
+    render(<Admin />);
+
     expect(screen.queryByText(/Order history \(this browser\)/)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Clear order history' })).not.toBeInTheDocument();
-  });
-
-  it('shows a loading state while fetching inventory', async () => {
-    let resolveList!: (value: InventoryItem[]) => void;
-    inventoryList.mockReturnValue(
-      new Promise((resolve) => {
-        resolveList = resolve;
-      }),
-    );
-
-    render(<Admin />);
-    openInventory();
-
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
-    resolveList([]);
-    await waitFor(() => expect(screen.queryByText('Loading...')).not.toBeInTheDocument());
-  });
-
-  it('shows an error and working Retry when the inventory fetch fails', async () => {
-    inventoryList
-      .mockRejectedValueOnce(new Error('inventory down'))
-      .mockResolvedValueOnce([makeInventoryItem()]);
-
-    render(<Admin />);
-    openInventory();
-
-    await screen.findByText('inventory down');
-    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
-
-    await screen.findByText('Rolex Submariner');
-    expect(screen.queryByText('inventory down')).not.toBeInTheDocument();
-  });
-
-  it('+1 adjusts quantityAvailable up, sending the unchanged quantityReserved', async () => {
-    inventoryAdjust.mockResolvedValue(
-      makeInventoryItem({ quantityAvailable: 6, quantityReserved: 1 }),
-    );
-
-    render(<Admin />);
-    await showInventory();
-
-    fireEvent.click(screen.getByRole('button', { name: '+1' }));
-
-    await waitFor(() => expect(screen.getByText('6')).toBeInTheDocument());
-    expect(inventoryAdjust).toHaveBeenCalledWith('inv-1', 6, 1);
-  });
-
-  it('-1 adjusts quantityAvailable down and disables itself at 0', async () => {
-    inventoryList.mockResolvedValue([
-      makeInventoryItem({ quantityAvailable: 1, quantityReserved: 0 }),
-    ]);
-    inventoryAdjust.mockResolvedValue(
-      makeInventoryItem({ quantityAvailable: 0, quantityReserved: 0 }),
-    );
-
-    render(<Admin />);
-    await showInventory();
-
-    fireEvent.click(screen.getByRole('button', { name: '−1' }));
-
-    await waitFor(() => expect(inventoryAdjust).toHaveBeenCalledWith('inv-1', 0, 0));
-    await waitFor(() => expect(screen.getByRole('button', { name: '−1' })).toBeDisabled());
-  });
-
-  it('shows an inline error and working Retry when an adjustment fails', async () => {
-    inventoryAdjust
-      .mockRejectedValueOnce(new Error('adjust failed'))
-      .mockResolvedValueOnce(makeInventoryItem({ quantityAvailable: 6, quantityReserved: 1 }));
-
-    render(<Admin />);
-    await showInventory();
-
-    fireEvent.click(screen.getByRole('button', { name: '+1' }));
-
-    await screen.findByText('adjust failed');
-    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
-
-    await waitFor(() => expect(screen.getByText('6')).toBeInTheDocument());
-    expect(screen.queryByText('adjust failed')).not.toBeInTheDocument();
   });
 });
