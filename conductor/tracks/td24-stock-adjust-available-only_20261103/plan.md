@@ -1,6 +1,6 @@
 # TD-24 Implementation Plan
 
-## Phase 1 — Available-only stock adjust
+## Phase 1 — Available-only stock adjust [checkpoint: f14ecb3]
 - [x] Task: `adjust` sends `quantityAvailable` only (FR1–FR2) — efa4304
   - [x] Red: `inventoryClient.test.ts` body `{quantityAvailable: 6}` via `adjust('inv-1', 6)`; `CatalogueAdmin.test.tsx` ±1 expect `adjust('inv-1', 6)` / `('inv-1', 0)`. Confirm failure.
   - [x] Green: `inventoryClient.adjust(id, quantityAvailable)`; `CatalogueAdmin` call site.
