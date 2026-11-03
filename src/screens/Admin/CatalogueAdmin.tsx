@@ -129,11 +129,7 @@ export default function CatalogueAdmin() {
       return next;
     });
     try {
-      const updated = await inventoryClient.adjust(
-        stock.id,
-        stock.quantityAvailable + delta,
-        stock.quantityReserved,
-      );
+      const updated = await inventoryClient.adjust(stock.id, stock.quantityAvailable + delta);
       replaceRow(row.sku, (current) => ({ ...current, stock: updated }));
     } catch (error) {
       setAdjustError((prev) => ({ ...prev, [stock.id]: errorMessage(error) }));

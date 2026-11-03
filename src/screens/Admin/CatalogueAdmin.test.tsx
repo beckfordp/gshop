@@ -181,7 +181,7 @@ describe('CatalogueAdmin', () => {
     expect(screen.queryByText('inventory down')).not.toBeInTheDocument();
   });
 
-  it('+1 adjusts real stock up, sending the unchanged quantityReserved', async () => {
+  it('+1 adjusts real stock up, sending quantityAvailable only', async () => {
     inventoryAdjust.mockResolvedValue(
       makeInventoryItem({ quantityAvailable: 6, quantityReserved: 1 }),
     );
@@ -194,7 +194,7 @@ describe('CatalogueAdmin', () => {
     await waitFor(() =>
       expect(within(row('watch-rolex-submariner')).getByText('6')).toBeInTheDocument(),
     );
-    expect(inventoryAdjust).toHaveBeenCalledWith('inv-1', 6, 1);
+    expect(inventoryAdjust).toHaveBeenCalledWith('inv-1', 6);
   });
 
   it('-1 adjusts real stock down and disables itself at 0', async () => {
@@ -211,7 +211,7 @@ describe('CatalogueAdmin', () => {
 
     fireEvent.click(decrease);
 
-    await waitFor(() => expect(inventoryAdjust).toHaveBeenCalledWith('inv-1', 0, 0));
+    await waitFor(() => expect(inventoryAdjust).toHaveBeenCalledWith('inv-1', 0));
     await waitFor(() => expect(decrease).toBeDisabled());
   });
 

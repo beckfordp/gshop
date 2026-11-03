@@ -77,18 +77,18 @@ describe('inventoryClient.adjust', () => {
     vi.restoreAllMocks();
   });
 
-  it('PATCHes /inventorys/{id} with the new quantityAvailable and unchanged quantityReserved', async () => {
+  it('PATCHes /inventorys/{id} with the new quantityAvailable only', async () => {
     inventoryClient.baseUrl = baseUrl;
     const fetchMock = vi
       .spyOn(globalThis, 'fetch')
       .mockResolvedValue(new Response(JSON.stringify(updated), { status: 200 }));
 
-    const result = await inventoryClient.adjust('inv-1', 6, 0);
+    const result = await inventoryClient.adjust('inv-1', 6);
 
     expect(fetchMock).toHaveBeenCalledWith(`${baseUrl}/inventorys/inv-1`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ quantityAvailable: 6, quantityReserved: 0 }),
+      body: JSON.stringify({ quantityAvailable: 6 }),
     });
     expect(result).toEqual(updated);
   });
@@ -97,19 +97,19 @@ describe('inventoryClient.adjust', () => {
     inventoryClient.baseUrl = baseUrl;
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 404 }));
 
-    await expect(inventoryClient.adjust('inv-1', 6, 0)).rejects.toThrow(InventoryClientError);
+    await expect(inventoryClient.adjust('inv-1', 6)).rejects.toThrow(InventoryClientError);
   });
 
   it('throws InventoryClientError when the network request fails', async () => {
     inventoryClient.baseUrl = baseUrl;
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
 
-    await expect(inventoryClient.adjust('inv-1', 6, 0)).rejects.toThrow(InventoryClientError);
+    await expect(inventoryClient.adjust('inv-1', 6)).rejects.toThrow(InventoryClientError);
   });
 
   it('throws InventoryClientError when the base URL is not configured', async () => {
     inventoryClient.baseUrl = undefined;
 
-    await expect(inventoryClient.adjust('inv-1', 6, 0)).rejects.toThrow(InventoryClientError);
+    await expect(inventoryClient.adjust('inv-1', 6)).rejects.toThrow(InventoryClientError);
   });
 });

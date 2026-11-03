@@ -48,11 +48,10 @@ async function list(sku?: string): Promise<InventoryItem[]> {
   return (await response.json()) as InventoryItem[];
 }
 
-async function adjust(
-  id: string,
-  quantityAvailable: number,
-  quantityReserved: number,
-): Promise<InventoryItem> {
+// Sets quantityAvailable only: quantityReserved is owned by inventory's
+// reservation ledger, and sending a page-load value would overwrite live
+// reservations (TD-24).
+async function adjust(id: string, quantityAvailable: number): Promise<InventoryItem> {
   if (!inventoryClient.baseUrl) {
     throw new InventoryClientError('Inventory service URL is not configured');
   }
@@ -62,7 +61,7 @@ async function adjust(
     response = await fetch(`${inventoryClient.baseUrl}/inventorys/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ quantityAvailable, quantityReserved }),
+      body: JSON.stringify({ quantityAvailable }),
     });
   } catch (error) {
     throw new InventoryClientError(`Failed to reach inventory service: ${errorMessage(error)}`);
