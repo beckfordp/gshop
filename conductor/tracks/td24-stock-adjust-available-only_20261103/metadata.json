@@ -1,0 +1,8 @@
+{
+  "track_id": "td24-stock-adjust-available-only_20261103",
+  "type": "bug",
+  "status": "new",
+  "created_at": "2026-11-03T09:20:00Z",
+  "updated_at": "2026-11-03T09:20:00Z",
+  "description": "TD-24 — admin stock adjust sends quantityAvailable only"
+}

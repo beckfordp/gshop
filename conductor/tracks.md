@@ -6,6 +6,9 @@ This file tracks all major tracks for the project.
 
 ## Tracks
 
+- [ ] **Track: TD-24 — admin stock adjust sends quantityAvailable only**
+  *Link: [./tracks/td24-stock-adjust-available-only_20261103/](./tracks/td24-stock-adjust-available-only_20261103/)*
+
 ---
 
 ## Backlog
