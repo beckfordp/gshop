@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { cartClient } from './cartClient';
 
 // cart-service has no auth/session system — carts are anonymous UUIDs with

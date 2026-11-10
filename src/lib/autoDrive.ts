@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Demo affordance for the operator queue: a toggle that advances tasks
 // automatically by calling the real fulfilment-service endpoints. The
 // occasional simulated failure keeps the DispatchFailed path visible without

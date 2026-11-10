@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Extracts the server's `{"error": "..."}` message from a failed response,
 // falling back when the body is missing or not JSON. Shared by the clients
 // that surface server-side validation messages to the UI.

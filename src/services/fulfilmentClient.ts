@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { FULFILMENT_SERVICE_URL } from './env';
 import { serverErrorMessage } from './httpError';
 import { errorMessage } from '../lib/format';

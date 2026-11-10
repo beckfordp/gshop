@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { clearCartId, getOrCreateCartId, getStoredCartId } from './cartId';
 import { cartClient } from './cartClient';

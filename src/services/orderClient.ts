@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { ORDER_SERVICE_URL } from './env';
 import { checkHealth } from './health';
 import { serverErrorMessage } from './httpError';

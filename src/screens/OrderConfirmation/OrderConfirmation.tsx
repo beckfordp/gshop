@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { useEffect, useRef } from 'react';
 import { formatPrice, formatStatus } from '../../lib/format';
 import type { Order } from '../../services/orderClient';

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import OrderHistory from './OrderHistory';

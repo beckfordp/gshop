@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Backend base URLs, one per Gluon service this app calls. Every generated
 // service defaults to port 8080 (see gluon/docs/system-design.md's "Service
 // discovery & ports") and there's no documented port map yet for running

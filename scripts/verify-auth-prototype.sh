@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Verification for track auth-prototype_20261028 (US-16.5 prototype).
 # Run from the repo root. The mock-auth UI has no backend, so build/lint/tests
 # plus a live browser walkthrough are the whole check.

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Phase 2 verification (track cart_20261008): Add to cart button on the
 # Catalog screen. Run from the repo root.
 set -euo pipefail

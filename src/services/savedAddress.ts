@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import type { Address } from './checkoutTypes';
 
 // Prototype-only saved checkout address, keyed by the mock user id (US-16.5).

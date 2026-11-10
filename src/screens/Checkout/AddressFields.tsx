@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import type { AddressErrors, AddressValues } from './validation';
 
 interface AddressFieldsProps {

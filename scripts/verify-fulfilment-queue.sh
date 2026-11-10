@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Live verification for track fulfilment-queue_20261028.
 # Drives the real operator API the way gshop's Admin -> Order processing
 # screen sees it:

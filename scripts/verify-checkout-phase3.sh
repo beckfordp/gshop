@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Phase 3 verification (track checkout_20261009): Checkout screen. Run
 # from the repo root.
 set -euo pipefail

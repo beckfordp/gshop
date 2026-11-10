@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Live verification for track fulfilment-history_20261028 (US-17.6/18.5).
 # Drives the real stack the way gshop's Order History sees it:
 #   checkout -> PaymentAuthorized -> fulfilment simulate-next (dispatch and

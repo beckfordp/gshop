@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Pure auth-form validation for the prototype signup/login screen. Kept out
 // of the component so the rules are testable without React.
 

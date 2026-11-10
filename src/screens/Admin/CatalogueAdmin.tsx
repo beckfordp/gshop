@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { catalogClient } from '../../services/catalogClient';
 import { inventoryClient, type InventoryItem } from '../../services/inventoryClient';

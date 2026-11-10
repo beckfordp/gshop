@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import WatchArt from './WatchArt';

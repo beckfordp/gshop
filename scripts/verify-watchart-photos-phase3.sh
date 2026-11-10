@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Phase 3 verification (track watchart-photos_20261010): full suite after
 # swapping WatchArt to real Unsplash photos. Run from the repo root.
 set -euo pipefail

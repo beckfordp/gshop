@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Real watch photography, licensed free-to-use and hotlinked directly from
 // Unsplash's CDN (no local copies — see track watchart-photos_20261010).
 // Only 60 distinct usable photos were found, fewer than the 100-item

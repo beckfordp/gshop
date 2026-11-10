@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Phase 4 verification (track boutique-redesign_20261010): App shell header
 # and nav restyle. Run from the repo root.
 set -euo pipefail

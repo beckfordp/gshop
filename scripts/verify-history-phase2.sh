@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Phase 2 verification (track history_20261009): Order History screen.
 # Run from the repo root.
 set -euo pipefail

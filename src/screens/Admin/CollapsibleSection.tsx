@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { useId, useState, type ReactNode } from 'react';
 
 interface CollapsibleSectionProps {

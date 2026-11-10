@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import type { CheckoutGateway, CheckoutRequest } from './checkoutGateway';
 import { CheckoutGatewayError, type ReservationFailure } from './checkoutTypes';
 import type { Order, OrderItem } from './orderClient';

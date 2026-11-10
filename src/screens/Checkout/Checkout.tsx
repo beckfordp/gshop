@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { useEffect, useRef, useState } from 'react';
 import { cartClient } from '../../services/cartClient';
 import { clearCartId, getStoredCartId } from '../../services/cartId';

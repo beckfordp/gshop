@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { CART_SERVICE_URL } from './env';
 import { checkHealth } from './health';
 

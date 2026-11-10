@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import {
   FULFILMENT_SERVICE_URL,
   INVENTORY_SERVICE_URL,

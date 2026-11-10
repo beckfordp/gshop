@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Phase 1 verification (track history_20261009): customerId service,
 # orderClient.list(), and Cart's checkout customerId source update. Run
 # from the repo root.

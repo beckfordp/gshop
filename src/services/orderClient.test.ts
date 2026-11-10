@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { orderClient, OrderClientError, type Order } from './orderClient';
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Phase 3 verification (track boutique-redesign_20261010): Cart, Checkout,
 # and Order History restyled with WatchArt thumbnails. Run from the repo root.
 set -euo pipefail

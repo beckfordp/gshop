@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import type { CatalogueProduct, NewProduct } from '../../services/catalogueMock';
 
 export interface ProductFormValues {

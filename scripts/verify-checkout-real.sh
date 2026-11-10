@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Live verification for track checkout-real-wiring_20261027 (Phase 5).
 # Drives the real order-service/payment-service/inventory-service contracts
 # through port-forwards, exactly as gshop's checkout gateway does:

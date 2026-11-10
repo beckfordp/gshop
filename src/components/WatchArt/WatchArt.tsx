@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { imageForSku } from '../../data/watchImages';
 import './WatchArt.css';
 

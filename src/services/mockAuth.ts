@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { sha256Hex } from '../lib/sha256';
 import type { AuthSession } from './authTypes';
 

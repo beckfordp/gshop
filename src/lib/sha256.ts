@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Minimal SHA-256 (hex) for the prototype auth mock. Implemented locally
 // because jsdom's test environment has no `crypto.subtle`; browsers do, but a
 // pure implementation keeps the mock deterministic everywhere. Not for any

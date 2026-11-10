@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Per-browser identity registry (prototype): maps a userId to the email it
 // signed up/logged in with, so Order History can show a User badge. Orders
 // only carry customerId until the order contract gains userId (follow-up).

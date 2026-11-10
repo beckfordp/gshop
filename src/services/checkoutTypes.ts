@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Shared checkout types. The wire contracts live in gluon/docs/system-design.md's
 // "REST contracts" section — keep these in sync with it rather than inventing
 // frontend-only shapes.

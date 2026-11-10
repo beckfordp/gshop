@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import type { Address } from '../../services/checkoutTypes';
 
 // Pure checkout-form validation. Kept out of the component so the rules are

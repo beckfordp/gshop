@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Verification for track admin-screen_20261010: Admin screen (order-history
 # clear + inventory management). Run from the repo root.
 set -euo pipefail

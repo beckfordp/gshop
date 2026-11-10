@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { AUTH_MOCK_ENABLED } from './env';
 import { saveSession, signIn as mockSignIn, signUp as mockSignUp } from './mockAuth';
 import { rememberIdentity } from './identityStore';

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { errorMessage, formatPrice } from '../../lib/format';
 import {

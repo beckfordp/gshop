@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import AdminConsole from './AdminConsole';
 import CatalogueAdmin from './CatalogueAdmin';
 import CollapsibleSection from './CollapsibleSection';

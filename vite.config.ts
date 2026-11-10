@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 

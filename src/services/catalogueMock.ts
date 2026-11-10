@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // PROTOTYPE ONLY — simulated catalogue writes for the Admin Catalogue section.
 // Reads are real (catalogClient/inventoryClient); these writes only return
 // updated copies held in the screen's state, nothing reaches catalog-service.

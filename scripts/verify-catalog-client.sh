@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Phase 2 verification (track catalog_20261008): catalogClient.list() against
 # catalog-service's real GET /catalogs contract. Run from the repo root.
 set -euo pipefail

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Verification for track fulfilment-prototype_20261028 (Journey 3 prototype).
 # Mock-only UI: build/lint/tests/coverage plus the manual browser review.
 set -euo pipefail

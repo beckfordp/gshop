@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { INVENTORY_SERVICE_URL } from './env';
 import { checkHealth } from './health';
 import { errorMessage } from '../lib/format';

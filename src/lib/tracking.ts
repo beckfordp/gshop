@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Simulated carrier tracking numbers for the operator dispatch form. These
 // are demo placeholders shaped like each carrier's real format — nothing is
 // validated against a carrier and nothing leaves the local cluster.

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // A persistent, checkout-independent anonymous customer identity. Unlike
 // the cart id (src/services/cartId.ts), this is never cleared — it's
 // minted once and reused for every checkout's `customerId` and every

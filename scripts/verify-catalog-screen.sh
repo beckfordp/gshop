@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Phase 3 verification (track catalog_20261008): Catalog browse screen,
 # wired into App.tsx. Run from the repo root.
 set -euo pipefail

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Phase 2 verification (track boutique-redesign_20261010): Catalog screen
 # restyled as a watch-boutique card grid. Run from the repo root.
 set -euo pipefail

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { CHECKOUT_MOCK_ENABLED } from './env';
 import { paymentClient } from './paymentClient';
 import { orderClient, type NewOrderItem, type Order } from './orderClient';

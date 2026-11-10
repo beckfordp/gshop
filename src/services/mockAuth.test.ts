@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { afterEach, describe, expect, it } from 'vitest';
 import { AuthError, getSession, signIn, signOut, signUp } from './mockAuth';
 

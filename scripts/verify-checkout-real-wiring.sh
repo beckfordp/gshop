@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Verification for track checkout-real-wiring_20261027 (Phases 1-4): the
 # checkout form's client, gateway, mock and failure UI. Run from the repo root.
 set -euo pipefail

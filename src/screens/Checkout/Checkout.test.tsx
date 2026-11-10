@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

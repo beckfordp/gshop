@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Phase 1 verification (track checkout_20261009): orderClient. Run from
 # the repo root.
 set -euo pipefail

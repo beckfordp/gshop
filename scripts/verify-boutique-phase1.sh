@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Phase 1 verification (track boutique-redesign_20261010): design tokens +
 # WatchArt component. Run from the repo root.
 set -euo pipefail

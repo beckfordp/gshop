@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Phase 1 verification (track watchart-photos_20261010): watchImages data +
 # imageForSku lookup logic. Run from the repo root.
 set -euo pipefail

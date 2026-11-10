@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Live verification for track auth-real-wiring_20261028 (US-16.5).
 # Checks the build/lint/tests, then drives user-service's real auth contracts
 # exactly as gshop's userClient does and confirms the welcome email is sent.

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { afterEach, describe, expect, it } from 'vitest';
 import { getCheckoutAddress, saveCheckoutAddress } from './savedAddress';
 

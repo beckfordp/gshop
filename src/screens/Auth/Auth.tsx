@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { useEffect, useRef, useState } from 'react';
 import { authGateway } from '../../services/authGateway';
 import {

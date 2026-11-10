@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import { useCallback, useEffect, useState } from 'react';
 import { orderClient, OrderClientError, type Order } from '../../services/orderClient';
 import { getStoredCustomerId } from '../../services/customerId';

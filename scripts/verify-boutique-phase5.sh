@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Phase 5 verification (track boutique-redesign_20261010): 100-item catalog
 # data. Checks gshop's own test suite stays green (no gshop source changed
 # in this phase) and that the live catalog-service now reports 100 items
